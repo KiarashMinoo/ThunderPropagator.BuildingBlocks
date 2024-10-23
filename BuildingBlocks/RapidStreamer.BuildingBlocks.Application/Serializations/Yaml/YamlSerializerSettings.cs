@@ -1,0 +1,19 @@
+﻿using YamlDotNet.Serialization;
+
+namespace RapidStreamer.BuildingBlocks.Application.Serializations.Yaml
+{
+    public
+#if !DEBUG
+        sealed
+#endif
+        class YamlSerializerSettings
+    {
+        public bool JsonCompatible { get; set; } = true;
+        public bool IgnoreFields { get; set; }
+        public bool IncludeNonPublicProperties { get; set; }
+        public bool EnablePrivateConstructors { get; set; }
+        public INamingConvention? NamingConvention { get; set; }
+        public INamingConvention? EnumNamingConvention { get; set; }
+        public ITypeResolver? TypeResolver { get; set; }
+    }
+}

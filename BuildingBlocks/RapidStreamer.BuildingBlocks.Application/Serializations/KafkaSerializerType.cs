@@ -1,0 +1,18 @@
+﻿namespace RapidStreamer.BuildingBlocks.Application.Serializations
+{
+    public enum KafkaSerializerType
+    {
+        /// <summary>
+        /// System.Text.Json
+        /// </summary>
+        Json = SerializerType.Json,
+
+        /// <summary>
+        /// Newtonsoft.Json
+        /// </summary>
+        NJson = SerializerType.NJson,
+
+        SchemaJson,
+        Avro
+    }
+}
