@@ -26,4 +26,8 @@ jobs:
           version: ${{ github.event.inputs.version }}
           
       - run: |
-          cat ./BuildingBlocks/RapidStreamer.BuildingBlocks.Infrastructure/RapidStreamer.BuildingBlocks.Infrastructure.csproj
+          git config user.name "Kiarash Minoo"
+          git config user.email "yanis_1984@msn.com"
+          git add .
+          git commit -m "Bump project version to ${{ steps.bump.outputs.newVersion }}"
+          git push
