@@ -15,7 +15,7 @@ env:
 jobs:
   project-version:
     runs-on: ubuntu-latest
-    name: Update version
+    name: Update version    
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -38,6 +38,7 @@ jobs:
   pack-nugets:
     runs-on: ubuntu-latest
     name: Create nuget
+    needs: [project-version]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
