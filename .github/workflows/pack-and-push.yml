@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 env:
-  NuGetDirectory: ${{ github.workspace}}/nuget
+  ArtifactsDirectory: ${{ github.workspace}}/artifacts
   Version: "*.*.^.*"
 
 jobs:
@@ -48,7 +48,14 @@ jobs:
         with:
           dotnet-version: '8.0.x'          
 
-      - run: sudo sh ./pack.sh              
+      - run: dotnet pack core/Piranha/Piranha.csproj --no-build -c Release -o ${{ env.ArtifactsDirectory }}      
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: nuget
+          if-no-files-found: error
+          retention-days: 7
+          path: ${{ env.ArtifactsDirectory }}/*.nupkg
              
 
   push_nuget:    
@@ -56,8 +63,10 @@ jobs:
     name: Deploy to myget    
     needs: [pack_nugets]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: nuget
+          path: ${{ env.ArtifactsDirectory }}
         
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -69,6 +78,6 @@ jobs:
 
       - name: Publish NuGet package
         run: |
-            ls ./artifacts/
-            dotnet nuget push './artifacts/RapidStreamer*.nupkg' --skip-duplicate -k ${{ secrets.MYGET_APIKEY }}
+            ls ${{ env.ArtifactsDirectory }}      
+            dotnet nuget push * ${{ env.ArtifactsDirectory }} --skip-duplicate -k ${{ secrets.MYGET_APIKEY }}
 
