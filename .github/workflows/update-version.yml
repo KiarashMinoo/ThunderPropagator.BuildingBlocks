@@ -26,4 +26,4 @@ jobs:
           version: ${{ github.event.inputs.version }}
           
       - run: |
-          cat ./BuildingBlocks/RapidStreamer.BuildingBlocks.Application/RapidStreamer.BuildingBlocks.Application.csproj
+          cat ./BuildingBlocks/RapidStreamer.BuildingBlocks.Infrastructure/RapidStreamer.BuildingBlocks.Infrastructure.csproj
