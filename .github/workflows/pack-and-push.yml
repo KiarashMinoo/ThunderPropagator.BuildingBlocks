@@ -56,9 +56,9 @@ jobs:
       - run: |
           dotnet restore
           dotnet clean
-          dotnet build -c Debug
+          dotnet build 
           
-          dotnet pack ./BuildingBlocks/RapidStreamer.BuildingBlocks.Infrastructure/RapidStreamer.BuildingBlocks.Infrastructure.csproj -c Debug -o ${{ env.ArtifactsDirectory }}      
+          dotnet pack ./BuildingBlocks/RapidStreamer.BuildingBlocks.Infrastructure/RapidStreamer.BuildingBlocks.Infrastructure.csproj -o ${{ env.ArtifactsDirectory }}      
 
       - uses: actions/upload-artifact@v3
         with:
