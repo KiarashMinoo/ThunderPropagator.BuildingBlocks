@@ -1,4 +1,4 @@
-name: Upgrade Versions
+name: Update Versions
 
 on:
   workflow_dispatch:
@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set project versions
-        id: upgrade-versions
+        id: update
         uses: vers-one/dotnet-project-version-updater@v1.6
         with:
           file: |
