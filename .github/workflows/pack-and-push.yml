@@ -58,7 +58,7 @@ jobs:
           dotnet clean
           dotnet build -c Release
           
-          dotnet pack ./BuildingBlocks/RapidStreamer.BuildingBlocks.Infrastructure/RapidStreamer.BuildingBlocks.Infrastructure.csproj -c Release -o ${{ env.ArtifactsDirectory }}      
+          dotnet pack ./BuildingBlocks/RapidStreamer.BuildingBlocks.Infrastructure/RapidStreamer.BuildingBlocks.Infrastructure.csproj -o ${{ env.ArtifactsDirectory }}      
 
       - uses: actions/upload-artifact@v3
         with:
