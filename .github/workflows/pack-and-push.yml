@@ -1,13 +1,6 @@
 name: Pack and Push
 
 on:
-  workflow_dispatch:    
-    inputs:
-      version:
-        description: "New version for the project"
-        required: true 
-        type: string  
-        default: "*.*.^.*"
   push:
     branches:
       - 'main'
@@ -17,9 +10,10 @@ permissions:
 
 env:
   NuGetDirectory: ${{ github.workspace}}/nuget
+  Version: "*.*.^.*"
 
 jobs:
-  update:
+  project-version:
     runs-on: ubuntu-latest
     name: Update version
     steps:
@@ -32,13 +26,13 @@ jobs:
         with:
           file: |
             "./BuildingBlocks/**/*.csproj", "./BuildingBlocks/**/*.nuspec", "./BuildingBlocks/**/AssemblyInfo.cs"
-          version: ${{ github.event.inputs.version }}
+          version: ${{ env.Version }}
           
       - run: |
           git config user.name "Kiarash Minoo"
           git config user.email "yanis_1984@msn.com"
           git add .
-          git commit -m "Bump project version to ${{ steps.bump.outputs.newVersion }}"
+          git commit -m "Update project version to ${{ steps.project-version.outputs.newVersion }}"
           git push
           
   create_nuget:
@@ -67,7 +61,7 @@ jobs:
           retention-days: 7
           path: ${{ env.NuGetDirectory }}/*.nupkg
 
-  deploy:    
+  push-nuget:    
     runs-on: ubuntu-latest
     name: Deploy to myget    
     steps:
@@ -82,5 +76,5 @@ jobs:
           dotnet-version: '8.0.x'       
 
       - name: Publish NuGet package
-        run: dotnet nuget push * "${{ secrets.MYGET_APIKEY }}" --source https://www.myget.org/F/rapidstreamer/
+        run: dotnet nuget push * "${{ secrets.MYGET_APIKEY }}" --source https://www.myget.org/F/rapidstreamer/api/v3/index.json
 
