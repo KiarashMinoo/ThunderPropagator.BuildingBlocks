@@ -50,7 +50,7 @@ jobs:
       - run: | 
           pwd
           ls
-          sudo ./pack.sh              
+          sudo sh ./pack.sh              
           git config user.name "Kiarash Minoo"
           git config user.email "yanis_1984@msn.com"
           git add .
