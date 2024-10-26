@@ -15,21 +15,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set RapidStreamer.BuildingBlocks.Application.csproj version
-        id: update-Application
+      - name: Set project versions
+        id: upgrade-versions
         uses: vers-one/dotnet-project-version-updater@v1.6
         with:
-          file: "BuildingBlocks/RapidStreamer.BuildingBlocks.Application/RapidStreamer.BuildingBlocks.Application.csproj"
-          version: ${{ github.event.inputs.version }}
-
-      - name: Set RapidStreamer.BuildingBlocks.Infrastructure.csproj version
-        id: update-Infrastructure
-        uses: vers-one/dotnet-project-version-updater@v1.6
-        with:
-          file: "BuildingBlocks/RapidStreamer.BuildingBlocks.Infrastructure/RapidStreamer.BuildingBlocks.Infrastructure.csproj"
+          file: |
+            "BuildingBlocks/**/*.csproj", "BuildingBlocks/**/*.nuspec", "BuildingBlocks/**/AssemblyInfo.cs"
           version: ${{ github.event.inputs.version }}
           
       - run: |
+          git status
           git config user.name "Kiarash Minoo"
           git config user.email "yanis_1984@msn.com"
           git add .
