@@ -48,22 +48,14 @@ jobs:
         with:
           dotnet-version: '8.0.x'          
 
-      - run: | 
-          sudo sh ./pack.sh              
-          git config user.name "Kiarash Minoo"
-          git config user.email "yanis_1984@msn.com"
-          git add .
-          git commit -m "Packing nuget package version ${{ steps.project-version.outputs.newVersion }}"
-          git push      
+      - run: sudo sh ./pack.sh              
+             
 
   push-nuget:    
     runs-on: ubuntu-latest
     name: Deploy to myget    
     needs: [pack-nugets]
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
         with:
