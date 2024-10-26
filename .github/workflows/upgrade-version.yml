@@ -1,5 +1,4 @@
-name: Docker Image CI
-
+name: Upgrade Versions
 on:
   workflow_dispatch:
     inputs:
