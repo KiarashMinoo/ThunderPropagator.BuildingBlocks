@@ -56,7 +56,10 @@ jobs:
     name: Deploy to myget    
     needs: [pack_nugets]
     steps:
-      - name: Setup .NET Core
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'   
@@ -65,5 +68,7 @@ jobs:
           NUGET_AUTH_TOKEN: ${{secrets.MYGET_APIKEY}}
 
       - name: Publish NuGet package
-        run: dotnet nuget push './artifacts/RapidStreamer*.nupkg' --skip-duplicate -k ${{ secrets.MYGET_APIKEY }}
+        run: |
+            ls ./artifacts/
+            dotnet nuget push './artifacts/RapidStreamer*.nupkg' --skip-duplicate -k ${{ secrets.MYGET_APIKEY }}
 
