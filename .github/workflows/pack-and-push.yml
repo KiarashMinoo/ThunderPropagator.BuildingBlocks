@@ -86,5 +86,5 @@ jobs:
       - name: Publish NuGet package
         run: |
             ls ${{ env.ArtifactsDirectory }}      
-            dotnet nuget push * ${{ env.ArtifactsDirectory }} --skip-duplicate -k ${{ secrets.MYGET_APIKEY }}
+            dotnet nuget push ${{ env.ArtifactsDirectory }}/RapidStreamer*.nuget --skip-duplicate -k ${{ secrets.MYGET_APIKEY }}
 
