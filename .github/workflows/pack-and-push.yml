@@ -28,8 +28,8 @@ jobs:
         id: update
         uses: vers-one/dotnet-project-version-updater@v1.6
         with:
-          file: "BuildingBlocks/RapidStreamer.BuildingBlocks.Infrastructure/RapidStreamer.BuildingBlocks.Infrastructure.csproj"
-          version: ${{ github.event.inputs.version }}
+          file: "./BuildingBlocks/RapidStreamer.BuildingBlocks.Infrastructure/RapidStreamer.BuildingBlocks.Infrastructure.csproj"
+          version: ${{ env.Version }}
           
       - run: |
           git config user.name "Kiarash Minoo"
