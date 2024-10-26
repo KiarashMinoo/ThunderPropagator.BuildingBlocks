@@ -26,8 +26,7 @@ jobs:
           version: ${{ github.event.inputs.version }}
           
       - run: |
-          cd
-          cat BuildingBlocks/RapidStreamer.BuildingBlocks.Application/RapidStreamer.BuildingBlocks.Application.csproj
+          pwd          
           git status
           git config user.name "Kiarash Minoo"
           git config user.email "yanis_1984@msn.com"
