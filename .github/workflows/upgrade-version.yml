@@ -4,7 +4,7 @@ on:
     inputs:
       version:
         description: "New version for the project"
-        required: true 
+        required: false 
         type: string  
 
 jobs:
@@ -15,12 +15,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set project versions
-        id: update
+      - name: Set MyProject.csproj version
+        id: update-Application
         uses: vers-one/dotnet-project-version-updater@v1.6
         with:
-          file: |
-            "**/*.csproj", "**/*.nuspec", "**/AssemblyInfo.cs"
+          file: "BuildingBlocks/RapidStreamer.BuildingBlocks.Application/RapidStreamer.BuildingBlocks.Application.csproj"
+          version: ${{ github.event.inputs.version }}
+
+      - name: Set MyProject.csproj version
+        id: update-Infrastructure
+        uses: vers-one/dotnet-project-version-updater@v1.6
+        with:
+          file: "BuildingBlocks/RapidStreamer.BuildingBlocks.Infrastructure/RapidStreamer.BuildingBlocks.Infrastructure.csproj"
           version: ${{ github.event.inputs.version }}
           
       - run: |
