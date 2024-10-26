@@ -36,7 +36,7 @@ jobs:
           git config user.name "Kiarash Minoo"
           git config user.email "yanis_1984@msn.com"
           git add .
-          git commit -m "Update project version to ${{ steps.project_version.outputs.newVersion }}"
+          git commit -m "Update project version to ${{ steps.update.outputs.newVersion }}"
           git push
           
   pack_nugets:
