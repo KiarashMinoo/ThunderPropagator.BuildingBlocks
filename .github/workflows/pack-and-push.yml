@@ -35,7 +35,7 @@ jobs:
           git commit -m "Update project version to ${{ steps.project-version.outputs.newVersion }}"
           git push
           
-  create_nuget:
+  pack_nugets:
     runs-on: ubuntu-latest
     name: Create nuget
     steps:
@@ -47,34 +47,29 @@ jobs:
         with:
           dotnet-version: '8.0.x'          
 
-      - run: |
-          dotnet restore
-          dotnet clean
-          dotnet build -c Release
-          
-          dotnet pack ./BuildingBlocks/RapidStreamer.BuildingBlocks.Infrastructure/RapidStreamer.BuildingBlocks.Infrastructure.csproj --no-build -c Release -o ${{ env.NuGetDirectory }}
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: nuget
-          if-no-files-found: error
-          retention-days: 7
-          path: ${{ env.NuGetDirectory }}/*.nupkg
+      - run: | 
+          pack.sh              
+          git config user.name "Kiarash Minoo"
+          git config user.email "yanis_1984@msn.com"
+          git add .
+          git commit -m "Packing nuget package version ${{ steps.project-version.outputs.newVersion }}"
+          git push
 
   push-nuget:    
     runs-on: ubuntu-latest
     name: Deploy to myget    
     steps:
-      - uses: actions/download-artifact@v3
-        with:
-          name: nuget
-          path: ${{ env.NuGetDirectory }}
-
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'       
+          dotnet-version: '8.0.x'   
+          source-url: https://www.myget.org/F/rapidstreamer/api/v3/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{secrets.MYGET_APIKEY}}
 
       - name: Publish NuGet package
-        run: dotnet nuget push * "${{ secrets.MYGET_APIKEY }}" --source https://www.myget.org/F/rapidstreamer/api/v3/index.json
+        run: dotnet nuget push '**/RapidStreamer*.nupkg' --skip-duplicate -k ${{ secrets.MYGET_APIKEY }}
 
