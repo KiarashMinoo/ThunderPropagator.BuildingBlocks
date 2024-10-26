@@ -1,4 +1,5 @@
 name: Upgrade Versions
+
 on:
   workflow_dispatch:
     inputs:
@@ -6,6 +7,7 @@ on:
         description: "New version for the project"
         required: true 
         type: string  
+        default: "*.*.*.^"
 
 jobs:
   update:
