@@ -27,7 +27,7 @@ jobs:
           
       - run: |
           cd
-          cat ./BuildingBlocks/RapidStreamer.BuildingBlocks.Application/RapidStreamer.BuildingBlocks.Application.csproj
+          cat BuildingBlocks/RapidStreamer.BuildingBlocks.Application/RapidStreamer.BuildingBlocks.Application.csproj
           git status
           git config user.name "Kiarash Minoo"
           git config user.email "yanis_1984@msn.com"
