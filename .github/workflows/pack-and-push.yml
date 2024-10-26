@@ -14,7 +14,7 @@ permissions:
 
 env:
   ArtifactsDirectory: ${{ github.workspace}}/artifacts
-  PackageVersion: "*.*.^.*"
+  Project_Version: "*.*.^.*"
 
 jobs:
   project_version:
@@ -30,7 +30,7 @@ jobs:
         with:
           file: |
             "**/*.csproj", "**/*.nuspec", "**/AssemblyInfo.cs"
-          version: ${{ env.PackageVersion }}
+          version: ${{ env.Project_Version }}
       
       - run: |
           git config user.name "Kiarash Minoo"
