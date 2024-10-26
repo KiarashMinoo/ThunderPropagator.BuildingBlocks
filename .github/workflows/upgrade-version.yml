@@ -4,7 +4,7 @@ on:
     inputs:
       version:
         description: "New version for the project"
-        required: false 
+        required: true 
         type: string  
 
 jobs:
@@ -15,14 +15,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set MyProject.csproj version
+      - name: Set RapidStreamer.BuildingBlocks.Application.csproj version
         id: update-Application
         uses: vers-one/dotnet-project-version-updater@v1.6
         with:
           file: "BuildingBlocks/RapidStreamer.BuildingBlocks.Application/RapidStreamer.BuildingBlocks.Application.csproj"
           version: ${{ github.event.inputs.version }}
 
-      - name: Set MyProject.csproj version
+      - name: Set RapidStreamer.BuildingBlocks.Infrastructure.csproj version
         id: update-Infrastructure
         uses: vers-one/dotnet-project-version-updater@v1.6
         with:
