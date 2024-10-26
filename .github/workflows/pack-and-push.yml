@@ -1,0 +1,86 @@
+name: Pack and Push
+
+on:
+  workflow_dispatch:    
+    inputs:
+      version:
+        description: "New version for the project"
+        required: true 
+        type: string  
+        default: "*.*.^.*"
+  push:
+    branches:
+      - 'main'
+
+permissions:
+  contents: write
+
+env:
+  NuGetDirectory: ${{ github.workspace}}/nuget
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    name: Update version
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set project versions
+        id: update
+        uses: vers-one/dotnet-project-version-updater@v1.6
+        with:
+          file: |
+            "./BuildingBlocks/**/*.csproj", "./BuildingBlocks/**/*.nuspec", "./BuildingBlocks/**/AssemblyInfo.cs"
+          version: ${{ github.event.inputs.version }}
+          
+      - run: |
+          git config user.name "Kiarash Minoo"
+          git config user.email "yanis_1984@msn.com"
+          git add .
+          git commit -m "Bump project version to ${{ steps.bump.outputs.newVersion }}"
+          git push
+          
+  create_nuget:
+    runs-on: ubuntu-latest
+    name: Create nuget
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'          
+
+      - run: |
+          dotnet restore
+          dotnet clean
+          dotnet build -c Release
+          
+          dotnet pack ./BuildingBlocks/RapidStreamer.BuildingBlocks.Infrastructure/RapidStreamer.BuildingBlocks.Infrastructure.csproj --no-build -c Release -o ${{ env.NuGetDirectory }}
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: nuget
+          if-no-files-found: error
+          retention-days: 7
+          path: ${{ env.NuGetDirectory }}/*.nupkg
+
+  deploy:    
+    runs-on: ubuntu-latest
+    name: Deploy to myget    
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: nuget
+          path: ${{ env.NuGetDirectory }}
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'       
+
+      - name: Publish NuGet package
+        run: dotnet nuget push * "${{ secrets.MYGET_APIKEY }}" --source https://www.myget.org/F/rapidstreamer/
+
