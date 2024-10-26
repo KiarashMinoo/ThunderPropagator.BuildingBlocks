@@ -26,24 +26,12 @@
         <Authors>RapidStreamer</Authors>
         <Description>Redefining real time data streaming; effortless, blazingly fast and cloud-native for maximum impact</Description>
         <PackageProjectUrl>www.rapidstreamer.com</PackageProjectUrl>
-    </PropertyGroup>
-    
-    <PropertyGroup>
         <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
     </PropertyGroup>
 
-    <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="BuildOnlySettings;ResolveReferences">
+    <Target DependsOnTargets="ResolveReferences" Name="CopyProjectReferencesToPackage">
         <ItemGroup>
-            <!-- Filter out unnecessary files -->
-            <_ReferenceCopyLocalPaths Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference')->WithMetadataValue('PrivateAssets', 'All'))"/>
-        </ItemGroup>
-
-        <!-- Print batches for debug purposes -->
-        <Message Text="Batch for .nupkg: ReferenceCopyLocalPaths = @(_ReferenceCopyLocalPaths), ReferenceCopyLocalPaths.DestinationSubDirectory = %(_ReferenceCopyLocalPaths.DestinationSubDirectory) Filename = %(_ReferenceCopyLocalPaths.Filename) Extension = %(_ReferenceCopyLocalPaths.Extension)" Importance="High" Condition="'@(_ReferenceCopyLocalPaths)' != ''" />
-
-        <ItemGroup>
-            <!-- Add file to package with consideration of sub folder. If empty, the root folder is chosen. -->
-            <BuildOutputInPackage Include="@(_ReferenceCopyLocalPaths)" TargetPath="%(_ReferenceCopyLocalPaths.DestinationSubDirectory)"/>
+            <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))"/>
         </ItemGroup>
     </Target>
 
@@ -56,7 +44,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\RapidStreamer.BuildingBlocks.Application\RapidStreamer.BuildingBlocks.Application.csproj"/>
+        <ProjectReference Include="..\RapidStreamer.BuildingBlocks.Application\RapidStreamer.BuildingBlocks.Application.csproj">
+            <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+            <IncludeAssets>RapidStreamer.BuildingBlocks.Application.dll</IncludeAssets>
+        </ProjectReference>
     </ItemGroup>
 
     <ItemGroup>
