@@ -48,6 +48,8 @@ jobs:
           dotnet-version: '8.0.x'          
 
       - run: | 
+          pwd
+          ls
           sudo ./pack.sh              
           git config user.name "Kiarash Minoo"
           git config user.email "yanis_1984@msn.com"
