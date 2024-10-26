@@ -85,6 +85,7 @@ jobs:
 
       - name: Publish NuGet package
         run: |
-            ls ${{ env.ArtifactsDirectory }}      
-            dotnet nuget push ${{ env.ArtifactsDirectory }}/RapidStreamer*.nuget --skip-duplicate -k ${{ secrets.MYGET_APIKEY }}
+            foreach($file in (Get-ChildItem "${{ env.ArtifactsDirectory }}" -Recurse -Include *.nupkg)) {
+              dotnet nuget push $file --api-key "${{ secrets.MYGET_APIKEY }}" --skip-duplicate              
+            }
 
