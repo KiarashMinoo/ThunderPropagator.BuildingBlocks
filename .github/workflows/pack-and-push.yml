@@ -5,11 +5,15 @@ on:
     branches:
       - 'main'
 
+defaults:
+  run:
+    shell: pwsh
+
 permissions:
   contents: write
 
 env:
-  NuGetDirectory: ${{ github.workspace}}/nuget
+  ArtifactsDirectory: ${{ github.workspace}}/artifacts
   Version: "*.*.^.*"
 
 jobs:
@@ -20,12 +24,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set project versions
+      - name: Set RapidStreamer.BuildingBlocks version
         id: update
         uses: vers-one/dotnet-project-version-updater@v1.6
         with:
-          file: |
-            "./BuildingBlocks/**/*.csproj", "./BuildingBlocks/**/*.nuspec", "./BuildingBlocks/**/AssemblyInfo.cs"
+          file: "./BuildingBlocks/RapidStreamer.BuildingBlocks.Infrastructure/RapidStreamer.BuildingBlocks.Infrastructure.csproj"
           version: ${{ env.Version }}
           
       - run: |
@@ -42,13 +45,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
         
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'          
 
-      - run: sudo sh ./pack.sh              
+      - run: |
+          dotnet restore
+          dotnet clean
+          dotnet build -c Release
+          
+          dotnet pack ./BuildingBlocks/RapidStreamer.BuildingBlocks.Infrastructure/RapidStreamer.BuildingBlocks.Infrastructure.csproj --no-build -c Release -o ${{ env.ArtifactsDirectory }}      
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: nuget
+          if-no-files-found: error
+          retention-days: 7
+          path: ${{ env.ArtifactsDirectory }}/*.nupkg
              
 
   push_nuget:    
@@ -56,8 +73,10 @@ jobs:
     name: Deploy to myget    
     needs: [pack_nugets]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: nuget
+          path: ${{ env.ArtifactsDirectory }}
         
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -69,6 +88,7 @@ jobs:
 
       - name: Publish NuGet package
         run: |
-            ls ./artifacts/
-            dotnet nuget push './artifacts/RapidStreamer*.nupkg' --skip-duplicate -k ${{ secrets.MYGET_APIKEY }}
+            foreach($file in (Get-ChildItem "${{ env.ArtifactsDirectory }}" -Recurse -Include *.nupkg)) {
+              dotnet nuget push $file --api-key "${{ secrets.MYGET_APIKEY }}" --skip-duplicate              
+            }
 
