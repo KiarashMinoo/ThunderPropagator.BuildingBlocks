@@ -35,6 +35,10 @@
         </ItemGroup>
     </Target>
 
+    <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    </PropertyGroup>
+
     <ItemGroup>
         <PackageReference Include="Apache.NMS.ActiveMQ" Version="2.1.0"/>
         <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="3.1.16"/>
