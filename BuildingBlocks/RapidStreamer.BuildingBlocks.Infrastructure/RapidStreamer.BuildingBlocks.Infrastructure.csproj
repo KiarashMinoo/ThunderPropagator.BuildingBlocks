@@ -10,7 +10,7 @@
         <Configurations>Debug;Release;Cluster</Configurations>
         <EnablePreviewFeatures>true</EnablePreviewFeatures>
         <Platforms>AnyCPU;ARM32;ARM64;x86;x64</Platforms>
-        <Version>1.0.37.0</Version>
+        <Version>1.0.36.0</Version>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -26,7 +26,14 @@
         <Authors>RapidStreamer</Authors>
         <Description>Redefining real time data streaming; effortless, blazingly fast and cloud-native for maximum impact</Description>
         <PackageProjectUrl>www.rapidstreamer.com</PackageProjectUrl>
+        <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
     </PropertyGroup>
+
+    <Target DependsOnTargets="ResolveReferences" Name="CopyProjectReferencesToPackage">
+        <ItemGroup>
+            <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))"/>
+        </ItemGroup>
+    </Target>
 
     <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
         <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
@@ -41,7 +48,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\RapidStreamer.BuildingBlocks.Application\RapidStreamer.BuildingBlocks.Application.csproj" PrivateAssets="all" IncludeAssets="all"/>
+        <ProjectReference Include="..\RapidStreamer.BuildingBlocks.Application\RapidStreamer.BuildingBlocks.Application.csproj">
+            <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+            <IncludeAssets>RapidStreamer.BuildingBlocks.Application.dll</IncludeAssets>
+        </ProjectReference>
     </ItemGroup>
 
     <ItemGroup>
