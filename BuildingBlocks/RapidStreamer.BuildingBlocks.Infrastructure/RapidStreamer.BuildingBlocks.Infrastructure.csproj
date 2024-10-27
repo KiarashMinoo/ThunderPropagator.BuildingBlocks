@@ -26,14 +26,7 @@
         <Authors>RapidStreamer</Authors>
         <Description>Redefining real time data streaming; effortless, blazingly fast and cloud-native for maximum impact</Description>
         <PackageProjectUrl>www.rapidstreamer.com</PackageProjectUrl>
-        <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
     </PropertyGroup>
-
-    <Target DependsOnTargets="ResolveReferences" Name="CopyProjectReferencesToPackage">
-        <ItemGroup>
-            <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))"/>
-        </ItemGroup>
-    </Target>
 
     <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
         <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
@@ -48,10 +41,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\RapidStreamer.BuildingBlocks.Application\RapidStreamer.BuildingBlocks.Application.csproj">
-            <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
-            <IncludeAssets>RapidStreamer.BuildingBlocks.Application.dll</IncludeAssets>
-        </ProjectReference>
+        <ProjectReference Include="..\RapidStreamer.BuildingBlocks.Application\RapidStreamer.BuildingBlocks.Application.csproj" PrivateAssets="all" IncludeAssets="all"/>
     </ItemGroup>
 
     <ItemGroup>
