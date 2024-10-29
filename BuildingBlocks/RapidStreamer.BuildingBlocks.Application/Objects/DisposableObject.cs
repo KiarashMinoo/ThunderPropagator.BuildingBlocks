@@ -1,4 +1,6 @@
-﻿namespace RapidStreamer.BuildingBlocks.Application.Objects
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace RapidStreamer.BuildingBlocks.Application.Objects
 {
     public abstract class DisposableObject : EquatableObject,
         IDisposable,
@@ -139,6 +141,7 @@
             return ValueTask.CompletedTask;
         }
 
+        [SuppressMessage("ReSharper", "MethodHasAsyncOverload")]
         private async ValueTask DisposeAsync(bool disposing)
         {
             Disposing = disposing;
@@ -147,10 +150,14 @@
             {
                 if (Disposing)
                 {
+                    DisposeManagedResources();
                     await DisposeManagedResourcesAsync();
                 }
 
+                ReleaseUnmanagedResources();
                 await ReleaseUnmanagedResourcesAsync();
+
+                SetLargeFieldsAsNull();
                 await SetLargeFieldsAsNullAsync();
 
                 Disposed = true;
