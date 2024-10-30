@@ -13,10 +13,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildingBlocks", "BuildingB
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1ACE9E2E-4250-4D9A-8079-07D839222B67}"
 	ProjectSection(SolutionItems) = preProject
+		pack.sh = pack.sh
 		RapidStreamer.png = RapidStreamer.png
 		RapidStreamer.svg = RapidStreamer.svg
 		README.md = README.md
-		pack.sh = pack.sh
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RapidStreamer.BuildingBlocks.Infrastructure", "BuildingBlocks\RapidStreamer.BuildingBlocks.Infrastructure\RapidStreamer.BuildingBlocks.Infrastructure.csproj", "{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}"
@@ -40,6 +40,16 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5A33A95E-21B1-4FB7-8706-22EBB7CC49FE}.Cluster|Any CPU.ActiveCfg = Cluster|Any CPU
+		{5A33A95E-21B1-4FB7-8706-22EBB7CC49FE}.Cluster|Any CPU.Build.0 = Cluster|Any CPU
+		{5A33A95E-21B1-4FB7-8706-22EBB7CC49FE}.Cluster|ARM32.ActiveCfg = Cluster|ARM32
+		{5A33A95E-21B1-4FB7-8706-22EBB7CC49FE}.Cluster|ARM32.Build.0 = Cluster|ARM32
+		{5A33A95E-21B1-4FB7-8706-22EBB7CC49FE}.Cluster|ARM64.ActiveCfg = Cluster|ARM64
+		{5A33A95E-21B1-4FB7-8706-22EBB7CC49FE}.Cluster|ARM64.Build.0 = Cluster|ARM64
+		{5A33A95E-21B1-4FB7-8706-22EBB7CC49FE}.Cluster|x64.ActiveCfg = Cluster|x64
+		{5A33A95E-21B1-4FB7-8706-22EBB7CC49FE}.Cluster|x64.Build.0 = Cluster|x64
+		{5A33A95E-21B1-4FB7-8706-22EBB7CC49FE}.Cluster|x86.ActiveCfg = Cluster|x86
+		{5A33A95E-21B1-4FB7-8706-22EBB7CC49FE}.Cluster|x86.Build.0 = Cluster|x86
 		{5A33A95E-21B1-4FB7-8706-22EBB7CC49FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5A33A95E-21B1-4FB7-8706-22EBB7CC49FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5A33A95E-21B1-4FB7-8706-22EBB7CC49FE}.Debug|ARM32.ActiveCfg = Debug|ARM32
@@ -50,6 +60,16 @@ Global
 		{5A33A95E-21B1-4FB7-8706-22EBB7CC49FE}.Debug|x64.Build.0 = Debug|x64
 		{5A33A95E-21B1-4FB7-8706-22EBB7CC49FE}.Debug|x86.ActiveCfg = Debug|x86
 		{5A33A95E-21B1-4FB7-8706-22EBB7CC49FE}.Debug|x86.Build.0 = Debug|x86
+		{5A33A95E-21B1-4FB7-8706-22EBB7CC49FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A33A95E-21B1-4FB7-8706-22EBB7CC49FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A33A95E-21B1-4FB7-8706-22EBB7CC49FE}.Release|ARM32.ActiveCfg = Release|ARM32
+		{5A33A95E-21B1-4FB7-8706-22EBB7CC49FE}.Release|ARM32.Build.0 = Release|ARM32
+		{5A33A95E-21B1-4FB7-8706-22EBB7CC49FE}.Release|ARM64.ActiveCfg = Release|ARM64
+		{5A33A95E-21B1-4FB7-8706-22EBB7CC49FE}.Release|ARM64.Build.0 = Release|ARM64
+		{5A33A95E-21B1-4FB7-8706-22EBB7CC49FE}.Release|x64.ActiveCfg = Release|x64
+		{5A33A95E-21B1-4FB7-8706-22EBB7CC49FE}.Release|x64.Build.0 = Release|x64
+		{5A33A95E-21B1-4FB7-8706-22EBB7CC49FE}.Release|x86.ActiveCfg = Release|x86
+		{5A33A95E-21B1-4FB7-8706-22EBB7CC49FE}.Release|x86.Build.0 = Release|x86
 		{0FC34437-9E34-44A2-8BF3-827E3EA07D6E}.Cluster|Any CPU.ActiveCfg = Cluster|Any CPU
 		{0FC34437-9E34-44A2-8BF3-827E3EA07D6E}.Cluster|Any CPU.Build.0 = Cluster|Any CPU
 		{0FC34437-9E34-44A2-8BF3-827E3EA07D6E}.Cluster|ARM32.ActiveCfg = Cluster|ARM32
@@ -80,6 +100,16 @@ Global
 		{0FC34437-9E34-44A2-8BF3-827E3EA07D6E}.Release|x64.Build.0 = Release|x64
 		{0FC34437-9E34-44A2-8BF3-827E3EA07D6E}.Release|x86.ActiveCfg = Release|x86
 		{0FC34437-9E34-44A2-8BF3-827E3EA07D6E}.Release|x86.Build.0 = Release|x86
+		{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}.Cluster|Any CPU.ActiveCfg = Cluster|Any CPU
+		{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}.Cluster|Any CPU.Build.0 = Cluster|Any CPU
+		{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}.Cluster|ARM32.ActiveCfg = Cluster|ARM32
+		{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}.Cluster|ARM32.Build.0 = Cluster|ARM32
+		{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}.Cluster|ARM64.ActiveCfg = Cluster|ARM64
+		{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}.Cluster|ARM64.Build.0 = Cluster|ARM64
+		{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}.Cluster|x64.ActiveCfg = Cluster|x64
+		{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}.Cluster|x64.Build.0 = Cluster|x64
+		{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}.Cluster|x86.ActiveCfg = Cluster|x86
+		{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}.Cluster|x86.Build.0 = Cluster|x86
 		{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}.Debug|ARM32.ActiveCfg = Debug|ARM32
@@ -100,16 +130,6 @@ Global
 		{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}.Release|x64.Build.0 = Release|x64
 		{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}.Release|x86.ActiveCfg = Release|x86
 		{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}.Release|x86.Build.0 = Release|x86
-		{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}.Cluster|Any CPU.ActiveCfg = Cluster|Any CPU
-		{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}.Cluster|Any CPU.Build.0 = Cluster|Any CPU
-		{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}.Cluster|ARM32.ActiveCfg = Cluster|ARM32
-		{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}.Cluster|ARM32.Build.0 = Cluster|ARM32
-		{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}.Cluster|ARM64.ActiveCfg = Cluster|ARM64
-		{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}.Cluster|ARM64.Build.0 = Cluster|ARM64
-		{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}.Cluster|x86.ActiveCfg = Cluster|x86
-		{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}.Cluster|x86.Build.0 = Cluster|x86
-		{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}.Cluster|x64.ActiveCfg = Cluster|x64
-		{CCF5CE1F-8B84-4261-B7EA-03D7D834176D}.Cluster|x64.Build.0 = Cluster|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
