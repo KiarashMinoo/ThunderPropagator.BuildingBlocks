@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <authors>RapidStreamer</authors>
+        <owners>RapidStreamer</owners>
+        <projectUrl>https://github.com/KAB-TEAM/RapidStreamer.BuildingBlocks</projectUrl>
+        <license type="expression">Apache-2.0</license>
+        <icon>RapidStreamer.png</icon>
+        <readme>README.md</readme>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>
+            Redefining real time data streaming; effortless, blazingly fast and cloud-native for maximum impact
+        </description>
+        <copyright>Copyright ©2024 RapidStreamer Corporation</copyright>
+        <tags>
+            Real-Time Data Streaming, Blazingly Fast, Cloud-Native, Data Streaming, Effortless Performance,
+            High Impact, Real-Time Processing, Fast Data Pipelines, Cloud Solutions, Streaming Technology
+        </tags>
+        <projectUrl>www.rapidstreamer.com</projectUrl>
+    </metadata>
+    <files>
+        <file src="README.md" target=""/>
+        <file src="RapidStreamer.png" target=""/>
+    </files>
+</package>

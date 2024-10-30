@@ -1,81 +1,32 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<OutputType>Library</OutputType>
-		<TargetFramework>net8.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<NoWarn>$(NoWarn);1591</NoWarn>
-		<Configurations>Debug;Release;Cluster</Configurations>
-		<EnablePreviewFeatures>true</EnablePreviewFeatures>
-		<Platforms>AnyCPU;ARM32;ARM64;x86;x64</Platforms>
-		<Version>1.0.42.0</Version>
-		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-	</PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);1591</NoWarn>
+        <Configurations>Debug;Release;Cluster</Configurations>
+        <LangVersion>latestmajor</LangVersion>
+        <Platforms>AnyCPU;ARM32;ARM64;x86;x64</Platforms>
+        <Version>1.0.42.0</Version>
+    </PropertyGroup>
 
-	<PropertyGroup>
-		<IsPackable>true</IsPackable>
-		<PackageId>RapidStreamer.BuildingBlocks</PackageId>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Description>Redefining real time data streaming; effortless, blazingly fast and cloud-native for maximum impact</Description>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageIcon>RapidStreamer.png</PackageIcon>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<Copyright>2024</Copyright>
-		<Title>RapidStreamer</Title>
-		<Authors>RapidStreamer</Authors>
-		<Description>Redefining real time data streaming; effortless, blazingly fast and cloud-native for maximum impact</Description>
-		<PackageProjectUrl>www.rapidstreamer.com</PackageProjectUrl>
-	</PropertyGroup>
+    <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    </PropertyGroup>
 
-	<PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
-		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-	</PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Apache.NMS.ActiveMQ" Version="2.1.0"/>
+        <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="3.1.16"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2"/>
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.10"/>
+        <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="8.0.1"/>
+    </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\RapidStreamer.BuildingBlocks.Application\RapidStreamer.BuildingBlocks.Application.csproj" PrivateAssets="all"/>
-	</ItemGroup>
-
-	<PropertyGroup>
-		<TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
-	</PropertyGroup>
-
-	<Target Name="CopyProjectReferencesToPackage" DependsOnTargets="BuildOnlySettings;ResolveReferences">
-		<ItemGroup>
-			<!-- Filter out unnecessary files -->
-			<_ReferenceCopyLocalPaths Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference')-&gt;WithMetadataValue('PrivateAssets', 'All'))" />
-		</ItemGroup>
-
-		<Message Text="Batch for .nupkg: ReferenceCopyLocalPaths = @(_ReferenceCopyLocalPaths), ReferenceCopyLocalPaths.DestinationSubDirectory = %(_ReferenceCopyLocalPaths.DestinationSubDirectory) Filename = %(_ReferenceCopyLocalPaths.Filename) Extension = %(_ReferenceCopyLocalPaths.Extension)" Importance="High" Condition="'@(_ReferenceCopyLocalPaths)' != ''" />
-
-		<ItemGroup>
-			<!-- Add file to package with consideration of sub folder. If empty, the root folder is chosen. -->
-			<BuildOutputInPackage Include="@(_ReferenceCopyLocalPaths)" TargetPath="%(_ReferenceCopyLocalPaths.DestinationSubDirectory)" />
-		</ItemGroup>
-	</Target>
-
-	<ItemGroup>
-		<PackageReference Include="Apache.NMS.ActiveMQ" Version="2.1.0" />
-		<PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="3.1.16" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
-		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.10" />
-		<PackageReference Include="System.Diagnostics.PerformanceCounter" Version="8.0.1" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Include="..\..\RapidStreamer.png">
-			<Pack>True</Pack>
-			<PackagePath></PackagePath>
-			<Link>RapidStreamer.png</Link>
-		</None>
-	</ItemGroup>
-	<ItemGroup>
-		<None Include="..\..\README.md">
-			<Pack>True</Pack>
-			<PackagePath></PackagePath>
-			<Link>README.png</Link>
-		</None>
-	</ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\RapidStreamer.BuildingBlocks.Application\RapidStreamer.BuildingBlocks.Application.csproj" />
+    </ItemGroup>
 
 </Project>
