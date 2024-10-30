@@ -18,29 +18,86 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="CaseConverter" Version="2.0.1"/>
-        <PackageReference Include="JetBrains.Annotations" Version="2024.3.0"/>
-        <PackageReference Include="MemoryPack" Version="1.21.3"/>
-        <PackageReference Include="MessagePack" Version="2.5.187"/>
-        <PackageReference Include="MessagePack.Annotations" Version="2.5.187"/>
+        <PackageReference Include="CaseConverter" Version="2.0.1">
+            <IncludeAssets>all</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="JetBrains.Annotations" Version="2024.3.0">
+            <IncludeAssets>all</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="MemoryPack" Version="1.21.3">
+            <IncludeAssets>all</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="MessagePack" Version="2.5.187">
+            <IncludeAssets>all</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="MessagePack.Annotations" Version="2.5.187">
+            <IncludeAssets>all</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
         <PackageReference Include="MessagePackAnalyzer" Version="2.5.187">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="8.0.10"/>
-        <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.1.2"/>
-        <PackageReference Include="NetJSON" Version="1.4.4"/>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
-        <PackageReference Include="Newtonsoft.Json.Schema" Version="4.0.1"/>
-        <PackageReference Include="PCRE.NET" Version="1.1.0"/>
-        <PackageReference Include="protobuf-net" Version="3.2.45"/>
-        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.1.2"/>
-        <PackageReference Include="System.Text.Json" Version="8.0.5"/>
-        <PackageReference Include="YamlDotNet" Version="16.1.3"/>
-        <PackageReference Include="NJsonSchema" Version="11.0.2"/>
-        <PackageReference Include="ZeroFormatter" Version="1.6.4"/>
-        <PackageReference Include="ZeroFormatter.Analyzer" Version="1.1.1"/>
-        <PackageReference Include="Ardalis.GuardClauses" Version="5.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="8.0.10">
+            <IncludeAssets>all</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.1.2">
+            <IncludeAssets>all</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="NetJSON" Version="1.4.4">
+            <IncludeAssets>all</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3">
+            <IncludeAssets>all</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Newtonsoft.Json.Schema" Version="4.0.1">
+            <IncludeAssets>all</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="PCRE.NET" Version="1.1.0">
+            <IncludeAssets>all</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="protobuf-net" Version="3.2.45">
+            <IncludeAssets>all</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.1.2">
+            <IncludeAssets>all</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="System.Text.Json" Version="8.0.5">
+            <IncludeAssets>all</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="YamlDotNet" Version="16.1.3">
+            <IncludeAssets>all</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="NJsonSchema" Version="11.0.2">
+            <IncludeAssets>all</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="ZeroFormatter" Version="1.6.4">
+            <IncludeAssets>all</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="ZeroFormatter.Analyzer" Version="1.1.1">
+            <IncludeAssets>all</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Ardalis.GuardClauses" Version="5.0.0">
+            <IncludeAssets>all</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
     </ItemGroup>
 
 </Project>
