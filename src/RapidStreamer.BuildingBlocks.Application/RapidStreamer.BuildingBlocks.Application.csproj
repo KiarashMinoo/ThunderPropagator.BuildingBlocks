@@ -26,6 +26,7 @@
         <PackageTags>Real-Time Data Streaming, Blazingly Fast, Cloud-Native, Data Streaming, Effortless Performance, High Impact, Real-Time Processing, Fast Data Pipelines, Cloud Solutions, Streaming Technology</PackageTags>
         <PackageIcon>RapidStreamer.png</PackageIcon>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <AvoidCycleErrorOnSelfReference>true</AvoidCycleErrorOnSelfReference>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
