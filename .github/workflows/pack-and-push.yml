@@ -19,7 +19,7 @@ env:
 jobs:
   versioning_and_pack:
     runs-on: ubuntu-latest
-    name: Update version    
+    name: Update version and Pack nugets   
     steps:
       - name: Checkout
         uses: actions/checkout@v3
