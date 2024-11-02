@@ -19,16 +19,16 @@ env:
 jobs:
   versioning_and_pack:
     runs-on: ubuntu-latest
-    name: Update version and Pack nugets   
+    name: Update version and Pack nugets
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
-      
+
       - name: Set project versions
         id: update
         uses: vers-one/dotnet-project-version-updater@v1.6
@@ -36,15 +36,16 @@ jobs:
           file: |
             "**/*.csproj", "**/*.nuspec", "**/AssemblyInfo.cs"
           version: ${{ env.Project_Version }}
-          
-      - run: |          
+
+      - run: |
           dotnet restore
           dotnet clean
           dotnet build -c Debug
           
           dotnet pack ./src/RapidStreamer.BuildingBlocks.Application/RapidStreamer.BuildingBlocks.Application.csproj -c Debug -o ${{ env.ArtifactsDirectory }}                        
-          
-      - run: |          
+          dotnet pack ./src/RapidStreamer.BuildingBlocks.Infrastructure/RapidStreamer.BuildingBlocks.Infrastructure.csproj -c Debug -o ${{ env.ArtifactsDirectory }}                        
+
+      - run: |
           git config user.name "Kiarash Minoo"
           git config user.email "yanis_1984@msn.com"
           git add .
@@ -57,29 +58,29 @@ jobs:
           if-no-files-found: error
           retention-days: 7
           path: ${{ env.ArtifactsDirectory }}/*.nupkg
-             
-
-  push_nuget:    
+  
+  
+  push_nuget:
     runs-on: ubuntu-latest
-    name: Deploy to myget    
-    needs: [versioning_and_pack]
+    name: Deploy to myget
+    needs: [ versioning_and_pack ]
     steps:
       - uses: actions/download-artifact@v3
         with:
           name: nuget
           path: ${{ env.ArtifactsDirectory }}
-        
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'   
+          dotnet-version: '8.0.x'
           source-url: https://www.myget.org/F/rapidstreamer/api/v3/index.json
         env:
           NUGET_AUTH_TOKEN: ${{secrets.MYGET_APIKEY}}
 
       - name: Publish NuGet package
         run: |
-            foreach($file in (Get-ChildItem "${{ env.ArtifactsDirectory }}" -Recurse -Include *.nupkg)) {
-              dotnet nuget push $file --api-key "${{ secrets.MYGET_APIKEY }}" --skip-duplicate              
-            }
+          foreach($file in (Get-ChildItem "${{ env.ArtifactsDirectory }}" -Recurse -Include *.nupkg)) {
+            dotnet nuget push $file --api-key "${{ secrets.MYGET_APIKEY }}" --skip-duplicate              
+          }
 
