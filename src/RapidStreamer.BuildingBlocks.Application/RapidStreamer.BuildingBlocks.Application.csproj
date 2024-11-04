@@ -12,6 +12,12 @@
         <Platforms>AnyCPU;x86;x64</Platforms>
         <Version>1.0.54.0</Version>
     </PropertyGroup>
+    
+    <PropertyGroup Condition="'$(Configuration)'=='Release'">
+        <DebugSymbols>False</DebugSymbols>
+        <DebugType>None</DebugType>
+        <DefineConstants/>
+    </PropertyGroup>
 
     <PropertyGroup Label="nuget">
         <IsPackable>true</IsPackable>
