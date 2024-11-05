@@ -62,7 +62,11 @@ namespace RapidStreamer.BuildingBlocks.Application
                 action(state);
             }, cancellationToken);
 
-            return DisposableObject.Create(() => task.Dispose());
+            return DisposableObject.Create(() =>
+            {
+                if (task.Status is TaskStatus.RanToCompletion or TaskStatus.Faulted or TaskStatus.Canceled)
+                    task.Dispose();
+            });
         }
 
         public static IDisposable RunOnce(Action action, TimeSpan interval, CancellationToken cancellationToken = default)
@@ -76,7 +80,11 @@ namespace RapidStreamer.BuildingBlocks.Application
                 await action(state, cancellationToken);
             }, cancellationToken);
 
-            return DisposableObject.Create(() => task.Dispose());
+            return DisposableObject.Create(() =>
+            {
+                if (task.Status is TaskStatus.RanToCompletion or TaskStatus.Faulted or TaskStatus.Canceled)
+                    task.Dispose();
+            });
         }
 
         public static IDisposable RunOnce(Func<CancellationToken, Task> action, TimeSpan interval, CancellationToken cancellationToken = default)
