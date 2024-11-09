@@ -27,10 +27,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
-          source-url: https://nuget.pkg.github.com/KAB-TEAM/index.json
-        env:
-          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}   
+          dotnet-version: '8.0.x'          
 
       - name: Set project versions
         id: update
@@ -97,9 +94,9 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
-          source-url: https://www.myget.org/F/rapidstreamer/api/v3/index.json
+          source-url: https://nuget.pkg.github.com/KAB-TEAM/index.json
         env:
-          NUGET_AUTH_TOKEN: ${{secrets.MYGET_APIKEY}}
+          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}   
 
       - name: Publish NuGet package
         run: |
