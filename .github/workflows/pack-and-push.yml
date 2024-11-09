@@ -104,6 +104,6 @@ jobs:
       - name: Publish NuGet package
         run: |
           foreach($file in (Get-ChildItem "${{ env.ArtifactsDirectory }}" -Recurse -Include *.nupkg)) {
-            dotnet nuget push $file --api-key "${{ secrets.MYGET_APIKEY }}" --skip-duplicate --no-symbols true             
+            dotnet nuget push $file --skip-duplicate --no-symbols true             
           }
 
