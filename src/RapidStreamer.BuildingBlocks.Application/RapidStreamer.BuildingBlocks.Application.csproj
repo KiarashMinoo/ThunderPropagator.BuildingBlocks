@@ -10,7 +10,7 @@
         <Configurations>Debug;Release</Configurations>
         <LangVersion>latestmajor</LangVersion>
         <Platforms>AnyCPU;x86;x64</Platforms>
-        <Version>1.0.64.0</Version>
+        <Version>1.0.65.0</Version>
     </PropertyGroup>
     
     <PropertyGroup Condition="'$(Configuration)'=='Release'">
