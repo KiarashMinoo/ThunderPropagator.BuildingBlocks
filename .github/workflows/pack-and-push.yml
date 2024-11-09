@@ -93,7 +93,7 @@ jobs:
           path: ${{ env.ArtifactsDirectory }}
 
       - name: Prep packages
-        run: dotnet nuget add source --username KiarashMinoo --password ${{ secrets.GHP_NUGET_PACKAGE_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/KiarashMinoo/index.json"
+        run: dotnet nuget add source --username KiarashMinoo --password ${{ secrets.GHP_NUGET_PACKAGE_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/KAB-TEAM/index.json"
       
       - name: Push package to GitHub packages 
         run: |
