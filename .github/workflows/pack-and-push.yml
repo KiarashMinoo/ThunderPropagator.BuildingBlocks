@@ -96,7 +96,7 @@ jobs:
           dotnet-version: '8.0.x'
           source-url: https://nuget.pkg.github.com/KAB-TEAM/index.json
         env:
-          NUGET_AUTH_TOKEN: ${{secrets.NUGET_PUSH_API_KEY}}   
+          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}   
 
       - name: Publish NuGet package
         run: |
