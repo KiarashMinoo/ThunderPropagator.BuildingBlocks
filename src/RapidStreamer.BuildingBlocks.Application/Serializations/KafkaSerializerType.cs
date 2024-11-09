@@ -12,6 +12,11 @@
         /// </summary>
         NJson = SerializerType.NJson,
 
+        /// <summary>
+        /// NetJSON 
+        /// </summary>
+        NetJson = SerializerType.NetJson,
+
         SchemaJson,
         Avro
     }

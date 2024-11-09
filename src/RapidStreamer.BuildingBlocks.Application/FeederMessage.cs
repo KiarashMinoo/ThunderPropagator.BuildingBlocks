@@ -3,7 +3,6 @@ using JetBrains.Annotations;
 using MessagePack;
 using ProtoBuf;
 using RapidStreamer.BuildingBlocks.Application.Attributes;
-using RapidStreamer.BuildingBlocks.Application.Collections;
 using RapidStreamer.BuildingBlocks.Application.CorrelationId;
 using RapidStreamer.BuildingBlocks.Application.Enums;
 using RapidStreamer.BuildingBlocks.Application.Objects;

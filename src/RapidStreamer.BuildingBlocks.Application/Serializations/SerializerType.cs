@@ -10,6 +10,11 @@
         /// <summary>
         /// Newtonsoft.Json
         /// </summary>
-        NJson
+        NJson,
+
+        /// <summary>
+        /// NetJSON 
+        /// </summary>
+        NetJson
     }
 }
