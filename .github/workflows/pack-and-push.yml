@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 #fetch-depth is needed for GitVersion
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -82,7 +84,7 @@ jobs:
   
   push_nuget:
     runs-on: ubuntu-latest
-    name: Deploy to myget
+    name: Deploy to github
     needs: [ versioning_and_pack ]
     steps:
       - uses: actions/download-artifact@v3
@@ -90,17 +92,12 @@ jobs:
           name: nuget
           path: ${{ env.ArtifactsDirectory }}
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-          source-url: https://nuget.pkg.github.com/KAB-TEAM/index.json
-        env:
-          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}   
-
-      - name: Publish NuGet package
+      - name: Prep packages
+        run: dotnet nuget add source --username KiarashMinoo --password ${{ secrets.GHP_NUGET_PACKAGE_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/KiarashMinoo/index.json"
+      
+      - name: Push package to GitHub packages 
         run: |
           foreach($file in (Get-ChildItem "${{ env.ArtifactsDirectory }}" -Recurse -Include *.nupkg)) {
-            dotnet nuget push $file --api-key ${{ secrets.GHP_NUGET_PACKAGE_TOKEN }} --source "https://nuget.pkg.github.com/RapidStreamer.BuildingBlocks/index.json" --skip-duplicate --no-symbols
+            dotnet nuget push $file --api-key ${{ secrets.GHP_NUGET_PACKAGE_TOKEN }} --source "github" --skip-duplicate --no-symbols
           }
 
