@@ -28,6 +28,9 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
+          source-url: https://nuget.pkg.github.com/KAB-TEAM/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}   
 
       - name: Set project versions
         id: update
@@ -37,7 +40,8 @@ jobs:
             "**/*.csproj", "**/*.nuspec", "**/AssemblyInfo.cs"
           version: ${{ env.Project_Version }}
 
-      - run: |
+      - name: Build solution and generate NuGet packages
+        run: |
           dotnet restore
           dotnet clean
           
@@ -63,7 +67,8 @@ jobs:
           
           dotnet pack  -c Debug -o ${{ env.ArtifactsDirectory }}                                                          
 
-      - run: |
+      - name: Push latest changes to repository
+        run: |
           git config user.name "Kiarash Minoo"
           git config user.email "yanis_1984@msn.com"
           git add .
@@ -99,6 +104,6 @@ jobs:
       - name: Publish NuGet package
         run: |
           foreach($file in (Get-ChildItem "${{ env.ArtifactsDirectory }}" -Recurse -Include *.nupkg)) {
-            dotnet nuget push $file --api-key "${{ secrets.MYGET_APIKEY }}" --skip-duplicate              
+            dotnet nuget push $file --api-key "${{ secrets.MYGET_APIKEY }}" --skip-duplicate --no-symbols true             
           }
 
