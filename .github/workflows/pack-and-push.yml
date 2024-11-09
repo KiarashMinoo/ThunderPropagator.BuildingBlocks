@@ -98,6 +98,6 @@ jobs:
       - name: Push package to GitHub packages 
         run: |
           foreach($file in (Get-ChildItem "${{ env.ArtifactsDirectory }}" -Recurse -Include *.nupkg)) {
-            dotnet nuget push $file --api-key ${{ secrets.GHP_NUGET_PACKAGE_TOKEN }} --source "github" --skip-duplicate --no-symbols
+            dotnet nuget push $file --api-key "${{ secrets.GHP_NUGET_PACKAGE_TOKEN }}" --source "github" --skip-duplicate --no-symbols
           }
 
