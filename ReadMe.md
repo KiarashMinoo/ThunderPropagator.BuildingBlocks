@@ -1,34 +1,75 @@
-﻿## RapidStreamer
+﻿
+# RapidStreamer.BuildingBlocks
 
-### Overview
+**RapidStreamer.BuildingBlocks** is a NuGet package designed to provide foundational components and utilities for building applications on .NET 8. This package is maintained by the **RapidStreamer** team, offering reusable building blocks to streamline development.
+
+## Overview
 
 RapidStreamer is a cutting-edge software solution designed for redefining real-time data streaming. Our mission is to provide effortless, blazingly fast, and cloud-native streaming capabilities for maximum impact.
 
-### License
-This software is licensed under the MIT License.
+## Table of Contents
 
-#### MIT License
-Copyright (c) 2024 RapidStreamer
+- [Installation](#installation)
+- [Configuring GitHub as a NuGet Package Source](#configuring-github-as-a-nuget-package-source)
+- [Getting Started](#getting-started)
+- [License](#license)
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+## Installation
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+The **RapidStreamer.BuildingBlocks** package is hosted on GitHub Packages. To install it, add the GitHub package source configuration, then use the **NuGet Package Manager** in Visual Studio or the **dotnet CLI**.
 
-### Usage
-This license applies to **RapidStreamer** and the core idea of "Redefining real-time data streaming; effortless, blazingly fast and cloud-native for maximum impact," allowing for:
+### NuGet CLI
 
-* Use: Feel free to integrate this concept into your projects.
-* Modification: You can modify the expression, formatting, or application as needed.
-* Distribution: Share this idea in your community or commercial applications.
-Please ensure to attribute and include the copyright notice as specified above.
+To install directly via the .NET CLI:
+```bash
+dotnet add package RapidStreamer.BuildingBlocks --version [Latest Version]
+```
 
-#### Getting Started
-To get started with **RapidStreamer**, follow these steps:
+### Package Manager Console in Visual Studio
 
-Download the latest version from our website.
-Follow the installation instructions in the documentation.
-Start streaming your data effortlessly!
-For further details, please refer to the documentation or visit our support page.
+```powershell
+Install-Package RapidStreamer.BuildingBlocks -Version [Latest Version]
+```
 
-Thank you for choosing **RapidStreamer**!
+## Configuring GitHub as a NuGet Package Source
+
+The **RapidStreamer.BuildingBlocks** package is available from GitHub Packages. To enable this GitHub source in your project, add the GitHub Packages URL to your NuGet configuration.
+
+1. **Edit NuGet.config**:
+   Add the following GitHub package source to your `NuGet.config` file:
+
+   ```xml
+   <configuration>
+     <packageSources>
+       <add key="GitHub-KAB-TEAM" value="https://nuget.pkg.github.com/KAB-TEAM/index.json" />
+     </packageSources>
+   </configuration>
+   ```
+
+2. **Authentication**:
+    - GitHub Packages requires authentication to access private repositories. Use your GitHub personal access token (PAT) as your password and GitHub username as the username.
+    - Set up a GitHub PAT in your NuGet configuration to access the GitHub source:
+
+   ```bash
+   dotnet nuget add source https://nuget.pkg.github.com/KAB-TEAM/index.json -n GitHub-KAB-TEAM -u USERNAME -p TOKEN --store-password-in-clear-text
+   ```
+   Replace `USERNAME` with your GitHub username and `TOKEN` with a GitHub PAT with `read:packages` and `repo` scope.
+
+3. **Verify the Configuration**:
+   After adding the source, confirm that the GitHub source is listed with:
+   ```bash
+   dotnet nuget list source
+   ```
+
+## Getting Started
+
+Once configured, you can use the components provided by **RapidStreamer.BuildingBlocks** by importing the package into your .NET 8 project. Refer to the documentation for each component to explore the available functionality and example usage.
+
+## License
+
+This project is licensed under the MIT License.
+
+---
+
+© 2024 RapidStreamer. All rights reserved.
+
