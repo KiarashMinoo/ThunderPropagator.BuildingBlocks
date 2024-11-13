@@ -111,10 +111,10 @@ namespace RapidStreamer.BuildingBlocks.Infrastructure.System.Network
                     _etwSession.Source.Process();
                 }
             }
-            catch
+            catch (Exception exception)
             {
                 ResetCounters(); // Stop reporting figures
-                // Probably should log the exception
+                Console.Error.WriteLine(exception);
             }
 
             return;
