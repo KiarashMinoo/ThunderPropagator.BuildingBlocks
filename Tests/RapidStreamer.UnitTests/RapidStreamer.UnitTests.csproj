@@ -1,13 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
         <Configurations>Debug;Release</Configurations>
         <EnablePreviewFeatures>true</EnablePreviewFeatures>
         <Platforms>AnyCPU;x86;x64</Platforms>
-        <Version>1.0.67.0</Version>
+        <Version>1.0.68.0</Version>
         <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
         <LangVersion>latestmajor</LangVersion>
     </PropertyGroup>

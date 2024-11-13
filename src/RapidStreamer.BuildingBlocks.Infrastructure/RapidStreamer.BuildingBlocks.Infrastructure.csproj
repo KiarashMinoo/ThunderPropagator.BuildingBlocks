@@ -9,8 +9,8 @@
         <Configurations>Debug;Release</Configurations>
         <LangVersion>latestmajor</LangVersion>
         <Platforms>AnyCPU;x86;x64</Platforms>
-        <Version>1.0.67.0</Version>
         <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+        <Version>1.0.68.0</Version>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)'=='Release'">
