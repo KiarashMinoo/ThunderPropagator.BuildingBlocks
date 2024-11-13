@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -11,7 +10,7 @@
         <LangVersion>latestmajor</LangVersion>
         <Platforms>AnyCPU;x86;x64</Platforms>
         <Version>1.0.68.0</Version>
-        <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     </PropertyGroup>
     
     <PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -41,16 +40,19 @@
                 <When Condition="'$(Platform)'=='x86'">
                     <PropertyGroup>
                         <PackageId>RapidStreamer.BuildingBlocks.Debug.x86</PackageId>
+                        <PlatformTarget>x86</PlatformTarget>
                     </PropertyGroup>
                 </When>
                 <When Condition="'$(Platform)'=='x64'">
                     <PropertyGroup>
                         <PackageId>RapidStreamer.BuildingBlocks.Debug.x64</PackageId>
+                        <PlatformTarget>x64</PlatformTarget>
                     </PropertyGroup>
                 </When>
                 <Otherwise>
                     <PropertyGroup>
                         <PackageId>RapidStreamer.BuildingBlocks.Debug</PackageId>
+                        <PlatformTarget>AnyCPU</PlatformTarget>
                     </PropertyGroup>
                 </Otherwise>
             </Choose>
@@ -60,16 +62,19 @@
                 <When Condition="'$(Platform)'=='x86'">
                     <PropertyGroup>
                         <PackageId>RapidStreamer.BuildingBlocks.x86</PackageId>
+                        <PlatformTarget>x86</PlatformTarget>
                     </PropertyGroup>
                 </When>
                 <When Condition="'$(Platform)'=='x64'">
                     <PropertyGroup>
                         <PackageId>RapidStreamer.BuildingBlocks.x64</PackageId>
+                        <PlatformTarget>x64</PlatformTarget>
                     </PropertyGroup>
                 </When>
                 <Otherwise>
                     <PropertyGroup>
                         <PackageId>RapidStreamer.BuildingBlocks</PackageId>
+                        <PlatformTarget>AnyCPU</PlatformTarget>
                     </PropertyGroup>
                 </Otherwise>
             </Choose>
