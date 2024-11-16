@@ -31,8 +31,6 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\RapidStreamer.BuildingBlocks.Application\RapidStreamer.BuildingBlocks.Application.csproj" />
-        <Platforms>AnyCPU;x86;x64;ARM64</Platforms>
-        <Version>1.0.71.0</Version>
     </ItemGroup>
 
 </Project>
