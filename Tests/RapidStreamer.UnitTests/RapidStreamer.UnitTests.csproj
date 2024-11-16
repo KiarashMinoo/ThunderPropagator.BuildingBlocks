@@ -7,7 +7,7 @@
         <IsPackable>false</IsPackable>
         <Configurations>Debug;Release</Configurations>
         <EnablePreviewFeatures>true</EnablePreviewFeatures>
-        <Platforms>AnyCPU;x86;x64</Platforms>
+        <Platforms>AnyCPU;x86;x64;ARM64</Platforms>
         <Version>1.0.71.0</Version>
         <LangVersion>latestmajor</LangVersion>
     </PropertyGroup>
@@ -17,8 +17,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1"/>
-        <PackageReference Include="xunit" Version="2.9.2"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+        <PackageReference Include="xunit" Version="2.9.2" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
@@ -30,7 +30,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\RapidStreamer.BuildingBlocks.Application\RapidStreamer.BuildingBlocks.Application.csproj"/>
+        <ProjectReference Include="..\..\src\RapidStreamer.BuildingBlocks.Application\RapidStreamer.BuildingBlocks.Application.csproj" />
     </ItemGroup>
 
 </Project>

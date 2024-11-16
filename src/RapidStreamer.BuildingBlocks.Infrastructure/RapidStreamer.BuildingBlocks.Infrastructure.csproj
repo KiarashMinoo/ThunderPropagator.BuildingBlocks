@@ -8,7 +8,7 @@
         <NoWarn>$(NoWarn);1591</NoWarn>
         <Configurations>Debug;Release</Configurations>
         <LangVersion>latestmajor</LangVersion>
-        <Platforms>AnyCPU;x86;x64</Platforms>
+        <Platforms>AnyCPU;x86;x64;ARM64</Platforms>
         <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
         <Version>1.0.71.0</Version>
     </PropertyGroup>
@@ -37,6 +37,12 @@
     <Choose>
         <When Condition="'$(Configuration)'=='Debug'">
             <Choose>
+                <When Condition="'$(Platform)'=='ARM64'">
+                    <PropertyGroup>
+                        <PackageId>RapidStreamer.BuildingBlocks.Modules.Debug.ARM64</PackageId>
+                        <PlatformTarget>ARM64</PlatformTarget>
+                    </PropertyGroup>
+                </When>
                 <When Condition="'$(Platform)'=='x86'">
                     <PropertyGroup>
                         <PackageId>RapidStreamer.BuildingBlocks.Modules.Debug.x86</PackageId>
@@ -59,6 +65,12 @@
         </When>
         <Otherwise>
             <Choose>
+                <When Condition="'$(Platform)'=='ARM64'">
+                    <PropertyGroup>
+                        <PackageId>RapidStreamer.BuildingBlocks.Modules.ARM64</PackageId>
+                        <PlatformTarget>ARM64</PlatformTarget>
+                    </PropertyGroup>
+                </When>
                 <When Condition="'$(Platform)'=='x86'">
                     <PropertyGroup>
                         <PackageId>RapidStreamer.BuildingBlocks.Modules.x86</PackageId>
@@ -88,7 +100,7 @@
     <ItemGroup>
         <PackageReference Include="Apache.NMS.ActiveMQ" Version="2.1.0"/>
         <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="3.1.17"/>
-        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.0"/>
     </ItemGroup>
 
     <ItemGroup>
