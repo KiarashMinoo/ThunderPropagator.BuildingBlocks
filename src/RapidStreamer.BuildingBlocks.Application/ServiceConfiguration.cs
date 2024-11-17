@@ -9,6 +9,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 
@@ -102,11 +103,16 @@ namespace RapidStreamer.BuildingBlocks.Application
             var rtn = type.IsClass switch
             {
                 true when !ReferenceEquals(type, typeof(string)) => value.FromNJson<T>(),
-                _ => type == typeof(TimeSpan)
-                    ? TimeSpan.Parse(value)
-                    : type == typeof(Guid)
-                        ? Guid.Parse(value)
-                        : Convert.ChangeType(value, type)
+                _ => type.IsEnum switch
+                {
+                    true when Enum.TryParse(type, value, out var enumValue) => Convert.ChangeType(enumValue, type),
+                    _ => type.GetTypeInfo().Name switch
+                    {
+                        nameof(TimeSpan) => TimeSpan.Parse(value),
+                        nameof(Guid) => Guid.Parse(value),
+                        _ => Convert.ChangeType(value, type)
+                    }
+                }
             };
 
             return rtn is not null ? (T)rtn : defaultValue;
