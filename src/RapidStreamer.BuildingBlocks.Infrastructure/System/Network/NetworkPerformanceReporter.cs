@@ -11,6 +11,12 @@ namespace RapidStreamer.BuildingBlocks.Infrastructure.System.Network
 #endif
         class NetworkPerformanceReporter : DisposableObject
     {
+#if NET9_0_OR_GREATER
+        private readonly Lock _lock = new();
+#else
+        private readonly object _lock = new();
+#endif
+
         private class Counters
         {
             public long TcpReceived;
@@ -46,7 +52,11 @@ namespace RapidStreamer.BuildingBlocks.Infrastructure.System.Network
 
             NetworkPerformanceData networkData;
 
-            lock (_counters)
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
                 networkData = new NetworkPerformanceData
                 {
@@ -123,7 +133,11 @@ namespace RapidStreamer.BuildingBlocks.Infrastructure.System.Network
             {
                 if (data.ProcessID == _processId)
                 {
-                    lock (_counters)
+#if NET9_0_OR_GREATER
+                    lock (_lock)
+#else
+                    lock (_lock)
+#endif
                     {
                         _counters.TcpReceived += data.size;
                     }
@@ -134,7 +148,11 @@ namespace RapidStreamer.BuildingBlocks.Infrastructure.System.Network
             {
                 if (data.ProcessID == _processId)
                 {
-                    lock (_counters)
+#if NET9_0_OR_GREATER
+                    lock (_lock)
+#else
+                    lock (_lock)
+#endif
                     {
                         _counters.TcpSent += data.size;
                     }
@@ -145,7 +163,11 @@ namespace RapidStreamer.BuildingBlocks.Infrastructure.System.Network
             {
                 if (data.ProcessID == _processId)
                 {
-                    lock (_counters)
+#if NET9_0_OR_GREATER
+                    lock (_lock)
+#else
+                    lock (_lock)
+#endif
                     {
                         _counters.UdpReceived += data.size;
                     }
@@ -156,7 +178,11 @@ namespace RapidStreamer.BuildingBlocks.Infrastructure.System.Network
             {
                 if (data.ProcessID == _processId)
                 {
-                    lock (_counters)
+#if NET9_0_OR_GREATER
+                    lock (_lock)
+#else
+                    lock (_lock)
+#endif
                     {
                         _counters.UdpSent += data.size;
                     }
@@ -166,7 +192,11 @@ namespace RapidStreamer.BuildingBlocks.Infrastructure.System.Network
 
         private void ResetCounters()
         {
-            lock (_counters)
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
                 _counters.TcpSent = 0;
                 _counters.TcpReceived = 0;

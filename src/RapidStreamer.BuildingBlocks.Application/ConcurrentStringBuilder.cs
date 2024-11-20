@@ -14,62 +14,64 @@ namespace RapidStreamer.BuildingBlocks.Application
         ICloneable<ConcurrentStringBuilder>,
         ICloneable<StringBuilder>
     {
-        private readonly bool _concurrent;
+#if NET9_0_OR_GREATER
+        private readonly Lock _lock = new();
+#else
+        private readonly object _lock = new();
+#endif
 
         private readonly StringBuilder _stringBuilder;
 
-        public ConcurrentStringBuilder() : this(true)
-        {
-        }
-
-        public ConcurrentStringBuilder(bool concurrent)
+        public ConcurrentStringBuilder()
         {
             _stringBuilder = new StringBuilder();
-            _concurrent = concurrent;
         }
 
-        public ConcurrentStringBuilder(int capacity, bool concurrent = true)
+        public ConcurrentStringBuilder(int capacity)
         {
             _stringBuilder = new StringBuilder(capacity);
-            _concurrent = concurrent;
         }
 
-        public ConcurrentStringBuilder(string? value, bool concurrent = true)
+        public ConcurrentStringBuilder(string? value)
         {
             _stringBuilder = new StringBuilder(value);
-            _concurrent = concurrent;
         }
 
-        public ConcurrentStringBuilder(string? value, int capacity, bool concurrent = true)
+        public ConcurrentStringBuilder(string? value, int capacity)
         {
             _stringBuilder = new StringBuilder(value, capacity);
-            _concurrent = concurrent;
         }
 
-        public ConcurrentStringBuilder(string? value, int startIndex, int length, int capacity, bool concurrent = true)
+        public ConcurrentStringBuilder(string? value, int startIndex, int length, int capacity)
         {
             _stringBuilder = new StringBuilder(value, startIndex, length, capacity);
-            _concurrent = concurrent;
         }
 
-        public ConcurrentStringBuilder(int capacity, int maxCapacity, bool concurrent = true)
+        public ConcurrentStringBuilder(int capacity, int maxCapacity)
         {
             _stringBuilder = new StringBuilder(capacity, maxCapacity);
-            _concurrent = concurrent;
         }
 
         public int Capacity
         {
             get
             {
-                lock (this)
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+                lock (_lock)
+#endif
                 {
                     return _stringBuilder.Capacity;
                 }
             }
             set
             {
-                lock (this)
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+                lock (_lock)
+#endif
                 {
                     _stringBuilder.Capacity = value;
                 }
@@ -80,7 +82,11 @@ namespace RapidStreamer.BuildingBlocks.Application
         {
             get
             {
-                lock (this)
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+                lock (_lock)
+#endif
                 {
                     return _stringBuilder.MaxCapacity;
                 }
@@ -91,7 +97,11 @@ namespace RapidStreamer.BuildingBlocks.Application
         {
             get
             {
-                lock (this)
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+                lock (_lock)
+#endif
                 {
                     return _stringBuilder.Length;
                 }
@@ -103,1104 +113,1004 @@ namespace RapidStreamer.BuildingBlocks.Application
         {
             get
             {
-                try
-                {
-                    EnterLock();
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+                lock (_lock)
+#endif
                     return _stringBuilder[index];
-                }
-                finally
-                {
-                    ExitLock();
-                }
             }
             set
             {
-                try
-                {
-                    EnterLock();
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+                lock (_lock)
+#endif
                     _stringBuilder[index] = value;
-                }
-                finally
-                {
-                    ExitLock();
-                }
-            }
-        }
-
-        private void EnterLock()
-        {
-            if (_concurrent)
-            {
-                Monitor.Enter(this);
-            }
-        }
-
-        private void ExitLock()
-        {
-            if (_concurrent)
-            {
-                Monitor.Exit(this);
             }
         }
 
         public int EnsureCapacity(int capacity)
         {
-            try
-            {
-                EnterLock();
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
                 return _stringBuilder.EnsureCapacity(capacity);
-            }
-            finally
-            {
-                ExitLock();
-            }
         }
 
         public ConcurrentStringBuilder Append(char value, int repeatCount)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value, repeatCount);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Append(char[]? value, int startIndex, int charCount)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value, startIndex, charCount);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Append(string? value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Append(string? value, int startIndex, int count)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value, startIndex, count);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Append(ConcurrentStringBuilder? value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value?._stringBuilder);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Append(ConcurrentStringBuilder? value, int startIndex, int count)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value?._stringBuilder, startIndex, count);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Append(StringBuilder? value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Append(StringBuilder? value, int startIndex, int count)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value, startIndex, count);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Append(bool value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Append(char value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Append(sbyte value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Append(byte value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Append(short value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Append(int value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Append(long value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Append(float value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Append(double value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Append(decimal value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Append(ushort value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Append(uint value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Append(ulong value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Append(object? value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Append(char[]? value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Append(ReadOnlySpan<char> value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Append(ReadOnlyMemory<char> value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public unsafe ConcurrentStringBuilder Append(char* value, int valueCount)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value, valueCount);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder AppendLine()
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.AppendLine();
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder AppendLine(string? value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Append(value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder AppendJoin(string? separator, params object?[] values)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.AppendJoin(separator, values);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder AppendJoin<T>(string? separator, IEnumerable<T> values)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.AppendJoin(separator, values);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder AppendJoin(string? separator, params string?[] values)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.AppendJoin(separator, values);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder AppendJoin(char separator, params object?[] values)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.AppendJoin(separator, values);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder AppendJoin<T>(char separator, IEnumerable<T> values)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.AppendJoin(separator, values);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder AppendJoin(char separator, params string?[] values)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.AppendJoin(separator, values);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder AppendFormat([StringSyntax(StringSyntaxAttribute.CompositeFormat)] string format, object? arg0)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.AppendFormat(format, arg0);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder AppendFormat([StringSyntax(StringSyntaxAttribute.CompositeFormat)] string format, object? arg0, object? arg1)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.AppendFormat(format, arg0, arg1);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder AppendFormat([StringSyntax(StringSyntaxAttribute.CompositeFormat)] string format, object? arg0, object? arg1, object? arg2)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.AppendFormat(format, arg0, arg1, arg2);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder AppendFormat([StringSyntax(StringSyntaxAttribute.CompositeFormat)] string format, params object?[] args)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.AppendFormat(format, args);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder AppendFormat(IFormatProvider? provider, [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string format, object? arg0)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.AppendFormat(format, arg0);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder AppendFormat(IFormatProvider? provider, [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string format, object? arg0, object? arg1)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.AppendFormat(format, arg0, arg1);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder AppendFormat(IFormatProvider? provider, [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string format, object? arg0, object? arg1,
             object? arg2)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.AppendFormat(format, arg0, arg1, arg2);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder AppendFormat(IFormatProvider? provider, [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string format, params object?[] args)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.AppendFormat(format, args);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Insert(int index, string? value, int count)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Insert(index, value, count);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Insert(int index, string? value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Insert(index, value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Insert(int index, bool value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Insert(index, value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Insert(int index, sbyte value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Insert(index, value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Insert(int index, byte value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Insert(index, value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Insert(int index, short value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Insert(index, value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Insert(int index, char value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Insert(index, value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Insert(int index, char[]? value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Insert(index, value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Insert(int index, char[]? value, int startIndex, int charCount)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Insert(index, value, startIndex, charCount);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Insert(int index, int value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Insert(index, value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Insert(int index, long value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Insert(index, value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Insert(int index, float value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Insert(index, value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Insert(int index, double value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Insert(index, value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Insert(int index, decimal value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Insert(index, value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Insert(int index, ushort value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Insert(index, value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Insert(int index, uint value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Insert(index, value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Insert(int index, ulong value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Insert(index, value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Insert(int index, object? value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Insert(index, value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Insert(int index, ReadOnlySpan<char> value)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Insert(index, value);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Replace(string oldValue, string? newValue)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Replace(oldValue, newValue);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Replace(string oldValue, string? newValue, int startIndex, int count)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Replace(oldValue, newValue, startIndex, count);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Replace(char oldChar, char newChar)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Replace(oldChar, newChar);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Replace(char oldChar, char newChar, int startIndex, int count)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Replace(oldChar, newChar, startIndex, count);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Remove(int startIndex, int length)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Remove(startIndex, length);
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public ConcurrentStringBuilder Clear()
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.Clear();
                 return this;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.CopyTo(sourceIndex, destination, destinationIndex, count);
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public void CopyTo(int sourceIndex, Span<char> destination, int count)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 _stringBuilder.CopyTo(sourceIndex, destination, count);
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public bool Equals([NotNullWhen(true)] ConcurrentStringBuilder? sb)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 return _stringBuilder.Equals(sb?._stringBuilder);
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public bool Equals([NotNullWhen(true)] StringBuilder? sb)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 return _stringBuilder.Equals(sb);
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public bool Equals(ReadOnlySpan<char> span)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 return _stringBuilder.Equals(span);
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public override string ToString()
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 return _stringBuilder.ToString();
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         object ICloneable.Clone() => MemberwiseClone();
-        public ConcurrentStringBuilder Clone() => new(ToString(), _concurrent);
+        public ConcurrentStringBuilder Clone() => new(ToString());
         StringBuilder ICloneable<StringBuilder>.Clone() => new(ToString());
 
         public string ToString(int startIndex, int length)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 return _stringBuilder.ToString(startIndex, length);
-            }
-            finally
-            {
-                ExitLock();
             }
         }
 
         public string ToString(bool removeLast)
         {
-            try
+#if NET9_0_OR_GREATER
+            lock (_lock)
+#else
+            lock (_lock)
+#endif
             {
-                EnterLock();
                 var rtn = ToString();
                 return removeLast ? rtn[..^1] : rtn;
-            }
-            finally
-            {
-                ExitLock();
             }
         }
     }

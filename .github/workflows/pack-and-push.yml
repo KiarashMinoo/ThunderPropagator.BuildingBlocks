@@ -13,7 +13,7 @@ permissions:
   contents: write
 
 env:
-  ArtifactsDirectory: ${{ github.workspace}}/artifacts
+  ArtifactsDirectory: ${{ github.workspace }}/artifacts
   Project_Version: "*.*.^.*"
 
 jobs:
