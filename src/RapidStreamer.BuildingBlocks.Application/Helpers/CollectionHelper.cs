@@ -71,17 +71,19 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
 
             if (array.Length < count)
                 yield return array;
-
-            var loopsCount = (int)Math.Ceiling(array.Length / (count * 1.0));
-
-            for (var i = 0; i < loopsCount; i++)
+            else
             {
-                if (i == 0)
-                    yield return new ArraySegment<T>(array, 0, count);
-                else if (i == loopsCount - 1)
-                    yield return new ArraySegment<T>(array, i * count, array.Length % count);
-                else
-                    yield return new ArraySegment<T>(array, i * count, count);
+                var loopsCount = (int)Math.Ceiling(array.Length / (count * 1.0));
+
+                for (var i = 0; i < loopsCount; i++)
+                {
+                    if (i == 0)
+                        yield return new ArraySegment<T>(array, 0, count);
+                    else if (i == loopsCount - 1)
+                        yield return new ArraySegment<T>(array, i * count, array.Length % count);
+                    else
+                        yield return new ArraySegment<T>(array, i * count, count);
+                }
             }
         }
 
