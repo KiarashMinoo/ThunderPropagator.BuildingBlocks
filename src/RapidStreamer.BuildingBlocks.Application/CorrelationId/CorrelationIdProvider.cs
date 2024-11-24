@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+﻿using System.Reflection;
 using System.Text;
 
 namespace RapidStreamer.BuildingBlocks.Application.CorrelationId
@@ -16,13 +16,22 @@ namespace RapidStreamer.BuildingBlocks.Application.CorrelationId
             StringBuilder stringBuilder = new();
 
             var unixNow = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            stringBuilder.Append(unixNow);
+            stringBuilder.Append($"{unixNow}-");
 
-            var hashCode = input.GetHashCode();
-            stringBuilder.Append(hashCode);
+            var hashCode = input switch
+            {
+                FeederMessage feederMessage => feederMessage.HashKey switch
+                {
+                    not null or 0 => feederMessage.HashKey.Value,
+                    _ => input.GetHashCode()
+                },
+                _ => input.GetHashCode()
+            };
+
+            stringBuilder.Append($"{hashCode}-");
 
             var type = typeof(T);
-            var typeName = type.FullName ?? type.Name;
+            var typeName = type.GetTypeInfo().Name;
             var typeNameBytes = Encoding.UTF32.GetBytes(typeName);
             var typeNameBase64 = Convert.ToBase64String(typeNameBytes)[..^2];
 
