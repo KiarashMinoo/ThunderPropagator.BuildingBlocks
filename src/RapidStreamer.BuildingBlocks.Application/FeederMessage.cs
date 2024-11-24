@@ -101,6 +101,8 @@ namespace RapidStreamer.BuildingBlocks.Application
         [MustDisposeResource]
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
+        public override int GetHashCode() => _dictionary.Keys.Aggregate(0, HashCode.Combine);
+
         protected override void DisposeManagedResources() => _dictionary.Clear();
     }
 }
