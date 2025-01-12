@@ -1,7 +1,5 @@
 ﻿using Ardalis.GuardClauses;
 using JetBrains.Annotations;
-using MessagePack;
-using ProtoBuf;
 using RapidStreamer.BuildingBlocks.Application.Attributes;
 using RapidStreamer.BuildingBlocks.Application.CorrelationId;
 using RapidStreamer.BuildingBlocks.Application.Enums;
@@ -12,8 +10,6 @@ using System.Runtime.CompilerServices;
 
 namespace RapidStreamer.BuildingBlocks.Application
 {
-    [ProtoContract]
-    [MessagePackObject(true)]
     [JsonSerialization(CamelCase = false)]
     public abstract class FeederMessage : DisposableObject,
         IDictionary<string, object?>,
