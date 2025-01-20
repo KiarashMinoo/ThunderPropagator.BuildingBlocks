@@ -32,46 +32,10 @@
         <PackageIcon>RapidStreamer.png</PackageIcon>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <AvoidCycleErrorOnSelfReference>true</AvoidCycleErrorOnSelfReference>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)' == 'Debug' And '$(Platform)' == 'ARM64'">
-        <PackageId>RapidStreamer.BuildingBlocks.Modules.Debug.ARM64</PackageId>
-        <PlatformTarget>ARM64</PlatformTarget>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)' == 'Debug' And '$(Platform)' == 'x86'">
-        <PackageId>RapidStreamer.BuildingBlocks.Modules.Debug.x86</PackageId>
-        <PlatformTarget>x86</PlatformTarget>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)' == 'Debug' And '$(Platform)' == 'x64'">
-        <PackageId>RapidStreamer.BuildingBlocks.Modules.Debug.x64</PackageId>
-        <PlatformTarget>x64</PlatformTarget>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)' == 'Debug' And '$(Platform)' == 'AnyCPU'">
-        <PackageId>RapidStreamer.BuildingBlocks.Modules.Debug</PackageId>
-        <PlatformTarget>AnyCPU</PlatformTarget>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)' == 'Release' And '$(Platform)' == 'ARM64'">
-        <PackageId>RapidStreamer.BuildingBlocks.Modules.ARM64</PackageId>
-        <PlatformTarget>ARM64</PlatformTarget>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)' == 'Release' And '$(Platform)' == 'x86'">
-        <PackageId>RapidStreamer.BuildingBlocks.Modules.x86</PackageId>
-        <PlatformTarget>x86</PlatformTarget>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)' == 'Release' And '$(Platform)' == 'x64'">
-        <PackageId>RapidStreamer.BuildingBlocks.Modules.x64</PackageId>
-        <PlatformTarget>x64</PlatformTarget>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)' == 'Release' And '$(Platform)' == 'AnyCPU'">
-        <PackageId>RapidStreamer.BuildingBlocks.Modules</PackageId>
-        <PlatformTarget>AnyCPU</PlatformTarget>
+        <PackageId Condition="'$(Configuration)' == 'Debug' And '$(Platform)' != 'AnyCPU'">RapidStreamer.BuildingBlocks.Modules.Debug.$(Platform)</PackageId>
+        <PackageId Condition="'$(Configuration)' == 'Debug' And '$(Platform)' == 'AnyCPU'">RapidStreamer.BuildingBlocks.Modules.Debug</PackageId>
+        <PackageId Condition="'$(Configuration)' == 'Release' And '$(Platform)' != 'AnyCPU'">RapidStreamer.BuildingBlocks.Modules.$(Platform)</PackageId>
+        <PackageId Condition="'$(Configuration)' == 'Release' And '$(Platform)' == 'AnyCPU'">RapidStreamer.BuildingBlocks.Modules</PackageId>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
@@ -81,7 +45,7 @@
     <ItemGroup>
         <PackageReference Include="Apache.NMS.ActiveMQ" Version="2.1.0"/>
         <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="3.1.18"/>
-        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.1" />
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.1"/>
     </ItemGroup>
 
     <ItemGroup>
