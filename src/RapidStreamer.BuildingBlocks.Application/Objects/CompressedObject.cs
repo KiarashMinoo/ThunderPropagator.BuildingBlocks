@@ -6,7 +6,9 @@
         {
             GZipStream,
             DeflateStream,
-            BrotliStream
+            BrotliStream,
+            BZip2,
+            GZip
         }
 
         private readonly byte[] _value;

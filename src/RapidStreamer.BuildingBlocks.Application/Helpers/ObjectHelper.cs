@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.IO.Compression;
 using System.Reflection;
 using System.Text;
+using ICSharpCode.SharpZipLib.BZip2;
+using ICSharpCode.SharpZipLib.GZip;
 using Newtonsoft.Json;
 using RapidStreamer.BuildingBlocks.Application.Attributes;
 using RapidStreamer.BuildingBlocks.Application.Collections;
@@ -111,6 +113,34 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
                     using (var gzipStream = new BrotliStream(memoryStream, compressionLevel))
                         gzipStream.Write(bytes, 0, bytes.Length);
                     break;
+                case CompressedObject.CompressionType.BZip2:
+                {
+                    var level = compressionLevel switch
+                    {
+                        CompressionLevel.Optimal => 5,
+                        CompressionLevel.Fastest => 1,
+                        CompressionLevel.NoCompression => 0,
+                        CompressionLevel.SmallestSize => 9,
+                        _ => throw new ArgumentOutOfRangeException(nameof(compressionLevel), compressionLevel, null)
+                    };
+                    using MemoryStream source = new(bytes);
+                    BZip2.Compress(source, memoryStream, false, level);
+                    break;
+                }
+                case CompressedObject.CompressionType.GZip:
+                {
+                    var level = compressionLevel switch
+                    {
+                        CompressionLevel.Optimal => 5,
+                        CompressionLevel.Fastest => 1,
+                        CompressionLevel.NoCompression => 0,
+                        CompressionLevel.SmallestSize => 9,
+                        _ => throw new ArgumentOutOfRangeException(nameof(compressionLevel), compressionLevel, null)
+                    };
+                    using MemoryStream source = new(bytes);
+                    GZip.Compress(source, memoryStream, false, level);
+                    break;
+                }
                 default:
                     throw new ArgumentOutOfRangeException(nameof(compressionType), compressionType, null);
             }
@@ -139,11 +169,25 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
                     using (var decompressStream = new BrotliStream(memoryStream, CompressionMode.Decompress))
                         decompressStream.CopyTo(outputStream);
                     break;
+                case CompressedObject.CompressionType.BZip2:
+                    BZip2.Decompress(memoryStream, outputStream, false);
+                    break;
+                case CompressedObject.CompressionType.GZip:
+                    GZip.Decompress(memoryStream, outputStream, false);
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(compressionType), compressionType, null);
             }
 
             return outputStream.ToArray().FromNJsonBytes<T>()!;
         }
+
+        public static string ToSafeString(this object? value, string? format = null, IFormatProvider? formatProvider = null) => value switch
+        {
+            null => string.Empty,
+            string stringValue when !string.IsNullOrWhiteSpace(stringValue) => stringValue,
+            IFormattable formattableValue => formattableValue.ToString(format, formatProvider),
+            _ => value.ToString() ?? string.Empty
+        };
     }
 }
