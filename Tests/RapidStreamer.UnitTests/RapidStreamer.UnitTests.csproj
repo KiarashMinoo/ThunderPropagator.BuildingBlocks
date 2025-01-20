@@ -8,7 +8,7 @@
         <Configurations>Debug;Release</Configurations>
         <EnablePreviewFeatures>true</EnablePreviewFeatures>
         <Platforms>AnyCPU;x86;x64;ARM64</Platforms>
-        <Version>1.0.87.0</Version>
+        <Version>1.0.88.0</Version>
         <LangVersion>latestmajor</LangVersion>
     </PropertyGroup>
 
