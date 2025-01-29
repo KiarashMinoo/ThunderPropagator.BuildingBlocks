@@ -26,7 +26,7 @@ namespace RapidStreamer.BuildingBlocks.Application.Ciphering
         public static string Decrypt(string cipherText, byte[] encryptionKeyBytes)
         {
             var iv = new byte[16];
-            var buffer = Convert.FromBase64String(cipherText);
+            var buffer = Convert.FromBase64String(!cipherText.EndsWith("==") ? $"{cipherText}==" : cipherText);
 
             using var aes = Aes.Create();
             aes.Key = encryptionKeyBytes;
