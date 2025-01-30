@@ -77,7 +77,7 @@ jobs:
       - name: Push package to GitHub packages
         run: |
           foreach($file in (Get-ChildItem "${{ env.ArtifactsDirectory }}" -Recurse -Include *.nupkg)) {            
-            dotnet nuget push $file --source "RapidStreamer" --skip-duplicate --no-symbols
+            dotnet nuget push $file --source "RapidStreamer" --api-key t6T9DH4xM3c52sr8zNdBVAwSEK7URXWhkqQGvugbPjpnYy --skip-duplicate --no-symbols
           }
 
       - name: Push latest changes to repository
