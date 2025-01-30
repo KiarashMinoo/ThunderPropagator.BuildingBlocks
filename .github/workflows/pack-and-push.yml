@@ -19,7 +19,7 @@ env:
 jobs:
   versioning_and_pack:
     runs-on: ubuntu-24.04
-    name: Update version and Pack nugets
+    name: Update version and Pack and Push nuget packages
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -32,7 +32,7 @@ jobs:
           dotnet-version: |
             8.0.x
             9.0.x    
-      
+
       - name: Set project versions
         id: update
         uses: vers-one/dotnet-project-version-updater@v1.6
@@ -74,17 +74,16 @@ jobs:
           
           dotnet pack  -c Debug -o ${{ env.ArtifactsDirectory }}                                                          
 
+      - name: Push package to GitHub packages
+        run: |
+          foreach($file in (Get-ChildItem "${{ env.ArtifactsDirectory }}" -Recurse -Include *.nupkg)) {            
+            dotnet nuget push $file --source "RapidStreamer" --skip-duplicate --no-symbols
+          }
+
       - name: Push latest changes to repository
         run: |
           git config user.name "Kiarash Minoo"
           git config user.email "yanis_1984@msn.com"
           git add .
           git commit -m "Update project version to ${{ steps.update.outputs.newVersion }}"
-          git push                
-
-      - name: Push package to GitHub packages
-        run: |
-          foreach($file in (Get-ChildItem "${{ env.ArtifactsDirectory }}" -Recurse -Include *.nupkg)) {
-            dotnet nuget push -s http://185.215.244.94:37080/v3/index.json -k t6T9DH4xM3c52sr8zNdBVAwSEK7URXWhkqQGvugbPjpnYy $file
-          }
-
+          git push
