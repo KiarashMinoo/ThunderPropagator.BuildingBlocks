@@ -14,6 +14,7 @@ permissions:
 
 env:  
   Project_Version: "*.*.^.*"
+  ArtifactsDirectory: ${{ github.workspace }}/artifacts
 
 jobs:
   versioning_and_pack:
@@ -23,8 +24,6 @@ jobs:
       matrix:
         configuration: [Debug, Release]
         platform: [ARM64, x64, x86, Any CPU]
-    env:
-      ArtifactsDirectory: ${{ github.workspace }}/artifacts_${{ matrix.configuration }}_${{ matrix.platform }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
