@@ -45,17 +45,19 @@ jobs:
             "**/*.csproj", "**/*.nuspec", "**/AssemblyInfo.cs"
           version: ${{ env.Project_Version }}
 
-      - name: Build solution and generate NuGet packages
+      - name: Build solution and generate NuGet packages (AnyCPU)
+        if: "${{  matrix.platform }} == 'AnyCPU'"
         run: |
           dotnet clean
+          dotnet build --nologo -c ${{ matrix.configuration }} 
+          dotnet pack  --nologo -c ${{ matrix.configuration }} -o ${{ env.ArtifactsDirectory }}         
 
-          if [ ${{  matrix.platform }} == 'AnyCPU' ]; then
-            dotnet build --nologo -c ${{ matrix.configuration }} 
-            dotnet pack  --nologo -c ${{ matrix.configuration }} -o ${{ env.ArtifactsDirectory }}
-          else
-            dotnet build --nologo -c ${{ matrix.configuration }} /p:Platform=${{ matrix.platform }}
-            dotnet pack  --nologo -c ${{ matrix.configuration }} /p:Platform=${{ matrix.platform }} -o ${{ env.ArtifactsDirectory }}
-          fi          
+      - name: Build solution and generate NuGet packages 
+        if: "${{  matrix.platform }} != 'AnyCPU'"
+        run: |
+          dotnet clean
+          dotnet build --nologo -c ${{ matrix.configuration }} /p:Platform=${{ matrix.platform }}
+          dotnet pack  --nologo -c ${{ matrix.configuration }} /p:Platform=${{ matrix.platform }} -o ${{ env.ArtifactsDirectory }}
 
       - name: scp packages
         run: |
