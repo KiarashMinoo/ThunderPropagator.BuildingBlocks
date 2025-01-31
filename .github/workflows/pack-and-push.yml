@@ -46,14 +46,14 @@ jobs:
           version: ${{ env.Project_Version }}
 
       - name: Build solution and generate NuGet packages (AnyCPU)
-        if: "${{  matrix.platform }} == 'AnyCPU'"
+        if: ${{  matrix.platform  == 'AnyCPU' }}
         run: |
           dotnet clean
           dotnet build --nologo -c ${{ matrix.configuration }} 
           dotnet pack  --nologo -c ${{ matrix.configuration }} -o ${{ env.ArtifactsDirectory }}         
 
       - name: Build solution and generate NuGet packages 
-        if: "${{  matrix.platform }} != 'AnyCPU'"
+        if: ${{  matrix.platform != 'AnyCPU' }} 
         run: |
           dotnet clean
           dotnet build --nologo -c ${{ matrix.configuration }} /p:Platform=${{ matrix.platform }}
