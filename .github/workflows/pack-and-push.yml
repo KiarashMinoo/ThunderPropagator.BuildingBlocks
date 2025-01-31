@@ -22,7 +22,7 @@ jobs:
     strategy:
       matrix:
         configuration: [Debug, Release]
-        platform: [ARM64, x64, x86, AnyCPU]
+        platform: [ARM64, x64, x86, Any CPU]
     env:
       ArtifactsDirectory: ${{ github.workspace }}/artifacts_${{ matrix.configuration }}_${{ matrix.platform }}
     steps:
