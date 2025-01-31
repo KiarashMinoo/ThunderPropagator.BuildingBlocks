@@ -23,7 +23,7 @@ jobs:
     strategy:
       matrix:
         configuration: [Debug, Release]
-        platform: [ARM64, x64, x86, Any CPU]
+        platform: [ARM64, x64, x86, AnyCPU]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -49,8 +49,13 @@ jobs:
         run: |
           dotnet clean
 
-          dotnet build --nologo -c ${{ matrix.configuration }} /p:Platform=${{ matrix.platform }}
-          dotnet pack  --nologo -c ${{ matrix.configuration }} /p:Platform=${{ matrix.platform }} -o ${{ env.ArtifactsDirectory }}
+          if [ ${{  matrix.platform }} == 'AnyCPU' ]; then
+            dotnet build --nologo -c ${{ matrix.configuration }} 
+            dotnet pack  --nologo -c ${{ matrix.configuration }} -o ${{ env.ArtifactsDirectory }}
+          else
+            dotnet build --nologo -c ${{ matrix.configuration }} /p:Platform=${{ matrix.platform }}
+            dotnet pack  --nologo -c ${{ matrix.configuration }} /p:Platform=${{ matrix.platform }} -o ${{ env.ArtifactsDirectory }}
+          fi          
 
       - name: scp packages
         run: |
