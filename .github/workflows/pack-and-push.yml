@@ -63,4 +63,4 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           ${{ secrets.REMOTE_PUB_KEY }} >> ~/.ssh/authorized_keys
-          scp ${{ env.ArtifactsDirectory }}/* ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE }}:/root/artifacts/${{ steps.update.outputs.newVersion }}"    
+          scp ${{ env.ArtifactsDirectory }}/* ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE }}:/root/artifacts/${{ steps.update.outputs.newVersion }}   
