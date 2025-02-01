@@ -12,30 +12,24 @@ defaults:
 permissions:
   contents: write
 
-env:  
+env:
+  ArtifactsDirectory: ${{ github.workspace}}/artifacts
   Project_Version: "*.*.^.*"
-  ArtifactsDirectory: ${{ github.workspace }}/artifacts
 
 jobs:
   versioning_and_pack:
-    runs-on: ubuntu-24.04
-    name: Update version and Pack and Push nuget packages
-    strategy:
-      matrix:
-        configuration: [Debug, Release]
-        platform: [ARM64, x64, x86, AnyCPU]
+    runs-on: ubuntu-22.04
+    name: Update version and Pack nugets
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0 #fetch-depth is needed for GitVersion
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: |
             8.0.x
-            9.0.x    
+            9.0.x
 
       - name: Set project versions
         id: update
@@ -45,24 +39,47 @@ jobs:
             "**/*.csproj", "**/*.nuspec", "**/AssemblyInfo.cs"
           version: ${{ env.Project_Version }}
 
-      - name: Build solution and generate NuGet packages (AnyCPU)
-        if: ${{  matrix.platform  == 'AnyCPU' }}
+      - name: Build solution and generate NuGet packages
         run: |
-          dotnet clean
-          dotnet build --nologo -c ${{ matrix.configuration }} 
-          dotnet pack  --nologo -c ${{ matrix.configuration }} -o ${{ env.ArtifactsDirectory }}         
+          dotnet clean          
+          dotnet restore
+          
+          #Debug          
+          dotnet build --nologo -c Debug /p:Platform=ARM64
+          dotnet pack  --nologo -c Debug /p:Platform=ARM64 -o ${{ env.ArtifactsDirectory }}
+          
+          dotnet build --nologo -c Debug /p:Platform=x64
+          dotnet pack  --nologo -c Debug /p:Platform=x64 -o ${{ env.ArtifactsDirectory }}
+          
+          dotnet build --nologo -c Debug /p:Platform=x86
+          dotnet pack  --nologo -c Debug /p:Platform=x86 -o ${{ env.ArtifactsDirectory }}                                                          
+          
+          dotnet build --nologo -c Debug 
+          dotnet pack  --nologo -c Debug -o ${{ env.ArtifactsDirectory }}
+          
+          #Release          
+          dotnet build --nologo -c Release /p:Platform=ARM64
+          dotnet pack  --nologo -c Release /p:Platform=ARM64 -o ${{ env.ArtifactsDirectory }}    
+          
+          dotnet build --nologo -c Release /p:Platform=x64
+          dotnet pack  --nologo -c Release /p:Platform=x64 -o ${{ env.ArtifactsDirectory }}                                                          
+          
+          dotnet build --nologo -c Release /p:Platform=x86
+          dotnet pack  --nologo -c Release /p:Platform=x86 -o ${{ env.ArtifactsDirectory }}
+          
+          dotnet build --nologo -c Release 
+          dotnet pack  --nologo -c Release -o ${{ env.ArtifactsDirectory }}
 
-      - name: Build solution and generate NuGet packages 
-        if: ${{  matrix.platform != 'AnyCPU' }} 
+      - name: Push package to GitHub packages
         run: |
-          dotnet clean
-          dotnet build --nologo -c ${{ matrix.configuration }} /p:Platform=${{ matrix.platform }}
-          dotnet pack  --nologo -c ${{ matrix.configuration }} /p:Platform=${{ matrix.platform }} -o ${{ env.ArtifactsDirectory }}
+          foreach($file in (Get-ChildItem "${{ env.ArtifactsDirectory }}" -Recurse -Include *.nupkg)) {
+            dotnet nuget push $file --source "RapidStreamer" --api-key "${{ secrets.GHP_NUGET_PACKAGE_TOKEN }}" --skip-duplicate --no-symbols
+          }
 
-      - name: scp packages
+      - name: Push latest changes to repository
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.REMOTE_PUB_KEY }}" >> ~/.ssh/authorized_keys
-          chmod 700 ~/.ssh
-          chmod 600 ~/.ssh/authorized_keys
-          scp ${{ env.ArtifactsDirectory }}/* ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE }}:/root/artifacts/${{ steps.update.outputs.newVersion }}   
+          git config user.name "Kiarash Minoo"
+          git config user.email "yanis_1984@msn.com"
+          git add .
+          git commit -m "Update project version to ${{ steps.update.outputs.newVersion }}"
+          git push            
