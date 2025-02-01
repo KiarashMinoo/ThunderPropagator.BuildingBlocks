@@ -41,21 +41,12 @@ The **RapidStreamer.BuildingBlocks** package is available from GitHub Packages. 
    ```xml
    <configuration>
      <packageSources>
-       <add key="GitHub-KAB-TEAM" value="https://nuget.pkg.github.com/KAB-TEAM/index.json" />
+       <add key="GitHub-KAB-TEAM" value="https://nuget.pkg.rapidstreamer.com/v3/index.json" />
      </packageSources>
    </configuration>
-   ```
-
-2. **Authentication**:
-    - GitHub Packages requires authentication to access private repositories. Use your GitHub personal access token (PAT) as your password and GitHub username as the username.
-    - Set up a GitHub PAT in your NuGet configuration to access the GitHub source:
-
-   ```bash
-   dotnet nuget add source https://nuget.pkg.github.com/KAB-TEAM/index.json -n GitHub-KAB-TEAM -u USERNAME -p TOKEN --store-password-in-clear-text
-   ```
-   Replace `USERNAME` with your GitHub username and `TOKEN` with a GitHub PAT with `read:packages` and `repo` scope.
-
-3. **Verify the Configuration**:
+   ``` 
+   
+2. **Verify the Configuration**:
    After adding the source, confirm that the GitHub source is listed with:
    ```bash
    dotnet nuget list source
@@ -63,7 +54,7 @@ The **RapidStreamer.BuildingBlocks** package is available from GitHub Packages. 
 
 ## Getting Started
 
-Once configured, you can use the components provided by **RapidStreamer.BuildingBlocks** by importing the package into your .NET 8 project. Refer to the documentation for each component to explore the available functionality and example usage.
+Once configured, you can use the components provided by **RapidStreamer.BuildingBlocks** or **RapidStreamer.BuildingBlocks.Modules** by importing the package into your .NET 8 or .NET 9 project. Refer to the documentation for each component to explore the available functionality and example usage.
 
 ## License
 
