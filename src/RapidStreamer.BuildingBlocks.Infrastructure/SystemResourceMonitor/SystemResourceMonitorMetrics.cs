@@ -4,4 +4,4 @@ using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.
 
 namespace RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor;
 
-public record SystemResourceMonitorMetrics(CpuMetrics CpuMetrics, MemoryMetrics MemoryMetrics, SystemDriveMetrics[] SystemDrives);
+public record SystemResourceMonitorMetrics(CpuMetrics Cpu, MemoryMetrics Memory, SystemDriveMetrics[] Drives);

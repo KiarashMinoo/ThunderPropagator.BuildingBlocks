@@ -32,6 +32,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\RapidStreamer.BuildingBlocks.Application\RapidStreamer.BuildingBlocks.Application.csproj" />
+        <ProjectReference Include="..\..\src\RapidStreamer.BuildingBlocks.Infrastructure\RapidStreamer.BuildingBlocks.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>

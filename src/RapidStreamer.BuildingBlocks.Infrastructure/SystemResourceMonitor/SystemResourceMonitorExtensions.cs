@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Cpu;
 using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Memory;
 using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.SystemDrives;
@@ -9,10 +10,10 @@ public static class SystemResourceMonitorExtensions
 {
     public static IServiceCollection AddSystemResourceMonitor(this IServiceCollection services)
     {
-        services.AddSingleton<CpuMetricsClient>();
-        services.AddSingleton<MemoryMetricsClient>();
-        services.AddSingleton<SystemDriveMetricsClient>();
-        services.AddSingleton<ISystemResourceMonitor, SystemResourceMonitorImpl>();
+        services.TryAddSingleton<CpuMetricsClient>();
+        services.TryAddSingleton<MemoryMetricsClient>();
+        services.TryAddSingleton<SystemDriveMetricsClient>();
+        services.TryAddSingleton<ISystemResourceMonitor, SystemResourceMonitorImpl>();
 
         return services;
     }

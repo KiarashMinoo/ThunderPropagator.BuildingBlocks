@@ -8,14 +8,32 @@ internal class CpuMetricsClient
     {
         var resetEvent = new ManualResetEvent(false);
 
-        double cpuUsageTotal = 0;
+        long processorCount = Environment.ProcessorCount;
+        double usage = 0;
+        long threadsCount = 0;
+        long processesCount = 0;
+        long totalThreadsCount = 0;
         Task.Run(async () =>
         {
+            var process = Process.GetCurrentProcess();
+            var processes = Process.GetProcesses();
+            threadsCount = process.Threads.Count;
+            processesCount = processes.Length;
+            totalThreadsCount = processes.Sum(p =>
+            {
+                try
+                {
+                    return p.Threads.Count;
+                }
+                catch
+                {
+                    return 0;
+                }
+            });
+
             // Start watching CPU
             var startTime = DateTime.UtcNow;
-            var startCpuUsage = all
-                ? Process.GetProcesses().Sum(p => p.TotalProcessorTime.TotalMilliseconds)
-                : Process.GetCurrentProcess().TotalProcessorTime.TotalMilliseconds;
+            var startCpuUsage = CpuUsage();
             var stopWatch = Stopwatch.StartNew();
 
             // Measure something else, such as .Net Core Middleware
@@ -24,19 +42,33 @@ internal class CpuMetricsClient
             // Stop watching to measure
             stopWatch.Stop();
             var endTime = DateTime.UtcNow;
-            var endCpuUsage = all
-                ? Process.GetProcesses().Sum(p => p.TotalProcessorTime.TotalMilliseconds)
-                : Process.GetCurrentProcess().TotalProcessorTime.TotalMilliseconds;
+            var endCpuUsage = CpuUsage();
 
             var cpuUsedMs = endCpuUsage - startCpuUsage;
             var totalMsPassed = (endTime - startTime).TotalMilliseconds;
-            cpuUsageTotal = cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
+            usage = cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
 
             resetEvent.Set();
+
+            return;
+
+            double CpuUsage() => all
+                ? processes.Sum(p =>
+                {
+                    try
+                    {
+                        return p.TotalProcessorTime.TotalMilliseconds;
+                    }
+                    catch
+                    {
+                        return 0;
+                    }
+                })
+                : process.TotalProcessorTime.TotalMilliseconds;
         });
 
         resetEvent.WaitOne();
 
-        return new CpuMetrics(Environment.ProcessorCount, cpuUsageTotal * 100);
+        return new CpuMetrics(processesCount, usage * 100, threadsCount, processesCount, totalThreadsCount);
     }
 }
