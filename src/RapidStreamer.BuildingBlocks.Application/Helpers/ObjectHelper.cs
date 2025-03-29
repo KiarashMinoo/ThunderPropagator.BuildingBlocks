@@ -73,10 +73,8 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
         public static bool IsDisposed<T>(this T instance)
             where T : notnull
         {
-#if DEBUG
             const string activityName = $"{nameof(ObjectHelper)}_{nameof(IsDisposed)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
-#endif
 
             try
             {

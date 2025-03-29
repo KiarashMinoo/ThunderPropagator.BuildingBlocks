@@ -7,10 +7,9 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
     {
         public static Stream ToProtobuf(this object instance)
         {
-#if DEBUG
             const string activityName = $"{nameof(ProtobufHelper)}_{nameof(ToProtobuf)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
-#endif
+
             MemoryStream memoryStream = new();
             Serializer.Serialize(memoryStream, instance);
             return memoryStream;
@@ -24,10 +23,9 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
 
         public static T FromProtobuf<T>(this Stream stream)
         {
-#if DEBUG
             const string activityName = $"{nameof(ProtobufHelper)}_{nameof(FromProtobuf)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
-#endif
+
             return Serializer.Deserialize<T>(stream);
         }
 

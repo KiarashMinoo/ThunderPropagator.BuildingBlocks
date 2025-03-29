@@ -1,7 +1,4 @@
-﻿#if DEBUG
-using System.Diagnostics;
-#endif
-using System.Diagnostics.Metrics;
+﻿using System.Diagnostics.Metrics;
 
 namespace RapidStreamer.BuildingBlocks.Application
 {
@@ -10,12 +7,9 @@ namespace RapidStreamer.BuildingBlocks.Application
         public const string MeterName = "rapidStreamer.meter";
         public const string ActivityName = "rapidStreamer.activity";
 
-#if DEBUG
-        private static readonly ActivitySource ActivitySource;
-#endif
-        private static readonly Meter Meter;
-
-        public static string Version { get; set; } = "1";
+        private static readonly ActivitySource? ActivitySource;
+        private static readonly Meter? Meter;
+        public static string Version { get; set; } = "1.0.0";
 
         public static KeyValuePair<string, object?> SuccessfulTag => new("Status", "Success");
         public static KeyValuePair<string, object?> UnsuccessfulTag => new("Status", "Failed");
@@ -23,32 +17,40 @@ namespace RapidStreamer.BuildingBlocks.Application
 
         static Telemetry()
         {
-#if DEBUG
-            ActivitySource = new ActivitySource(ActivityName, Version);
-#endif
-            Meter = new Meter(MeterName);
+            var otelExporterEndpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT");
+            if (!string.IsNullOrEmpty(otelExporterEndpoint))
+            {
+                var activityName = Environment.GetEnvironmentVariable("ACTIVITY_NAME") ?? ActivityName;
+                var version = Environment.GetEnvironmentVariable("VERSION") ?? Version;
+                ActivitySource = new ActivitySource(activityName, version);
+            }
+
+            if (bool.TryParse(Environment.GetEnvironmentVariable("METER_ENABLED"), out var meterEnabled) && meterEnabled)
+            {
+                var meterName = Environment.GetEnvironmentVariable("METER_NAME") ?? MeterName;
+                Meter = new Meter(meterName);
+            }
         }
 
-#if DEBUG
-        public static Activity? StartActivity(string name, ActivityKind kind) => ActivitySource.StartActivity(kind, name: name);
+        public static Activity? StartActivity(string name, ActivityKind kind) => ActivitySource?.StartActivity(kind, name: name);
+
         public static Activity? StartActivity(string name, ActivityKind kind, ActivityContext parentContext)
-            => ActivitySource.StartActivity(kind, name: name, parentContext: parentContext);
-#endif
+            => ActivitySource?.StartActivity(kind, name: name, parentContext: parentContext);
 
-        public static Counter<T> CreateCounter<T>(string name, string? unit = null, string? description = null)
+        public static Counter<T>? CreateCounter<T>(string name, string? unit = null, string? description = null)
             where T : struct
-            => Meter.CreateCounter<T>(name, unit, description);
+            => Meter?.CreateCounter<T>(name, unit, description);
 
-        public static UpDownCounter<T> CreateUpDownCounter<T>(string name, string? unit = null, string? description = null)
+        public static UpDownCounter<T>? CreateUpDownCounter<T>(string name, string? unit = null, string? description = null)
             where T : struct
-            => Meter.CreateUpDownCounter<T>(name, unit, description);
+            => Meter?.CreateUpDownCounter<T>(name, unit, description);
 
-        public static Histogram<T> CreateHistogram<T>(string name, string? unit = null, string? description = null)
+        public static Histogram<T>? CreateHistogram<T>(string name, string? unit = null, string? description = null)
             where T : struct
-            => Meter.CreateHistogram<T>(name, unit, description);
+            => Meter?.CreateHistogram<T>(name, unit, description);
 
-        public static ObservableGauge<T> CreateObservableGauge<T>(string name, Func<T> observeValue, string? unit = null, string? description = null)
+        public static ObservableGauge<T>? CreateObservableGauge<T>(string name, Func<T> observeValue, string? unit = null, string? description = null)
             where T : struct
-            => Meter.CreateObservableGauge(name, observeValue, unit, description);
+            => Meter?.CreateObservableGauge(name, observeValue, unit, description);
     }
 }

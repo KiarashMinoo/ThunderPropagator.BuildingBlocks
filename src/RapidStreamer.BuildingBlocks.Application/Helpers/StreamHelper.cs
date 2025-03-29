@@ -9,11 +9,9 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
     {
         public static byte[] ToByteArray(this Stream stream)
         {
-#if DEBUG
             const string activityName = $"{nameof(StreamHelper)}_{nameof(ToByteArray)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal)?
                 .SetTag(nameof(Stream.Length), stream.Length);
-#endif
 
             if (stream.Position != 0)
             {
@@ -30,11 +28,9 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
 
         public static Stream ToStream(this string str)
         {
-#if DEBUG
             const string activityName = $"{nameof(StreamHelper)}_{nameof(ToStream)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal)?
                 .SetTag(nameof(string.Length), str.Length);
-#endif
 
             var bytes = Encoding.UTF8.GetBytes(str);
             MemoryStream memoryStream = new(bytes);

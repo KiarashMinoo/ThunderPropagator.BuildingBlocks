@@ -56,10 +56,8 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
 
         public static string ToYaml<T>(this T instance, YamlSerializerSettings? serializerSettings = null)
         {
-#if DEBUG
             const string activityName = $"{nameof(YamlHelper)}_{nameof(ToYaml)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
-#endif
 
             var serializer = YamlSerializer(typeof(T), serializerSettings);
             return serializer.Serialize(instance);
@@ -99,10 +97,8 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
 
         public static T FromYaml<T>(this string yaml, YamlSerializerSettings? serializerSettings = null)
         {
-#if DEBUG
             const string activityName = $"{nameof(YamlHelper)}_{nameof(FromYaml)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
-#endif
 
             var deserializer = YamlDeserializer(typeof(T), serializerSettings);
             return deserializer.Deserialize<T>(yaml);
@@ -110,10 +106,8 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
 
         public static object? FromYaml(this string yaml, Type type, YamlSerializerSettings? serializerSettings = null)
         {
-#if DEBUG
             const string activityName = $"{nameof(YamlHelper)}_{nameof(FromYaml)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
-#endif
 
             var deserializer = YamlDeserializer(type, serializerSettings);
             return deserializer.Deserialize(yaml);

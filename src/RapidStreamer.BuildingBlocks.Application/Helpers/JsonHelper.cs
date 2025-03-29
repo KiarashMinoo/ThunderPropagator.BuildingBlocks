@@ -42,10 +42,8 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
 
         public static string ToJson<T>(this T instance, Func<JsonSerializerOptions, JsonSerializerOptions>? options = null)
         {
-#if DEBUG
             const string activityName = $"{nameof(JsonHelper)}_{nameof(ToJson)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
-#endif
 
             JsonSerializerOptions? serializerOptions = null;
 
@@ -81,10 +79,9 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
 
         public static T? FromJson<T>(this string json, Func<JsonSerializerOptions, JsonSerializerOptions>? options = null)
         {
-#if DEBUG
             const string activityName = $"{nameof(JsonHelper)}_{nameof(FromJson)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
-#endif
+
             JsonSerializerOptions? serializerOptions = null;
 
             if (options is not null)
@@ -98,10 +95,9 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
 
         public static object? FromJson(this string json, Type type, Func<JsonSerializerOptions, JsonSerializerOptions>? options = null)
         {
-#if DEBUG
             const string activityName = $"{nameof(JsonHelper)}_{nameof(FromJson)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
-#endif
+
             JsonSerializerOptions? serializerOptions = null;
 
             if (options is not null)

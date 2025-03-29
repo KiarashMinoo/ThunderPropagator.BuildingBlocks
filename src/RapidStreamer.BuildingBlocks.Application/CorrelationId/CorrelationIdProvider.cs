@@ -8,10 +8,8 @@ namespace RapidStreamer.BuildingBlocks.Application.CorrelationId
         public static string GenerateCorrelationId<T>(this T input)
             where T : notnull
         {
-#if DEBUG
             const string activityName = $"{nameof(CorrelationIdProvider)}_{nameof(GenerateCorrelationId)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
-#endif
 
             StringBuilder stringBuilder = new();
 

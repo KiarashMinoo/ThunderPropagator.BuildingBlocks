@@ -39,10 +39,9 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
 
         public static string ToNetJson<T>(this T instance, Func<NetJSONSettings, NetJSONSettings>? settings = null)
         {
-#if DEBUG
             const string activityName = $"{nameof(NetJsonHelper)}_{nameof(ToNetJson)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
-#endif
+
             NetJSONSettings? serializerSettings = null;
 
             if (settings is not null)
@@ -63,10 +62,9 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
         public static byte[] ToNetJsonBytes<T>(this T instance, Func<NetJSONSettings, NetJSONSettings>? settings = null)
             where T : notnull
         {
-#if DEBUG
             const string activityName = $"{nameof(NetJsonHelper)}_{nameof(ToNetJsonBytes)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
-#endif
+
             try
             {
                 var jsonStr = instance.ToNetJson(settings);
@@ -75,29 +73,23 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
             }
             finally
             {
-#if DEBUG
                 activity?.Stop();
-#endif
             }
         }
 
         public static string ToNetJsonBase64<T>(this T instance, Func<NetJSONSettings, NetJSONSettings>? settings = null)
             where T : notnull
         {
-#if DEBUG
             const string activityName = $"{nameof(NetJsonHelper)}_{nameof(ToNetJsonBase64)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
-#endif
             var bytes = instance.ToNetJsonBytes(settings);
             return Convert.ToBase64String(bytes)[..^2];
         }
 
         public static T? FromNetJson<T>(this string json, Func<NetJSONSettings, NetJSONSettings>? settings = null)
         {
-#if DEBUG
             const string activityName = $"{nameof(NetJsonHelper)}_{nameof(FromNetJson)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
-#endif
 
             NetJSONSettings? serializerSettings = null;
 
@@ -112,10 +104,9 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
 
         public static object? FromNetJson(this string json, Type type, Func<NetJSONSettings, NetJSONSettings>? settings = null)
         {
-#if DEBUG
             const string activityName = $"{nameof(NetJsonHelper)}_{nameof(FromNetJson)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
-#endif
+
             NetJSONSettings? serializerSettings = null;
 
             if (settings is not null)

@@ -12,11 +12,9 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
         {
             var array = enumerable as T[] ?? enumerable?.ToArray() ?? [];
 
-#if DEBUG
             const string activityName = $"{nameof(CollectionHelper)}_{nameof(Filter)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal)?
                 .SetTag(nameof(array.Length), array.Length);
-#endif
 
             if (array.Length == 0)
                 return LinkedArray<T>.Empty;
@@ -43,11 +41,10 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
 
         public static TR[]? Convert<T, TR>(this T[]? array, Func<T, TR> func)
         {
-#if DEBUG
             const string activityName = $"{nameof(CollectionHelper)}_{nameof(Convert)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal)?
                 .SetTag(nameof(Array.Length), array?.Length);
-#endif
+
             if (array is null || array.Length <= 0)
             {
                 return null;
@@ -102,10 +99,8 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
 
         public static void ForEach<T>(this IEnumerable<T>? collection, Action<int, T> action)
         {
-#if DEBUG
             const string activityName = $"{nameof(CollectionHelper)}_{nameof(ForEach)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
-#endif
 
             switch (collection)
             {
@@ -113,9 +108,7 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
                     return;
                 case List<T> list:
                 {
-#if DEBUG
                     activity?.SetTag(nameof(List<T>.Count), list.Count);
-#endif
 
                     var listSpan = CollectionsMarshal.AsSpan(list);
                     ref var listSpanReference = ref MemoryMarshal.GetReference(listSpan);
@@ -147,11 +140,9 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
 
         public static void ForEach<T>(this T[]? array, Action<int, T> execution)
         {
-#if DEBUG
             const string activityName = $"{nameof(CollectionHelper)}_{nameof(ForEach)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal)?
                 .SetTag(nameof(Array.Length), array?.Length);
-#endif
 
             if (array is not null && array.Length > 0)
             {
@@ -176,11 +167,9 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
 
         public static void ForEach<T>(this ArraySegment<T> array, Action<int, T> execution)
         {
-#if DEBUG
             const string activityName = $"{nameof(CollectionHelper)}_{nameof(ForEach)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal)?
                 .SetTag(nameof(Array.Length), array.Count);
-#endif
 
             if (array.Count > 0)
             {

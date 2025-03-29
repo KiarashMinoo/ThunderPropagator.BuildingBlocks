@@ -7,10 +7,8 @@ namespace RapidStreamer.BuildingBlocks.Application.CorrelationId
         public static T GenerateCorrelationId<T>(this T input)
             where T : class, ICorrelationIdSupport
         {
-#if DEBUG
             const string activityName = $"{nameof(CorrelationIdSupportHelper)}_{nameof(GenerateCorrelationId)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
-#endif
 
             var correlationId = CorrelationIdProvider.GenerateCorrelationId(input);
 
@@ -22,10 +20,8 @@ namespace RapidStreamer.BuildingBlocks.Application.CorrelationId
         public static T SetCorrelationId<T>(this T input, string correlationId)
             where T : class, ICorrelationIdSupport
         {
-#if DEBUG
             const string activityName = $"{nameof(CorrelationIdSupportHelper)}_{nameof(GenerateCorrelationId)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
-#endif
 
             input.CorrelationId = correlationId;
 
