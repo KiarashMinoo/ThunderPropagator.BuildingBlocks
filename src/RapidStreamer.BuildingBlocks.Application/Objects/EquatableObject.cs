@@ -3,7 +3,8 @@ using RapidStreamer.BuildingBlocks.Application.Attributes;
 
 namespace RapidStreamer.BuildingBlocks.Application.Objects
 {
-    public abstract class EquatableObject : IEquatable<EquatableObject>
+    public abstract class EquatableObject<TEquatableObject> : IEquatable<TEquatableObject>
+        where TEquatableObject : EquatableObject<TEquatableObject>
     {
         protected virtual IEnumerable<object?> GetAtomicValues()
         {
@@ -27,14 +28,14 @@ namespace RapidStreamer.BuildingBlocks.Application.Objects
         /// </summary>
         /// <param name="obj">Instance of ValueObject to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EquatableObject? obj) => obj is not null && GetAtomicValues().SequenceEqual(obj.GetAtomicValues());
+        public bool Equals(TEquatableObject? obj) => obj is not null && GetAtomicValues().SequenceEqual(obj.GetAtomicValues());
 
         /// <summary>
         ///     Returns true if objects are equal
         /// </summary>
         /// <param name="obj">Object to be compared</param>
         /// <returns>Boolean</returns>
-        public override bool Equals(object? obj) => Equals(obj as EquatableObject);
+        public override bool Equals(object? obj) => Equals(obj as TEquatableObject);
 
         /// <summary>
         ///     Gets the hash code
@@ -42,32 +43,17 @@ namespace RapidStreamer.BuildingBlocks.Application.Objects
         /// <returns>Hash code</returns>
         public override int GetHashCode() => GetAtomicValues().Aggregate(0, HashCode.Combine);
 
-        public static bool operator ==(EquatableObject obj1, EquatableObject obj2)
-            => obj1 switch
-            {
-                null when Equals(obj2, null) => true,
-                null => false,
-                _ => obj1.Equals(obj2)
-            };
-
-        public static bool operator !=(EquatableObject obj1, EquatableObject obj2)
+        public static bool operator ==(EquatableObject<TEquatableObject> obj1, EquatableObject obj2) => obj1 switch
         {
-            return !(obj1 == obj2);
-        }
+            null when Equals(obj2, null) => true,
+            null => false,
+            _ => obj1.Equals(obj2)
+        };
+
+        public static bool operator !=(EquatableObject<TEquatableObject> obj1, EquatableObject obj2) => !(obj1 == obj2);
     }
 
-    public abstract class EquatableObject<TEquatableObject> : EquatableObject,
-        IEquatable<TEquatableObject>
-        where TEquatableObject : EquatableObject<TEquatableObject>
+    public abstract class EquatableObject : EquatableObject<EquatableObject>
     {
-        /// <summary>
-        ///     Returns true if LoginRequestDto instances are equal
-        /// </summary>
-        /// <param name="obj">Instance of ValueObject to be compared</param>
-        /// <returns>Boolean</returns>
-        public bool Equals(TEquatableObject? obj)
-        {
-            return Equals(obj as object);
-        }
     }
 }

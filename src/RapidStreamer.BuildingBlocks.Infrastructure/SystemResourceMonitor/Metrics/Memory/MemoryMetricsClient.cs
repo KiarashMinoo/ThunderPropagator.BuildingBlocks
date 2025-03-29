@@ -36,7 +36,7 @@ internal class MemoryMetricsClient
 
     private static MemoryMetrics GetUnixMetrics()
     {
-        var info = new ProcessStartInfo("free -m")
+        var info = new ProcessStartInfo
         {
             FileName = "/bin/bash",
             Arguments = "-c \"free -m\"",

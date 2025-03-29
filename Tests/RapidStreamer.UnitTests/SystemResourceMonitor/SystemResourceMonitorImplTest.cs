@@ -19,7 +19,7 @@ public class SystemResourceMonitorImplTest
     }
 
     [Fact]
-    public void SystemResources_Must_Retruns_CpuUsage_For_1_Second()
+    public void SystemResources_Must_Returns_CpuUsage_For_1_Second()
     {
         //Arrange
         CpuMetricsClient cpuMetricsClient = new();

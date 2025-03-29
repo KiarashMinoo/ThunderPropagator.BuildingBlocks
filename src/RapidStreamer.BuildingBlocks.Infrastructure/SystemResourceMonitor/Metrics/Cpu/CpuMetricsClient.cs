@@ -46,7 +46,7 @@ internal class CpuMetricsClient
 
             var cpuUsedMs = endCpuUsage - startCpuUsage;
             var totalMsPassed = (endTime - startTime).TotalMilliseconds;
-            usage = cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
+            usage = cpuUsedMs / (processorCount * totalMsPassed);
 
             resetEvent.Set();
 
