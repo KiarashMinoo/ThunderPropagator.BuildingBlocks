@@ -25,7 +25,7 @@ namespace RapidStreamer.BuildingBlocks.Application
                 ActivitySource = new ActivitySource(activityName, version);
             }
 
-            if (bool.TryParse(Environment.GetEnvironmentVariable("METER_ENABLED"), out var meterEnabled) && meterEnabled)
+            if (bool.TryParse(Environment.GetEnvironmentVariable("METER_ENABLED") ?? "true", out var meterEnabled) && meterEnabled)
             {
                 var meterName = Environment.GetEnvironmentVariable("METER_NAME") ?? MeterName;
                 Meter = new Meter(meterName);
