@@ -1,4 +1,6 @@
 ﻿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using RapidStreamer.BuildingBlocks.Application.Attributes;
 
 namespace RapidStreamer.BuildingBlocks.Application.Objects
@@ -6,7 +8,7 @@ namespace RapidStreamer.BuildingBlocks.Application.Objects
     public abstract class EquatableObject<TEquatableObject> : IEquatable<TEquatableObject>
         where TEquatableObject : EquatableObject<TEquatableObject>
     {
-        protected virtual IEnumerable<object?> GetAtomicValues()
+        protected virtual List<object?> GetAtomicValues()
         {
             var type = GetType();
 
@@ -20,7 +22,7 @@ namespace RapidStreamer.BuildingBlocks.Application.Objects
                 .Where(property => property.CanRead && property.GetCustomAttribute(typeof(IgnoreMemberAttribute)) == null)
                 .Select(property => property.GetValue(this));
 
-            return fieldsValues.Union(propertiesValues);
+            return fieldsValues.Union(propertiesValues).ToList();
         }
 
         /// <summary>
@@ -28,7 +30,24 @@ namespace RapidStreamer.BuildingBlocks.Application.Objects
         /// </summary>
         /// <param name="obj">Instance of ValueObject to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TEquatableObject? obj) => obj is not null && GetAtomicValues().SequenceEqual(obj.GetAtomicValues());
+        public bool Equals(TEquatableObject? obj)
+        {
+            if (obj is null)
+                return false;
+
+            var left = GetAtomicValues();
+            var right = obj.GetAtomicValues();
+            if (left.Count != right.Count)
+                return false;
+
+            for (int i = 0; i < left.Count; i++)
+            {
+                if (Equals(left[i], right[i]))
+                    return false;
+            }
+
+            return true;
+        }
 
         /// <summary>
         ///     Returns true if objects are equal

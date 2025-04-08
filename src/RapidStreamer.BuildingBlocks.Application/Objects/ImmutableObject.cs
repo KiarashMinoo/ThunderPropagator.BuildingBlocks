@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace RapidStreamer.BuildingBlocks.Application.Objects;
@@ -5,9 +6,10 @@ namespace RapidStreamer.BuildingBlocks.Application.Objects;
 public abstract class ImmutableObject<TImmutableObject> : EquatableObject<TImmutableObject>
     where TImmutableObject : ImmutableObject<TImmutableObject>
 {
-    private IEnumerable<object?>? _atomicValues;
+    private List<object?>? _atomicValues;
+    private int? _hashCode;
 
-    public ImmutableObject()
+    protected ImmutableObject()
     {
         ValidateFields();
 
@@ -32,9 +34,15 @@ public abstract class ImmutableObject<TImmutableObject> : EquatableObject<TImmut
 
         if (gotAnyPublicSetter)
             throw new InvalidOperationException("This object is immutable.");
+
+        _atomicValues = base.GetAtomicValues();
+        _hashCode = _atomicValues.Aggregate(0, HashCode.Combine);
     }
 
-    protected override IEnumerable<object?> GetAtomicValues() => _atomicValues ??= base.GetAtomicValues();
+    protected override List<object?> GetAtomicValues() => _atomicValues ??= base.GetAtomicValues();
+
+    [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
+    public override int GetHashCode() => _hashCode ??= GetAtomicValues().Aggregate(0, HashCode.Combine);
 }
 
 public abstract class ImmutableObject : EquatableObject<ImmutableObject>;
