@@ -19,7 +19,9 @@ namespace RapidStreamer.BuildingBlocks.Application.Objects
 
             var propertiesValues = type
                 .GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .Where(property => property.CanRead && property.GetCustomAttribute(typeof(IgnoreMemberAttribute)) == null)
+                .Where(property => property.CanRead &&
+                                   property.GetCustomAttribute(typeof(IgnoreMemberAttribute)) == null &&
+                                   property.GetIndexParameters().Length == 0)
                 .Select(property => property.GetValue(this));
 
             return fieldsValues.Union(propertiesValues).ToList();

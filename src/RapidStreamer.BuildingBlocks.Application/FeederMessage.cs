@@ -18,8 +18,9 @@ namespace RapidStreamer.BuildingBlocks.Application
         ICloneable,
         ICloneable<IDictionary<string, object?>>
     {
-        private readonly ConcurrentDictionary<string, object?> _dictionary = [];
+        [IgnoreMember] private readonly ConcurrentDictionary<string, object?> _dictionary = [];
 
+        [IgnoreMember]
         public object? this[string key]
         {
             get => GetValueOrNull<object>(key)!;
