@@ -3,7 +3,6 @@ using CaseConverter;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using RapidStreamer.BuildingBlocks.Application.Collections;
 using RapidStreamer.BuildingBlocks.Application.Helpers;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -68,9 +67,13 @@ namespace RapidStreamer.BuildingBlocks.Application
 
         protected ServiceConfiguration() => _properties = new ConcurrentDictionary<string, string>();
 
-        protected ServiceConfiguration(IEnumerable<KeyValuePair<string, string>> properties) => _properties = new ConcurrentDictionary<string, string>(properties);
+        protected ServiceConfiguration(IEnumerable<KeyValuePair<string, string>> properties) => Bind(properties);
 
-        protected ServiceConfiguration(ServiceConfiguration serviceConfiguration) => _properties = new ConcurrentDictionary<string, string>(serviceConfiguration._properties);
+        protected ServiceConfiguration(ServiceConfiguration serviceConfiguration) => Bind(serviceConfiguration);
+
+        protected void Bind(IEnumerable<KeyValuePair<string, string>> properties) => _properties = new ConcurrentDictionary<string, string>(properties);
+
+        protected void Bind(ServiceConfiguration serviceConfiguration) => _properties = new ConcurrentDictionary<string, string>(serviceConfiguration._properties);
 
         protected void Set<T>(T? value, [CallerMemberName] string? key = null)
         {
