@@ -19,7 +19,7 @@ namespace RapidStreamer.BuildingBlocks.Application.Objects
         {
             private volatile Action? _disposeAction;
 
-            protected override bool Disposed => base.Disposed && _disposeAction == null;
+            protected override bool IsDisposed => base.IsDisposed && _disposeAction == null;
 
             public AnonymousDisposable(Action disposeAction) => _disposeAction = disposeAction;
 
@@ -31,7 +31,7 @@ namespace RapidStreamer.BuildingBlocks.Application.Objects
             private TState _state;
             private volatile Action<TState>? _disposeAction;
 
-            protected override bool Disposed => base.Disposed && _disposeAction == null;
+            protected override bool IsDisposed => base.IsDisposed && _disposeAction == null;
 
             public AnonymousDisposable(TState state, Action<TState> disposeAction)
             {
@@ -46,8 +46,11 @@ namespace RapidStreamer.BuildingBlocks.Application.Objects
             }
         }
 
-        protected virtual bool Disposing { get; private set; }
-        protected virtual bool Disposed { get; private set; }
+        protected virtual bool IsDisposing { get; private set; }
+        protected virtual bool IsDisposed { get; private set; }
+
+        public event EventHandler? Disposing;
+        public event EventHandler? Disposed;
 
         ~DisposableObject()
         {
@@ -88,19 +91,21 @@ namespace RapidStreamer.BuildingBlocks.Application.Objects
 
         private void Dispose(bool disposing)
         {
-            Disposing = disposing;
+            IsDisposing = disposing;
 
-            if (!Disposed)
+            if (!IsDisposed)
             {
-                if (Disposing)
+                if (IsDisposing)
                 {
+                    OnDisposing();
                     DisposeManagedResources();
                 }
 
                 ReleaseUnmanagedResources();
                 SetLargeFieldsAsNull();
 
-                Disposed = true;
+                IsDisposed = true;
+                OnDisposed();
             }
         }
 
@@ -144,12 +149,13 @@ namespace RapidStreamer.BuildingBlocks.Application.Objects
         [SuppressMessage("ReSharper", "MethodHasAsyncOverload")]
         private async ValueTask DisposeAsync(bool disposing)
         {
-            Disposing = disposing;
+            IsDisposing = disposing;
 
-            if (!Disposed)
+            if (!IsDisposed)
             {
-                if (Disposing)
+                if (IsDisposing)
                 {
+                    OnDisposing();
                     DisposeManagedResources();
                     await DisposeManagedResourcesAsync();
                 }
@@ -160,11 +166,22 @@ namespace RapidStreamer.BuildingBlocks.Application.Objects
                 SetLargeFieldsAsNull();
                 await SetLargeFieldsAsNullAsync();
 
-                Disposed = true;
+                IsDisposed = true;
+                OnDisposed();
             }
         }
 
         #endregion
+
+        protected virtual void OnDisposing()
+        {
+            Disposing?.Invoke(this, EventArgs.Empty);
+        }
+
+        protected virtual void OnDisposed()
+        {
+            Disposed?.Invoke(this, EventArgs.Empty);
+        }
 
         public static IDisposable Empty => EmptyDisposable.Instance;
 
