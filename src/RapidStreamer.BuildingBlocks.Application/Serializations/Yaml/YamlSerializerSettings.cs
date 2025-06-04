@@ -19,5 +19,6 @@ namespace RapidStreamer.BuildingBlocks.Application.Serializations.Yaml
         public ITypeResolver? TypeResolver { get; set; }
 
         public IEnumerable<IYamlTypeConverter>? TypeConverters { get; set; }
+        public IEnumerable<INodeDeserializer>? NodeDeserializers { get; set; }
     }
 }

@@ -103,9 +103,37 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
             if (typeResolver is not null)
                 deserializerBuilder.WithTypeResolver(typeResolver);
 
-            var converterType = type.GetCustomAttribute<YamlTypeConverterAttribute>()?.ConverterType;
-            if (converterType is not null)
-                deserializerBuilder.WithTypeConverter((IYamlTypeConverter)Activator.CreateInstance(converterType)!);
+            List<IYamlTypeConverter> typeConverters = [];
+            var typeConverter = type.GetCustomAttribute<YamlTypeConverterAttribute>()?.ConverterType;
+            if (typeConverter is not null)
+                typeConverters.Add((IYamlTypeConverter)Activator.CreateInstance(typeConverter)!);
+
+            if (serializerSettings?.TypeConverters is not null)
+                typeConverters.AddRange(serializerSettings.TypeConverters);
+
+            if (DefaultSerializerSettings.TypeConverters is not null)
+                typeConverters.AddRange(DefaultSerializerSettings.TypeConverters);
+
+            if (typeConverters.Count > 0)
+            {
+                typeConverters.ForEach(x => deserializerBuilder.WithTypeConverter(x));
+            }
+
+            List<INodeDeserializer> nodeDeserializers = [];
+            var nodeDeserializer = type.GetCustomAttribute<YamlNodeDeserializerAttribute>()?.NodeDeserializer;
+            if (nodeDeserializer is not null)
+                nodeDeserializers.Add((INodeDeserializer)Activator.CreateInstance(nodeDeserializer)!);
+
+            if (serializerSettings?.NodeDeserializers is not null)
+                nodeDeserializers.AddRange(serializerSettings.NodeDeserializers);
+
+            if (DefaultSerializerSettings.NodeDeserializers is not null)
+                nodeDeserializers.AddRange(DefaultSerializerSettings.NodeDeserializers);
+
+            if (nodeDeserializers.Count > 0)
+            {
+                nodeDeserializers.ForEach(x => deserializerBuilder.WithNodeDeserializer(x));
+            }
 
             return deserializerBuilder.Build();
         }
