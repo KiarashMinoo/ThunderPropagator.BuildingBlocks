@@ -1,5 +1,4 @@
 ﻿using RapidStreamer.BuildingBlocks.Application.Serializations.Yaml;
-using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 using YamlDotNet.Serialization;
@@ -15,8 +14,7 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
         {
             DefaultSerializerSettings = new YamlSerializerSettings
             {
-                NamingConvention = CamelCaseNamingConvention.Instance,
-                JsonCompatible = false
+                NamingConvention = CamelCaseNamingConvention.Instance
             };
         }
 
@@ -52,6 +50,10 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
             if (converterType is not null)
                 serializerBuilder.WithTypeConverter((IYamlTypeConverter)Activator.CreateInstance(converterType)!);
 
+            var style = serializerSettings?.Style ?? DefaultSerializerSettings.Style; 
+            if (style is not null)
+                serializerBuilder.WithDefaultScalarStyle(style.Value);
+            
             return serializerBuilder.Build();
         }
 

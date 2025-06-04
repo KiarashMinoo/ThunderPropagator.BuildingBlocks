@@ -1,4 +1,5 @@
-﻿using YamlDotNet.Serialization;
+﻿using YamlDotNet.Core;
+using YamlDotNet.Serialization;
 
 namespace RapidStreamer.BuildingBlocks.Application.Serializations.Yaml
 {
@@ -8,7 +9,8 @@ namespace RapidStreamer.BuildingBlocks.Application.Serializations.Yaml
 #endif
         class YamlSerializerSettings
     {
-        public bool JsonCompatible { get; set; } = true;
+        public ScalarStyle? Style { get; set; }
+        public bool JsonCompatible { get; set; } = false;
         public bool IgnoreFields { get; set; }
         public bool IncludeNonPublicProperties { get; set; }
         public bool EnablePrivateConstructors { get; set; }
