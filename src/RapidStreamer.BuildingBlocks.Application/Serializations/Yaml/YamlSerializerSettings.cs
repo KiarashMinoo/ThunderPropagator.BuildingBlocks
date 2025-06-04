@@ -17,5 +17,7 @@ namespace RapidStreamer.BuildingBlocks.Application.Serializations.Yaml
         public INamingConvention? NamingConvention { get; set; }
         public INamingConvention? EnumNamingConvention { get; set; }
         public ITypeResolver? TypeResolver { get; set; }
+
+        public IEnumerable<IYamlTypeConverter>? TypeConverters { get; set; }
     }
 }

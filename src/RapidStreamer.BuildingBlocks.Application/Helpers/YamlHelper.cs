@@ -46,14 +46,26 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
             if (typeResolver is not null)
                 serializerBuilder.WithTypeResolver(typeResolver);
 
-            var converterType = type.GetCustomAttribute<YamlTypeConverterAttribute>()?.ConverterType;
-            if (converterType is not null)
-                serializerBuilder.WithTypeConverter((IYamlTypeConverter)Activator.CreateInstance(converterType)!);
+            List<IYamlTypeConverter> typeConverters = [];
+            var typeConverter = type.GetCustomAttribute<YamlTypeConverterAttribute>()?.ConverterType;
+            if (typeConverter is not null)
+                typeConverters.Add((IYamlTypeConverter)Activator.CreateInstance(typeConverter)!);
 
-            var style = serializerSettings?.Style ?? DefaultSerializerSettings.Style; 
+            if (serializerSettings?.TypeConverters is not null)
+                typeConverters.AddRange(serializerSettings.TypeConverters);
+
+            if (DefaultSerializerSettings.TypeConverters is not null)
+                typeConverters.AddRange(DefaultSerializerSettings.TypeConverters);
+
+            if (typeConverters.Count > 0)
+            {
+                typeConverters.ForEach(x => serializerBuilder.WithTypeConverter(x));
+            }
+
+            var style = serializerSettings?.Style ?? DefaultSerializerSettings.Style;
             if (style is not null)
                 serializerBuilder.WithDefaultScalarStyle(style.Value);
-            
+
             return serializerBuilder.Build();
         }
 
