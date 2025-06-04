@@ -15,7 +15,8 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
         {
             DefaultSerializerSettings = new YamlSerializerSettings
             {
-                NamingConvention = CamelCaseNamingConvention.Instance
+                NamingConvention = CamelCaseNamingConvention.Instance,
+                JsonCompatible = false
             };
         }
 
