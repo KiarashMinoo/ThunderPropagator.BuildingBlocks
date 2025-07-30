@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);1591</NoWarn>
+    <NoWarn>$(NoWarn);1591;CS0067</NoWarn>
     <Configurations>Debug;Release</Configurations>
     <LangVersion>latestmajor</LangVersion>
     <Platforms>AnyCPU;x86;x64;ARM64</Platforms>
