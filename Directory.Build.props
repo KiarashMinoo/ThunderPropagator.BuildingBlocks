@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup Label="Verioning">
-    <PackageVersion>1.0.123.0-beta.2</PackageVersion>
+    <PackageVersion>1.0.124.0-beta.3</PackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <ImplicitUsings>enable</ImplicitUsings>
