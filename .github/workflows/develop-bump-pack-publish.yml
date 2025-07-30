@@ -151,24 +151,56 @@ jobs:
           printf "%s\n" "$NOTES" > release-notes.txt
           REL_NOTES="$(sed ':a;N;$!ba;s/\r//g;s/\n/\\n/g' release-notes.txt)"
           echo "REL_NOTES=$REL_NOTES" >> "$GITHUB_ENV"
+          
+      - name: Resolve solution file
+        id: sln
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Prefer explicit override (Repository Variable or Secret)
+          SOL="${SOLUTION_PATH:-}"
+          if [[ -n "$SOL" ]]; then
+            if [[ ! -f "$SOL" ]]; then
+              echo "SOLUTION_PATH is set to '$SOL' but file not found."; exit 1
+            fi
+          else
+            # Autodetect one .sln in repo root (fail if none or many)
+            mapfile -t SLNS < <(ls -1 *.sln 2>/dev/null || true)
+            if (( ${#SLNS[@]} == 0 )); then
+              echo "No .sln file found in repo root. Set SOLUTION_PATH."; exit 1
+            elif (( ${#SLNS[@]} > 1 )); then
+              echo "Multiple .sln files found: ${SLNS[*]}. Set SOLUTION_PATH to the one you want."; exit 1
+            else
+              SOL="${SLNS[0]}"
+            fi
+          fi
+          echo "solution=$SOL" >> "$GITHUB_OUTPUT"
+          echo "Using solution: $SOL"
 
       - name: Clean
-        run: dotnet clean --nologo 
+        run: |
+          SLN='${{ steps.sln.outputs.solution }}'
+          dotnet clean "$SLN" --nologo 
       
       - name: Restore
-        run: dotnet restore --nologo -p:Platform="${{ steps.cfg.outputs.platform_sol }}"
+        run: |
+          SLN='${{ steps.sln.outputs.solution }}'
+          dotnet restore "$SLN" --nologo -p:Platform="${{ steps.cfg.outputs.platform_sol }}"
 
       - name: Build
-        run: dotnet build --nologo \
-          -c "${{ matrix.configuration }}" \
-          -p:Platform="${{ steps.cfg.outputs.platform_sol }}" \
-          -p:ContinuousIntegrationBuild=true \
-          --no-restore
+        run: |
+          SLN='${{ steps.sln.outputs.solution }}'
+          dotnet build "$SLN" --nologo \
+            -c "${{ matrix.configuration }}" \
+            -p:Platform="${{ steps.cfg.outputs.platform_sol }}" \
+            -p:ContinuousIntegrationBuild=true \
+            --no-restore
 
       - name: Pack (with release notes)
         run: |
+          SLN='${{ steps.sln.outputs.solution }}'
           mkdir -p artifacts/pkg
-          dotnet pack --nologo \
+          dotnet pack "$SLN" --nologo \
             -c "${{ matrix.configuration }}" \
             -p:Platform="${{ steps.cfg.outputs.platform_sol }}" \
             -p:ContinuousIntegrationBuild=true \
