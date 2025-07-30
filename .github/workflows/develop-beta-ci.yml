@@ -1,4 +1,4 @@
-name: Build, Beta Bump (build++ & rev=0), Pack & Publish (develop)
+name: Build, Beta Bump (build++ & rev=0), Tag, Pack & Publish (develop)
 
 on:
   push:
@@ -6,14 +6,16 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  contents: write
-  actions: write
+  contents: write        # commit & tag
+  actions: write         # delete artifacts via gh api
 
 jobs:
-  # --- 1) bump on develop: build++ & revision=0, ensure/increment -beta.N ---
+  # --- 1) bump on develop: build++ & revision=0, ensure/increment -beta.N, commit, TAG ---
   bump-beta:
     if: ${{ github.actor != 'github-actions[bot]' }}
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.bump.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,6 +26,7 @@ jobs:
           test -f Directory.Build.props || { echo "Directory.Build.props not found."; exit 1; }
 
       - name: Bump <PackageVersion> (build++ & rev=0) and set -beta.N
+        id: bump
         shell: pwsh
         run: |
           $propsPath = Join-Path $PWD "Directory.Build.props"
@@ -43,7 +46,7 @@ jobs:
           $current = $pkgNode.InnerText.Trim()
           if (-not $current) { Write-Error "<PackageVersion> is empty."; exit 1 }
 
-          # Support 3-part or 4-part with optional prerelease
+          # Allow 3- or 4-part with optional prerelease
           $m4 = [regex]::Match($current, '^(?<maj>\d+)\.(?<min>\d+)\.(?<bld>\d+)\.(?<rev>\d+)(?:-(?<pre>.+))?$')
           $m3 = [regex]::Match($current, '^(?<maj>\d+)\.(?<min>\d+)\.(?<bld>\d+)(?:-(?<pre>.+))?$')
 
@@ -67,7 +70,7 @@ jobs:
           # develop policy: increment 3rd (build), reset 4th (revision) to 0
           $bld++; $rev = 0
 
-          # manage -beta.N
+          # manage -beta.N (normalize to 'beta')
           if (-not $pre) {
             $pre = "beta.1"
           } else {
@@ -75,7 +78,7 @@ jobs:
             if ($preMatch.Success) {
               $nStr = $preMatch.Groups['n'].Value
               $n = if ($nStr) { [int]$nStr + 1 } else { 1 }
-              $pre = "beta.$n"      # normalize to beta
+              $pre = "beta.$n"
             } else { $pre = "beta.1" }
           }
 
@@ -86,6 +89,8 @@ jobs:
           $pkgNode.InnerText = $newVersion
           $xml.Save($propsPath)
 
+          "version=$newVersion" >> $env:GITHUB_OUTPUT
+
       - name: Commit version bump (skip CI)
         run: |
           git config user.name "github-actions[bot]"
@@ -95,7 +100,19 @@ jobs:
           git commit -m "chore: beta bump (build++ & rev=0) [skip ci]"
           git push
 
-  # --- 2) pack matrix (sln only), add filtered release notes, upload packages ---
+      - name: Create & push tag for beta version
+        env:
+          VERSION: ${{ steps.bump.outputs.version }}
+        run: |
+          TAG="v${VERSION}"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists; skipping."
+          else
+            git tag -a "$TAG" -m "Beta $TAG"
+            git push origin "$TAG"
+          fi
+
+  # --- 2) pack matrix (sln only), add filtered release notes, upload artifacts ---
   pack:
     needs: bump-beta
     runs-on: ${{ matrix.os }}
@@ -126,50 +143,36 @@ jobs:
           restore-keys: |
             nuget-${{ runner.os }}-
 
+      # Normalize AnyCpu -> "Any CPU" for solution builds + set artifact suffix
       - name: Resolve Platform for .sln
         id: cfg
         shell: bash
         run: |
           IN="${{ matrix.platform_in }}"
-          if [[ "$IN" =~ ^[Aa]ny[Cc]pu$ ]]; then PLATFORM_SOL="Any CPU"; else PLATFORM_SOL="$IN"; fi
+          if [[ "$IN" =~ ^[Aa]ny[Cc]pu$ ]]; then
+            PLATFORM_SOL="Any CPU"
+            ARTIFACT_SUFFIX=""
+          else
+            PLATFORM_SOL="$IN"
+            ARTIFACT_SUFFIX="-$IN"
+          fi
           echo "platform_sol=$PLATFORM_SOL" >> "$GITHUB_OUTPUT"
+          echo "artifact_suffix=$ARTIFACT_SUFFIX" >> "$GITHUB_OUTPUT"
 
-      - name: Generate release notes (exclude merges & version bumps)
-        id: notes
-        shell: bash
-        run: |
-          set -euo pipefail
-          BEFORE="${{ github.event.before }}"; AFTER="${{ github.sha }}"
-          if [[ -n "$BEFORE" ]]; then RAW=$(git log --no-merges --format="%s" "$BEFORE..$AFTER" || true)
-          else RAW=$(git log --no-merges -n 50 --format="%s" || true); fi
-
-          FILTER='(packageversion|package version|bump version|version bump|^bump[[:space:]])'
-          NOTES="$(printf "%s\n" "$RAW" | grep -Ei -v "$FILTER" || true)"
-          NOTES="$(printf "%s\n" "$NOTES" | grep -Ei -v 'beta bump.*packageversion' || true)"
-          NOTES="$(printf "%s\n" "$NOTES" | sed '/^[[:space:]]*$/d; s/^/- /')"
-          [[ -z "$NOTES" ]] && NOTES='- No user-facing changes in this push.'
-          printf "%s\n" "$NOTES" > release-notes.txt
-          REL_NOTES="$(sed ':a;N;$!ba;s/\r//g;s/\n/\\n/g' release-notes.txt)"
-          echo "REL_NOTES=$REL_NOTES" >> "$GITHUB_ENV"
-          
       - name: Resolve solution file
         id: sln
         shell: bash
         run: |
           set -euo pipefail
-          # Prefer explicit override (Repository Variable or Secret)
           SOL="${SOLUTION_PATH:-}"
           if [[ -n "$SOL" ]]; then
-            if [[ ! -f "$SOL" ]]; then
-              echo "SOLUTION_PATH is set to '$SOL' but file not found."; exit 1
-            fi
+            [[ -f "$SOL" ]] || { echo "SOLUTION_PATH '$SOL' not found."; exit 1; }
           else
-            # Autodetect one .sln in repo root (fail if none or many)
             mapfile -t SLNS < <(ls -1 *.sln 2>/dev/null || true)
             if (( ${#SLNS[@]} == 0 )); then
-              echo "No .sln file found in repo root. Set SOLUTION_PATH."; exit 1
+              echo "No .sln at repo root. Set SOLUTION_PATH."; exit 1
             elif (( ${#SLNS[@]} > 1 )); then
-              echo "Multiple .sln files found: ${SLNS[*]}. Set SOLUTION_PATH to the one you want."; exit 1
+              echo "Multiple .sln files found: ${SLNS[*]}. Set SOLUTION_PATH."; exit 1
             else
               SOL="${SLNS[0]}"
             fi
@@ -180,8 +183,25 @@ jobs:
       - name: Clean
         run: |
           SLN='${{ steps.sln.outputs.solution }}'
-          dotnet clean "$SLN" --nologo 
-      
+          dotnet clean "$SLN" --nologo
+
+      - name: Generate release notes (exclude merges & version bumps)
+        id: notes
+        shell: bash
+        run: |
+          set -euo pipefail
+          BEFORE="${{ github.event.before }}"; AFTER="${{ github.sha }}"
+          if [[ -n "$BEFORE" ]]; then RAW=$(git log --no-merges --format="%s" "$BEFORE..$AFTER" || true)
+          else RAW=$(git log --no-merges -n 50 --format="%s" || true); fi
+          FILTER='(packageversion|package version|bump version|version bump|^bump[[:space:]])'
+          NOTES="$(printf "%s\n" "$RAW" | grep -Ei -v "$FILTER" || true)"
+          NOTES="$(printf "%s\n" "$NOTES" | grep -Ei -v 'beta bump.*packageversion' || true)"
+          NOTES="$(printf "%s\n" "$NOTES" | sed '/^[[:space:]]*$/d; s/^/- /')"
+          [[ -z "$NOTES" ]] && NOTES='- No user-facing changes in this push.'
+          printf "%s\n" "$NOTES" > release-notes.txt
+          REL_NOTES="$(sed ':a;N;$!ba;s/\r//g;s/\n/\\n/g' release-notes.txt)"
+          echo "REL_NOTES=$REL_NOTES" >> "$GITHUB_ENV"
+
       - name: Restore
         run: |
           SLN='${{ steps.sln.outputs.solution }}'
@@ -208,22 +228,22 @@ jobs:
             -o artifacts/pkg \
             --no-build
 
-      - name: Upload packages artifact
+      - name: Upload packages artifact (unique per leg)
         uses: actions/upload-artifact@v4
         with:
-          name: packages
+          name: pkg-${{ matrix.configuration }}${{ steps.cfg.outputs.artifact_suffix }}
           path: artifacts/pkg/*.nupkg
           if-no-files-found: error
 
-      - name: Upload symbols (optional)
+      - name: Upload symbols (optional, unique per leg)
         if: ${{ hashFiles('artifacts/pkg/*.snupkg') != '' }}
         uses: actions/upload-artifact@v4
         with:
-          name: symbols
+          name: symbols-${{ matrix.configuration }}${{ steps.cfg.outputs.artifact_suffix }}
           path: artifacts/pkg/*.snupkg
           if-no-files-found: ignore
 
-  # --- 3) publish to beta feed & delete artifacts ---
+  # --- 3) publish to beta feed & delete ALL artifacts ---
   publish:
     needs: pack
     runs-on: ubuntu-latest
@@ -232,14 +252,20 @@ jobs:
         uses: actions/setup-dotnet@v4
         with: { dotnet-version: 8.0.x }
 
-      - name: Download packages
+      - name: Download all packages artifacts
         uses: actions/download-artifact@v4
-        with: { name: packages, path: ./dist/packages }
+        with:
+          pattern: pkg-*
+          path: ./dist/packages
+          merge-multiple: true
 
-      - name: Download symbols (optional)
+      - name: Download all symbols artifacts (optional)
         continue-on-error: true
         uses: actions/download-artifact@v4
-        with: { name: symbols, path: ./dist/symbols }
+        with:
+          pattern: symbols-*
+          path: ./dist/symbols
+          merge-multiple: true
 
       - name: Push .nupkg to beta feed
         env:
@@ -265,14 +291,16 @@ jobs:
             dotnet nuget push "$sym" --source "$NUGET_SOURCE" --api-key "$NUGET_API_KEY" --skip-duplicate || true
           done
 
-      - name: Delete 'packages' artifact
-        uses: actions/delete-artifact@v4
-        with: { name: packages }
-
-      - name: Delete 'symbols' artifact (optional)
-        continue-on-error: true
-        uses: actions/delete-artifact@v4
-        with: { name: symbols }
+      - name: Delete ALL run artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GHB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts \
+            --paginate --jq '.artifacts[].id' | while read -r id; do
+            echo "Deleting artifact id=$id"
+            gh api -X DELETE repos/${{ github.repository }}/actions/artifacts/$id
+          done
 
       - name: Cleanup workspace
         run: rm -rf ./dist ./artifacts || true

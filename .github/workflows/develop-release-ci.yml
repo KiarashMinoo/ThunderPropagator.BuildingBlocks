@@ -4,11 +4,11 @@ on:
   push:
     branches:
       - release/**
-  workflow_dispatch: { }
+  workflow_dispatch: {}
 
 permissions:
-  contents: write
-  actions: write
+  contents: write        # commit & tag
+  actions: write         # delete artifacts via gh api
 
 jobs:
   # --- 1) finalize version: strip -beta.*, commit if changed, create & push tag, GH Release ---
@@ -105,9 +105,9 @@ jobs:
           name: v${{ steps.ver.outputs.version }}
           body_path: release-notes.txt
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHB_TOKEN: ${{ secrets.GHB_TOKEN }}
 
-  # --- 1b) NEW: propagate finalized version into 'develop' and push ---
+  # --- 1b) propagate finalized version into 'develop' and push ---
   sync-develop-version:
     needs: finalize-and-tag
     runs-on: ubuntu-latest
@@ -165,12 +165,11 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add Directory.Build.props
           git commit -m "chore: sync version from release to develop [skip ci]"
-          # Ensure we are up-to-date and push
           git fetch origin develop
           git pull --rebase origin develop
           git push origin HEAD:develop
 
-  # --- 2) pack matrix & upload artifacts (same as before) ---
+  # --- 2) pack matrix & upload artifacts ---
   pack:
     needs: finalize-and-tag
     runs-on: ${{ matrix.os }}
@@ -205,27 +204,30 @@ jobs:
         shell: bash
         run: |
           IN="${{ matrix.platform_in }}"
-          if [[ "$IN" =~ ^[Aa]ny[Cc]pu$ ]]; then PLATFORM_SOL="Any CPU"; else PLATFORM_SOL="$IN"; fi
+          if [[ "$IN" =~ ^[Aa]ny[Cc]pu$ ]]; then
+            PLATFORM_SOL="Any CPU"
+            ARTIFACT_SUFFIX=""
+          else
+            PLATFORM_SOL="$IN"
+            ARTIFACT_SUFFIX="-$IN"
+          fi
           echo "platform_sol=$PLATFORM_SOL" >> "$GITHUB_OUTPUT"
+          echo "artifact_suffix=$ARTIFACT_SUFFIX" >> "$GITHUB_OUTPUT"
 
       - name: Resolve solution file
         id: sln
         shell: bash
         run: |
           set -euo pipefail
-          # Prefer explicit override (Repository Variable or Secret)
           SOL="${SOLUTION_PATH:-}"
           if [[ -n "$SOL" ]]; then
-            if [[ ! -f "$SOL" ]]; then
-              echo "SOLUTION_PATH is set to '$SOL' but file not found."; exit 1
-            fi
+            [[ -f "$SOL" ]] || { echo "SOLUTION_PATH '$SOL' not found."; exit 1; }
           else
-            # Autodetect one .sln in repo root (fail if none or many)
             mapfile -t SLNS < <(ls -1 *.sln 2>/dev/null || true)
             if (( ${#SLNS[@]} == 0 )); then
-              echo "No .sln file found in repo root. Set SOLUTION_PATH."; exit 1
+              echo "No .sln at repo root. Set SOLUTION_PATH."; exit 1
             elif (( ${#SLNS[@]} > 1 )); then
-              echo "Multiple .sln files found: ${SLNS[*]}. Set SOLUTION_PATH to the one you want."; exit 1
+              echo "Multiple .sln files found: ${SLNS[*]}. Set SOLUTION_PATH."; exit 1
             else
               SOL="${SLNS[0]}"
             fi
@@ -236,7 +238,7 @@ jobs:
       - name: Clean
         run: |
           SLN='${{ steps.sln.outputs.solution }}'
-          dotnet clean "$SLN" --nologo 
+          dotnet clean "$SLN" --nologo
 
       - name: Restore
         run: |
@@ -247,10 +249,10 @@ jobs:
         run: |
           SLN='${{ steps.sln.outputs.solution }}'
           dotnet build "$SLN" --nologo \
-          -c "${{ matrix.configuration }}" \
-          -p:Platform="${{ steps.cfg.outputs.platform_sol }}" \
-          -p:ContinuousIntegrationBuild=true \
-          --no-restore
+            -c "${{ matrix.configuration }}" \
+            -p:Platform="${{ steps.cfg.outputs.platform_sol }}" \
+            -p:ContinuousIntegrationBuild=true \
+            --no-restore
 
       - name: Pack
         run: |
@@ -263,22 +265,22 @@ jobs:
             -o artifacts/pkg \
             --no-build
 
-      - name: Upload packages
+      - name: Upload packages artifact (unique per leg)
         uses: actions/upload-artifact@v4
         with:
-          name: packages
+          name: pkg-${{ matrix.configuration }}${{ steps.cfg.outputs.artifact_suffix }}
           path: artifacts/pkg/*.nupkg
           if-no-files-found: error
 
-      - name: Upload symbols (optional)
+      - name: Upload symbols (optional, unique per leg)
         if: ${{ hashFiles('artifacts/pkg/*.snupkg') != '' }}
         uses: actions/upload-artifact@v4
         with:
-          name: symbols
+          name: symbols-${{ matrix.configuration }}${{ steps.cfg.outputs.artifact_suffix }}
           path: artifacts/pkg/*.snupkg
           if-no-files-found: ignore
 
-  # --- 3) publish to stable & delete artifacts (same as before) ---
+  # --- 3) publish to stable & delete ALL artifacts ---
   publish:
     needs: pack
     runs-on: ubuntu-latest
@@ -287,14 +289,20 @@ jobs:
         uses: actions/setup-dotnet@v4
         with: { dotnet-version: 8.0.x }
 
-      - name: Download packages
+      - name: Download all packages artifacts
         uses: actions/download-artifact@v4
-        with: { name: packages, path: ./dist/packages }
+        with:
+          pattern: pkg-*
+          path: ./dist/packages
+          merge-multiple: true
 
-      - name: Download symbols (optional)
+      - name: Download all symbols artifacts (optional)
         continue-on-error: true
         uses: actions/download-artifact@v4
-        with: { name: symbols, path: ./dist/symbols }
+        with:
+          pattern: symbols-*
+          path: ./dist/symbols
+          merge-multiple: true
 
       - name: Push .nupkg to stable feed
         env:
@@ -320,14 +328,16 @@ jobs:
             dotnet nuget push "$sym" --source "$NUGET_SOURCE" --api-key "$NUGET_API_KEY" --skip-duplicate || true
           done
 
-      - name: Delete 'packages' artifact
-        uses: actions/delete-artifact@v4
-        with: { name: packages }
-
-      - name: Delete 'symbols' artifact (optional)
-        continue-on-error: true
-        uses: actions/delete-artifact@v4
-        with: { name: symbols }
+      - name: Delete ALL run artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GHB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts \
+            --paginate --jq '.artifacts[].id' | while read -r id; do
+            echo "Deleting artifact id=$id"
+            gh api -X DELETE repos/${{ github.repository }}/actions/artifacts/$id
+          done
 
       - name: Cleanup workspace
         run: rm -rf ./dist ./artifacts || true
