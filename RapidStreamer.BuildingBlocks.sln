@@ -17,13 +17,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		RapidStreamer.svg = RapidStreamer.svg
 		README.md = README.md
 		nuget.config = nuget.config
+		Directory.Build.props = Directory.Build.props
+		global.json = global.json
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{3EDD56B6-BA06-4A71-9DF3-E5FE373727BA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{3E82AEB2-84C1-43F5-851F-C8CB12EA6776}"
 	ProjectSection(SolutionItems) = preProject
-		.github\workflows\pack-and-push.yml = .github\workflows\pack-and-push.yml
+		.github\workflows\develop-bump-pack-publish.yml = .github\workflows\develop-bump-pack-publish.yml
+		.github\workflows\release-tag-pack-publish.yml = .github\workflows\release-tag-pack-publish.yml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RapidStreamer.BuildingBlocks.Infrastructure", "src\RapidStreamer.BuildingBlocks.Infrastructure\RapidStreamer.BuildingBlocks.Infrastructure.csproj", "{429E4576-6D65-43FA-AE6C-866F30C47D01}"

@@ -1,0 +1,246 @@
+name: Build, Beta Bump (build++ & rev=0), Pack & Publish (develop)
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  # --- 1) bump on develop: build++ & revision=0, ensure/increment -beta.N ---
+  bump-beta:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Ensure Directory.Build.props exists
+        run: |
+          test -f Directory.Build.props || { echo "Directory.Build.props not found."; exit 1; }
+
+      - name: Bump <PackageVersion> (build++ & rev=0) and set -beta.N
+        shell: pwsh
+        run: |
+          $propsPath = Join-Path $PWD "Directory.Build.props"
+          [xml]$xml = Get-Content -Raw $propsPath
+
+          function Get-Node($xml, $localName) {
+            $ns = $xml.DocumentElement.GetAttribute("xmlns")
+            if ($ns) {
+              $nsm = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
+              $nsm.AddNamespace("msb", $ns)
+              return $xml.SelectSingleNode("//msb:$localName", $nsm)
+            } else { return $xml.SelectSingleNode("//$localName") }
+          }
+
+          $pkgNode = Get-Node $xml "PackageVersion"
+          if (-not $pkgNode) { Write-Error "<PackageVersion> not found."; exit 1 }
+          $current = $pkgNode.InnerText.Trim()
+          if (-not $current) { Write-Error "<PackageVersion> is empty."; exit 1 }
+
+          # Support 3-part or 4-part with optional prerelease
+          $m4 = [regex]::Match($current, '^(?<maj>\d+)\.(?<min>\d+)\.(?<bld>\d+)\.(?<rev>\d+)(?:-(?<pre>.+))?$')
+          $m3 = [regex]::Match($current, '^(?<maj>\d+)\.(?<min>\d+)\.(?<bld>\d+)(?:-(?<pre>.+))?$')
+
+          if ($m4.Success) {
+            $maj = [int]$m4.Groups['maj'].Value
+            $min = [int]$m4.Groups['min'].Value
+            $bld = [int]$m4.Groups['bld'].Value
+            $rev = [int]$m4.Groups['rev'].Value
+            $pre = $m4.Groups['pre'].Value
+          } elseif ($m3.Success) {
+            $maj = [int]$m3.Groups['maj'].Value
+            $min = [int]$m3.Groups['min'].Value
+            $bld = [int]$m3.Groups['bld'].Value
+            $rev = 0
+            $pre = $m3.Groups['pre'].Value
+          } else {
+            Write-Error "Version '$current' must be 3- or 4-part (e.g., 1.2.3 or 1.2.3.0, optionally -beta.N)."
+            exit 1
+          }
+
+          # develop policy: increment 3rd (build), reset 4th (revision) to 0
+          $bld++; $rev = 0
+
+          # manage -beta.N
+          if (-not $pre) {
+            $pre = "beta.1"
+          } else {
+            $preMatch = [regex]::Match($pre, '^(?<label>[A-Za-z0-9\-]+)(?:\.(?<n>\d+))?$')
+            if ($preMatch.Success) {
+              $nStr = $preMatch.Groups['n'].Value
+              $n = if ($nStr) { [int]$nStr + 1 } else { 1 }
+              $pre = "beta.$n"      # normalize to beta
+            } else { $pre = "beta.1" }
+          }
+
+          $newVersion = "{0}.{1}.{2}.{3}-{4}" -f $maj, $min, $bld, $rev, $pre
+          Write-Host "Current: $current"
+          Write-Host "New:     $newVersion"
+
+          $pkgNode.InnerText = $newVersion
+          $xml.Save($propsPath)
+
+      - name: Commit version bump (skip CI)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then echo "No changes."; exit 0; fi
+          git add Directory.Build.props
+          git commit -m "chore: beta bump (build++ & rev=0) [skip ci]"
+          git push
+
+  # --- 2) pack matrix (sln only), add filtered release notes, upload packages ---
+  pack:
+    needs: bump-beta
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        platform_in: [AnyCpu, x86, x64, ARM64]
+        configuration: [Debug, Release]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Setup .NET (8.0.x & 9.0.x)
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+
+      - name: Cache NuGet
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', '**/*.sln', 'Directory.Build.props') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Resolve Platform for .sln
+        id: cfg
+        shell: bash
+        run: |
+          IN="${{ matrix.platform_in }}"
+          if [[ "$IN" =~ ^[Aa]ny[Cc]pu$ ]]; then PLATFORM_SOL="Any CPU"; else PLATFORM_SOL="$IN"; fi
+          echo "platform_sol=$PLATFORM_SOL" >> "$GITHUB_OUTPUT"
+
+      - name: Generate release notes (exclude merges & version bumps)
+        id: notes
+        shell: bash
+        run: |
+          set -euo pipefail
+          BEFORE="${{ github.event.before }}"; AFTER="${{ github.sha }}"
+          if [[ -n "$BEFORE" ]]; then RAW=$(git log --no-merges --format="%s" "$BEFORE..$AFTER" || true)
+          else RAW=$(git log --no-merges -n 50 --format="%s" || true); fi
+
+          FILTER='(packageversion|package version|bump version|version bump|^bump[[:space:]])'
+          NOTES="$(printf "%s\n" "$RAW" | grep -Ei -v "$FILTER" || true)"
+          NOTES="$(printf "%s\n" "$NOTES" | grep -Ei -v 'beta bump.*packageversion' || true)"
+          NOTES="$(printf "%s\n" "$NOTES" | sed '/^[[:space:]]*$/d; s/^/- /')"
+          [[ -z "$NOTES" ]] && NOTES='- No user-facing changes in this push.'
+          printf "%s\n" "$NOTES" > release-notes.txt
+          REL_NOTES="$(sed ':a;N;$!ba;s/\r//g;s/\n/\\n/g' release-notes.txt)"
+          echo "REL_NOTES=$REL_NOTES" >> "$GITHUB_ENV"
+
+      - name: Clean
+        run: dotnet clean --nologo 
+      
+      - name: Restore
+        run: dotnet restore --nologo -p:Platform="${{ steps.cfg.outputs.platform_sol }}"
+
+      - name: Build
+        run: dotnet build --nologo \
+          -c "${{ matrix.configuration }}" \
+          -p:Platform="${{ steps.cfg.outputs.platform_sol }}" \
+          -p:ContinuousIntegrationBuild=true \
+          --no-restore
+
+      - name: Pack (with release notes)
+        run: |
+          mkdir -p artifacts/pkg
+          dotnet pack --nologo \
+            -c "${{ matrix.configuration }}" \
+            -p:Platform="${{ steps.cfg.outputs.platform_sol }}" \
+            -p:ContinuousIntegrationBuild=true \
+            -p:PackageReleaseNotes="${{ env.REL_NOTES }}" \
+            -o artifacts/pkg \
+            --no-build
+
+      - name: Upload packages artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: artifacts/pkg/*.nupkg
+          if-no-files-found: error
+
+      - name: Upload symbols (optional)
+        if: ${{ hashFiles('artifacts/pkg/*.snupkg') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: symbols
+          path: artifacts/pkg/*.snupkg
+          if-no-files-found: ignore
+
+  # --- 3) publish to beta feed & delete artifacts ---
+  publish:
+    needs: pack
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with: { dotnet-version: 8.0.x }
+
+      - name: Download packages
+        uses: actions/download-artifact@v4
+        with: { name: packages, path: ./dist/packages }
+
+      - name: Download symbols (optional)
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with: { name: symbols, path: ./dist/symbols }
+
+      - name: Push .nupkg to beta feed
+        env:
+          NUGET_SOURCE: ${{ secrets.NUGET_SOURCE }}
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          test -n "$NUGET_SOURCE" && test -n "$NUGET_API_KEY" || { echo "Missing beta feed secrets."; exit 1; }
+          shopt -s nullglob
+          for pkg in dist/packages/*.nupkg; do
+            echo "Pushing $pkg"
+            dotnet nuget push "$pkg" --source "$NUGET_SOURCE" --api-key "$NUGET_API_KEY" --skip-duplicate
+          done
+
+      - name: Push .snupkg (optional)
+        if: ${{ always() }}
+        env:
+          NUGET_SOURCE: ${{ secrets.NUGET_SOURCE }}
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          shopt -s nullglob
+          for sym in dist/symbols/*.snupkg; do
+            echo "Pushing $sym"
+            dotnet nuget push "$sym" --source "$NUGET_SOURCE" --api-key "$NUGET_API_KEY" --skip-duplicate || true
+          done
+
+      - name: Delete 'packages' artifact
+        uses: actions/delete-artifact@v4
+        with: { name: packages }
+
+      - name: Delete 'symbols' artifact (optional)
+        continue-on-error: true
+        uses: actions/delete-artifact@v4
+        with: { name: symbols }
+
+      - name: Cleanup workspace
+        run: rm -rf ./dist ./artifacts || true
