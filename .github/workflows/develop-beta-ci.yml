@@ -26,7 +26,7 @@ jobs:
         run: |
           test -f Directory.Build.props || { echo "Directory.Build.props not found."; exit 1; }
 
-      - name: Bump <PackageVersion> (preserve build/rev, only bump -beta.N)
+      - name: Bump <PackageVersion> (bump build if no beta, else bump beta.N)
         id: bump
         shell: pwsh
         run: |
@@ -72,8 +72,10 @@ jobs:
             exit 1
           }
 
-          # Increment only beta.N
+          # Logic: bump build if no beta, otherwise just bump beta.N
           if (-not $pre) {
+            $bld += 1
+            $rev = if ($format -eq '4') { 0 } else { $null }
             $pre = "beta.1"
           } else {
             $preMatch = [regex]::Match($pre, '^(?<label>[A-Za-z0-9\-]+)(?:\.(?<n>\d+))?$')
@@ -114,17 +116,38 @@ jobs:
           git push
           echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
 
-      - name: Create & push tag for beta version
+      - name: Commit version bump (context-aware message, skip CI)
+        id: commit_bump
         env:
           VERSION: ${{ steps.bump.outputs.version }}
+        shell: pwsh
         run: |
-          TAG="v${VERSION}"
-          if git rev-parse "$TAG" >/dev/null 2>&1; then
-            echo "Tag $TAG already exists; skipping."
-          else
-            git tag -a "$TAG" -m "Beta $TAG"
-            git push origin "$TAG"
-          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if (git diff --quiet) {
+            echo "No changes."; exit 0
+          }
+
+          git add Directory.Build.props
+
+          # Parse current version to detect if only beta was bumped
+          if ($env:VERSION -match '^(?<base>\d+\.\d+\.\d+(?:\.\d+)?)(?:-(?<pre>.+))?$') {
+            $base = $Matches['base']
+            $pre = $Matches['pre']
+            if ($pre) {
+              $msg = "chore: beta bump to $env:VERSION [skip ci]"
+            } else {
+              $msg = "chore: version bump to $env:VERSION (build++) [skip ci]"
+            }
+          } else {
+            $msg = "chore: version bump to $env:VERSION [skip ci]"
+          }
+
+          git commit -m "$msg"
+          git push
+
+          echo "sha=$(git rev-parse HEAD)" >> $env:GITHUB_OUTPUT
 
   
   # --- 2) pack matrix (sln only), add filtered release notes, upload artifacts ---
