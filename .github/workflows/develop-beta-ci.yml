@@ -79,16 +79,23 @@ jobs:
               $nStr = $preMatch.Groups['n'].Value
               $n = if ($nStr) { [int]$nStr + 1 } else { 1 }
               $pre = "beta.$n"
-            } else { $pre = "beta.1" }
+            } else { 
+              $pre = "beta.1" 
+            }
           }
-
-          $newVersion = "{0}.{1}.{2}.{3}-{4}" -f $maj, $min, $bld, $rev, $pre
+        
+            if ($format -eq '4') {
+              $newVersion = "{0}.{1}.{2}.{3}-{4}" -f $maj, $min, $bld, $rev, $pre
+            } else {
+              $newVersion = "{0}.{1}.{2}-{3}" -f $maj, $min, $bld, $pre
+            }
+      
           Write-Host "Current: $current"
           Write-Host "New:     $newVersion"
-
+      
           $pkgNode.InnerText = $newVersion
           $xml.Save($propsPath)
-
+      
           "version=$newVersion" >> $env:GITHUB_OUTPUT
 
       - name: Commit version bump (skip CI)
