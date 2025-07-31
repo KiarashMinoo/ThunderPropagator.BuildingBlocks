@@ -99,14 +99,16 @@ jobs:
           $xml.Save($propsPath)
 
           "version=$newVersion" >> $env:GITHUB_OUTPUT
-      
-      - name: Commit version bump (skip CI)
+
+      - name: Commit version bump (include version, skip CI)
+        env:
+          VERSION: ${{ steps.bump.outputs.version }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if git diff --quiet; then echo "No changes."; exit 0; fi
           git add Directory.Build.props
-          git commit -m "chore: beta bump (build++ & rev=0) [skip ci]"
+          git commit -m "chore: beta bump to $VERSION (increment -beta.N only) [skip ci]"
           git push
 
       - name: Create & push tag for beta version
