@@ -25,7 +25,7 @@ jobs:
         run: |
           test -f Directory.Build.props || { echo "Directory.Build.props not found."; exit 1; }
 
-      - name: Bump <PackageVersion> (build++ & rev=0) and set -beta.N
+      - name: Bump <PackageVersion> (preserve build/rev, only bump -beta.N)
         id: bump
         shell: pwsh
         run: |
@@ -38,7 +38,9 @@ jobs:
               $nsm = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
               $nsm.AddNamespace("msb", $ns)
               return $xml.SelectSingleNode("//msb:$localName", $nsm)
-            } else { return $xml.SelectSingleNode("//$localName") }
+            } else {
+              return $xml.SelectSingleNode("//$localName")
+            }
           }
 
           $pkgNode = Get-Node $xml "PackageVersion"
@@ -46,7 +48,7 @@ jobs:
           $current = $pkgNode.InnerText.Trim()
           if (-not $current) { Write-Error "<PackageVersion> is empty."; exit 1 }
 
-          # Allow 3- or 4-part with optional prerelease
+          # Match 3- or 4-part with optional -beta.N
           $m4 = [regex]::Match($current, '^(?<maj>\d+)\.(?<min>\d+)\.(?<bld>\d+)\.(?<rev>\d+)(?:-(?<pre>.+))?$')
           $m3 = [regex]::Match($current, '^(?<maj>\d+)\.(?<min>\d+)\.(?<bld>\d+)(?:-(?<pre>.+))?$')
 
@@ -56,21 +58,20 @@ jobs:
             $bld = [int]$m4.Groups['bld'].Value
             $rev = [int]$m4.Groups['rev'].Value
             $pre = $m4.Groups['pre'].Value
+            $format = '4'
           } elseif ($m3.Success) {
             $maj = [int]$m3.Groups['maj'].Value
             $min = [int]$m3.Groups['min'].Value
             $bld = [int]$m3.Groups['bld'].Value
             $rev = 0
             $pre = $m3.Groups['pre'].Value
+            $format = '3'
           } else {
             Write-Error "Version '$current' must be 3- or 4-part (e.g., 1.2.3 or 1.2.3.0, optionally -beta.N)."
             exit 1
           }
 
-          # develop policy: increment 3rd (build), reset 4th (revision) to 0
-          $bld++; $rev = 0
-
-          # manage -beta.N (normalize to 'beta')
+          # Increment only beta.N
           if (-not $pre) {
             $pre = "beta.1"
           } else {
@@ -79,25 +80,26 @@ jobs:
               $nStr = $preMatch.Groups['n'].Value
               $n = if ($nStr) { [int]$nStr + 1 } else { 1 }
               $pre = "beta.$n"
-            } else { 
-              $pre = "beta.1" 
+            } else {
+              $pre = "beta.1"
             }
           }
-        
-            if ($format -eq '4') {
-              $newVersion = "{0}.{1}.{2}.{3}-{4}" -f $maj, $min, $bld, $rev, $pre
-            } else {
-              $newVersion = "{0}.{1}.{2}-{3}" -f $maj, $min, $bld, $pre
-            }
-      
+
+          # Format new version exactly matching the input version's structure
+          if ($format -eq '4') {
+            $newVersion = "{0}.{1}.{2}.{3}-{4}" -f $maj, $min, $bld, $rev, $pre
+          } else {
+            $newVersion = "{0}.{1}.{2}-{3}" -f $maj, $min, $bld, $pre
+          }
+
           Write-Host "Current: $current"
           Write-Host "New:     $newVersion"
-      
+
           $pkgNode.InnerText = $newVersion
           $xml.Save($propsPath)
-      
-          "version=$newVersion" >> $env:GITHUB_OUTPUT
 
+          "version=$newVersion" >> $env:GITHUB_OUTPUT
+      
       - name: Commit version bump (skip CI)
         run: |
           git config user.name "github-actions[bot]"
