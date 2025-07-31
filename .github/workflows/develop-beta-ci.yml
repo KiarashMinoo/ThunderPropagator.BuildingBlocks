@@ -103,19 +103,6 @@ jobs:
 
           "version=$newVersion" >> $env:GITHUB_OUTPUT
 
-      - name: Commit version bump (include version, skip CI)
-        id: commit_bump
-        env:
-          VERSION: ${{ steps.bump.outputs.version }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if git diff --quiet; then echo "No changes."; exit 0; fi
-          git add Directory.Build.props
-          git commit -m "chore: beta bump to $VERSION (increment -beta.N only) [skip ci]"
-          git push
-          echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
-
       - name: Commit version bump (context-aware message, skip CI)
         id: commit_bump
         env:
@@ -148,6 +135,34 @@ jobs:
           git push
 
           echo "sha=$(git rev-parse HEAD)" >> $env:GITHUB_OUTPUT
+
+      - name: Create & push tag for version
+        env:
+          VERSION: ${{ steps.bump.outputs.version }}
+        shell: pwsh
+        run: |
+          $version = $env:VERSION
+          $tag = "v$version"
+
+          if (git rev-parse "$tag" 2>$null) {
+            echo "Tag $tag already exists; skipping."
+            exit 0
+          }
+
+          # Determine if it's a beta tag
+          if ($version -match '^(?<base>\d+\.\d+\.\d+(?:\.\d+)?)(?:-(?<pre>.+))?$') {
+            $pre = $Matches['pre']
+            if ($pre) {
+              $message = "Beta $tag"
+            } else {
+              $message = "Build $tag"
+            }
+          } else {
+            $message = "Release $tag"
+          }
+
+          git tag -a "$tag" -m "$message"
+          git push origin "$tag"
 
   
   # --- 2) pack matrix (sln only), add filtered release notes, upload artifacts ---
