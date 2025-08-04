@@ -44,7 +44,7 @@ jobs:
             }
           }
 
-          $pkgNode = Get-Node $xml "PackageVersion"
+          $pkgNode = Get-Node $xml "Version"
           if (-not $pkgNode) { Write-Error "<Version> not found."; exit 1 }
           $current = $pkgNode.InnerText.Trim()
           if (-not $current) { Write-Error "<Version> is empty."; exit 1 }
