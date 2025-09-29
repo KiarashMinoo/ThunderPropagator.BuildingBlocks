@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 
 <configuration>
     <packageSources>
@@ -7,15 +7,6 @@
         <!-- GitHub Packages for RapidStreamer organization -->
         <add key="github" value="https://nuget.pkg.github.com/KiarashMinoo/index.json" />
     </packageSources>
-
-    <!-- Authentication credentials - Use environment variables or user-level config for security -->
-    <packageSourceCredentials>
-        <github>
-            <add key="Username" value="KiarashMinoo" />
-            <!-- Use environment variable GITHUB_TOKEN or configure in user-level NuGet.config -->
-            <add key="ClearTextPassword" value="%GITHUB_TOKEN%" />
-        </github>
-    </packageSourceCredentials>
 
     <!-- Package source mapping for enhanced security -->
     <packageSourceMapping>
