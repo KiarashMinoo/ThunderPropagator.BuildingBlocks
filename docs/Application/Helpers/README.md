@@ -407,7 +407,7 @@ var text = userInput.MinLength(3).MaxLength(50);
 
 ### 🔧 Serialization Suite
 
-#### [JsonHelper](JsonHelper.md)
+#### JsonHelper
 System.Text.Json serialization with custom attribute support and telemetry.
 
 **Key Features:**
@@ -416,7 +416,7 @@ System.Text.Json serialization with custom attribute support and telemetry.
 - Base64 encoding support
 - Performance optimized with activity tracking
 
-#### [NJsonHelper](NJsonHelper.md) 
+#### NJsonHelper 
 Newtonsoft.Json serialization maintaining compatibility and advanced features.
 
 **Key Features:**
@@ -425,7 +425,7 @@ Newtonsoft.Json serialization maintaining compatibility and advanced features.
 - Exception handling integration
 - Backwards compatibility support
 
-#### [NetJsonHelper](NetJsonHelper.md)
+#### NetJsonHelper
 NetJSON high-performance serialization for speed-critical scenarios.
 
 **Key Features:**
@@ -434,7 +434,7 @@ NetJSON high-performance serialization for speed-critical scenarios.
 - Telemetry integration
 - Custom settings support
 
-#### [MessagePackHelper](MessagePackHelper.md)
+#### MessagePackHelper
 Binary serialization using MessagePack for compact data representation.
 
 **Key Features:**
@@ -443,7 +443,7 @@ Binary serialization using MessagePack for compact data representation.
 - Async operation support
 - Compact data representation
 
-#### [ProtobufHelper](ProtobufHelper.md)
+#### ProtobufHelper
 Protocol Buffers serialization for cross-platform data interchange.
 
 **Key Features:**
@@ -452,7 +452,7 @@ Protocol Buffers serialization for cross-platform data interchange.
 - Efficient binary format
 - Schema evolution support
 
-#### [YamlHelper](YamlHelper.md)
+#### YamlHelper
 YAML serialization with extensive configuration options.
 
 **Key Features:**
@@ -463,7 +463,7 @@ YAML serialization with extensive configuration options.
 
 ### 🔧 Data Processing
 
-#### [ObjectHelper](ObjectHelper.md)
+#### ObjectHelper
 Object manipulation utilities including reflection, equality, and cloning.
 
 **Key Features:**
@@ -473,7 +473,7 @@ Object manipulation utilities including reflection, equality, and cloning.
 - Disposal detection for resource management
 - Compression and decompression utilities
 
-#### [StringHelper](StringHelper.md)
+#### StringHelper
 String manipulation utilities for encoding, conversion, and compression.
 
 **Key Features:**
@@ -482,7 +482,7 @@ String manipulation utilities for encoding, conversion, and compression.
 - Compression integration with CompressedObject
 - Memory-efficient string operations
 
-#### [StreamHelper](StreamHelper.md)
+#### StreamHelper
 Stream processing utilities for conversion and decompression operations.
 
 **Key Features:**
@@ -491,7 +491,7 @@ Stream processing utilities for conversion and decompression operations.
 - Multi-format decompression support
 - Memory stream optimization
 
-#### [Size](Size.md)
+#### Size
 Memory footprint calculation utilities for performance analysis.
 
 **Key Features:**
@@ -502,7 +502,7 @@ Memory footprint calculation utilities for performance analysis.
 
 ### 🔧 Security & Identity
 
-#### [JwtIdentityHelper](JwtIdentityHelper.md)
+#### JwtIdentityHelper
 JWT token validation and claims principal extraction.
 
 **Key Features:**
@@ -739,7 +739,7 @@ catch (Exception ex)
 
 The Helpers System integrates with other RapidStreamer BuildingBlocks:
 
-- **[Collections](../Collections/README.md)**: CollectionHelper creates and works with LinkedArray<T>
+- **[Collections](../Collections/README.md#linkedarray-t)**: CollectionHelper creates and works with LinkedArray<T>
 - **[Attributes](../Attributes/README.md)**: JsonSerializationAttribute affects serialization helpers
 - **[ChangeTrackingItems](../ChangeTrackingItems/README.md)**: Helpers used for tracking and serialization
 - **[Ciphering](../Ciphering/README.md)**: Serialization helpers used for encryption scenarios
@@ -810,8 +810,8 @@ The Helpers System is designed for extensibility. Consider contributing:
   - **[High-Performance Collections](../Collections/README.md#high-performance-collections)** - Specialized collection types
   - **[Observable Collections](../Collections/README.md#bindingdictionary)** - Event-driven collections
 - **[Identity Management](../Identity/README.md)**: JWT and authentication utilities
-  - **[JWT Configuration](../Identity/README.md#jwt-configuration)** - Token handling utilities
-  - **[Authentication Components](../Identity/README.md#authentication-components)** - Identity management
+  - **[JWT Configuration](../Identity/README.md#jwtconfiguration)** - Token handling utilities
+  - **[Authentication Components](../Identity/README.md#core-components)** - Identity management
 - **[Cryptography](../Ciphering/README.md)**: Security and encryption utilities
   - **[Encryption Services](../Ciphering/README.md#encryptionservice)** - Data protection utilities
   - **[Security Patterns](../Ciphering/README.md#security-best-practices)** - Secure coding practices

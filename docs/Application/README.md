@@ -233,7 +233,7 @@ For specific implementation details and examples, refer to the individual compon
 - **[Documentation Guidelines](../README.md)** - Documentation standards and patterns
 
 ### Component Quick Links
-- **[🏷️ Attributes](Attributes/README.md#custom-attributes)** - Metadata and serialization control
+- **[🏷️ Attributes](Attributes/README.md#components)** - Metadata and serialization control
 - **[🔐 Certificate Management](Certificate/README.md#x509-certificate-handling)** - Security operations
 - **[📊 Change Tracking](ChangeTrackingItems/README.md#change-tracking-framework)** - Audit trail capabilities
 - **[🔒 Cryptography](Ciphering/README.md#cryptographic-operations)** - Encryption and security
@@ -243,4 +243,4 @@ For specific implementation details and examples, refer to the individual compon
 - **[🛠️ Helper Utilities](Helpers/README.md#utility-classes)** - Configuration and data helpers
 - **[👤 Identity Management](Identity/README.md#authentication-components)** - JWT and user management
 - **[🎯 Object Models](Objects/README.md#foundational-patterns)** - Base object patterns
-- **[📄 Serialization](Serializations/README.md#serialization-utilities)** - JSON and YAML processing
+- **[📄 Serialization](Serializations/README.md#core-components)** - JSON and YAML processing

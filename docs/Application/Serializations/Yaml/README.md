@@ -10,10 +10,10 @@ The YAML serialization system consists of four core components that work togethe
 
 | Component | Purpose | Use Cases |
 |-----------|---------|-----------|
-| **[YamlTypeConverterAttribute](YamlTypeConverterAttribute.md)** | Declarative type converter assignment | Custom serialization for specific types |
-| **[YamlNodeDeserializerAttribute](YamlNodeDeserializerAttribute.md)** | Advanced node-level deserialization control | Complex parsing scenarios and validation |
-| **[YamlSerializerSettings](YamlSerializerSettings.md)** | Centralized configuration management | Environment-specific settings and presets |
-| **[YamlTypeConverter](YamlTypeConverter.md)** | Base classes for custom converters | Implementation foundation for type converters |
+| **YamlTypeConverterAttribute** | Declarative type converter assignment | Custom serialization for specific types |
+| **YamlNodeDeserializerAttribute** | Advanced node-level deserialization control | Complex parsing scenarios and validation |
+| **YamlSerializerSettings** | Centralized configuration management | Environment-specific settings and presets |
+| **YamlTypeConverter** | Base classes for custom converters | Implementation foundation for type converters |
 
 ## Architecture
 

@@ -12,16 +12,16 @@ The change tracking system consists of several interconnected components that wo
 
 | Component | Purpose | Documentation |
 |-----------|---------|---------------|
-| [`ChangeType`](ChangeType.md) | Enum defining types of changes (Added, Modified, Removed) | [ChangeType.md](ChangeType.md) |
-| [`ChangeTrackingItem<TValue>`](ChangeTrackingItem.md) | Immutable record of a single change operation | [ChangeTrackingItem.md](ChangeTrackingItem.md) |
-| [`ChangeTrackingItemCollection<TKey, TValue>`](ChangeTrackingItemCollection.md) | Thread-safe collection for managing change items | [ChangeTrackingItemCollection.md](ChangeTrackingItemCollection.md) |
+| `ChangeType` | Enum defining types of changes (Added, Modified, Removed) | ChangeType |
+| `ChangeTrackingItem<TValue>` | Immutable record of a single change operation | ChangeTrackingItem |
+| `ChangeTrackingItemCollection<TKey, TValue>` | Thread-safe collection for managing change items | ChangeTrackingItemCollection |
 
 ### Implementation Components
 
 | Component | Purpose | Documentation |
 |-----------|---------|---------------|
-| [`IChangeTrackingObject<TKey, TValue>`](ChangeTrackingObject.md) | Interface contract for change tracking objects | [ChangeTrackingObject.md](ChangeTrackingObject.md) |
-| [`ChangeTrackingObjectAdapter<TKey, TValue>`](ChangeTrackingObjectAdapter.md) | Ready-to-use implementation helper | [ChangeTrackingObjectAdapter.md](ChangeTrackingObjectAdapter.md) |
+| `IChangeTrackingObject<TKey, TValue>` | Interface contract for change tracking objects | ChangeTrackingObject |
+| `ChangeTrackingObjectAdapter<TKey, TValue>` | Ready-to-use implementation helper | ChangeTrackingObjectAdapter |
 
 ## Architecture
 
@@ -451,7 +451,7 @@ The change tracking system is designed to be extensible. You can:
   - **[Notifiable Objects](../Objects/README.md#notifiableobject)** - Property change notification infrastructure
   - **[Equatable Objects](../Objects/README.md#equatableobject)** - Value equality for change detection
   - **[Immutable Objects](../Objects/README.md#immutableobject)** - Immutability patterns for change tracking
-- **[Collections System](../Collections/README.md)**: Observable collections with change tracking
+- **[Collections System](../Collections/README.md#bindingdictionary-tkey-tvalue)**: Observable collections with change tracking
   - **[Binding Dictionary](../Collections/README.md#bindingdictionary)** - Observable dictionary with change events
   - **[Collection Performance](../Collections/README.md#performance-benchmarks)** - High-performance collection operations
 - **[Serialization System](../Serializations/README.md)**: Change tracking data serialization

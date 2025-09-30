@@ -1336,7 +1336,7 @@ The Collections system integrates with:
 - **[ChangeTrackingItems](../ChangeTrackingItems/README.md)**: For detailed change tracking and audit trails
   - **[Change Tracking Framework](../ChangeTrackingItems/README.md#change-tracking-framework)** - Audit trail capabilities
   - **[ChangeTrackingItemCollection](../ChangeTrackingItems/README.md#changetrackingitemcollection)** - Collection-based change tracking
-- **[Helpers System](../Helpers/README.md)**: CollectionHelper provides filtering and transformation utilities
+- **[Helpers System](../Helpers/README.md#collection-helpers)**: CollectionHelper provides filtering and transformation utilities
   - **[Collection Utilities](../Helpers/README.md#collection-utilities)** - Collection manipulation helpers
   - **[Data Transformation](../Helpers/README.md#data-transformation-utilities)** - Data processing utilities
 - **[Objects System](../Objects/README.md)**: NotifiableObject provides base infrastructure for change notifications
@@ -1369,6 +1369,6 @@ The RapidStreamer Collections system provides enterprise-grade collection types 
 These collections are designed for high-performance, observable, and maintainable applications where standard collections fall short of requirements.
 
 For detailed information about each component, refer to the individual documentation files:
-- [BindingDictionary.md](BindingDictionary.md) - Observable dictionary with change tracking
-- [GenericOrderedDictionary.md](GenericOrderedDictionary.md) - Type-safe ordered dictionary
-- [LinkedArray.md](LinkedArray.md) - Memory-efficient array with functional operations
+- BindingDictionary - Observable dictionary with change tracking
+- GenericOrderedDictionary - Type-safe ordered dictionary
+- LinkedArray - Memory-efficient array with functional operations

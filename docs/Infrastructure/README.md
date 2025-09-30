@@ -568,7 +568,7 @@ services.AddLogging(builder =>
   - **[Telemetry](../Application/README.md#telemetry)** - Comprehensive telemetry and monitoring capabilities
   - **[Exception Handling](../Application/README.md#exceptioninfo)** - Detailed exception information and metadata
 - **[Correlation ID Support](../Application/CorrelationId/README.md)** - Request tracing
-- **[Helper Utilities](../Application/Helpers/README.md)** - Configuration management and validation
+- **[Helper Utilities](../Application/Helpers/README.md#configuration-helpers)** - Configuration management and validation
 - **[Cryptography & Security](../Application/Ciphering/README.md)** - Encryption and security operations
 
 ### Development Resources

@@ -341,7 +341,7 @@ public interface ICorrelationIdSupport
 - Protected setter ensures controlled access
 - Universal application to any class type
 
-**[Read full documentation →](ICorrelationIdSupport.md)**
+**Read full documentation →**
 
 ### CorrelationIdProvider
 
@@ -360,7 +360,7 @@ public static class CorrelationIdProvider
 - Special handling for FeederMessage objects
 - Telemetry integration
 
-**[Read full documentation →](CorrelationIdProvider.md)**
+**Read full documentation →**
 
 ### CorrelationIdSupportHelper
 
@@ -380,7 +380,7 @@ public static class CorrelationIdSupportHelper
 - Manual correlation ID setting
 - Returns original object for chaining
 
-**[Read full documentation →](CorrelationIdSupportHelper.md)**
+**Read full documentation →**
 
 ## Integration Patterns
 

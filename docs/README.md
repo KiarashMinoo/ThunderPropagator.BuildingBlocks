@@ -198,25 +198,25 @@ Each main section contains:
 ## 🎯 Use Cases by Scenario
 
 ### Web Applications
-**Recommended Stack**: Refer to [Application Building Blocks](Application/README.md) for:
+**Recommended Stack**: Refer to [Application Building Blocks](Application/README.md#integration-guidelines) for:
 - Core application infrastructure (ServiceConfiguration, Telemetry, CorrelationId)
 - Security layer (JWT Configuration, Certificate Management, Encryption Services)
 - Data layer (Change Tracking, Collections, Serialization)
 
-**Monitoring**: Refer to [Infrastructure Building Blocks](Infrastructure/README.md) for:
+**Monitoring**: Refer to [Infrastructure Building Blocks](Infrastructure/README.md#health-monitoring) for:
 - Health Checks and System Resource Monitor
 
 ### Microservices
-**Monitoring & Observability**: Use [Infrastructure Building Blocks](Infrastructure/README.md) for:
+**Monitoring & Observability**: Use [Infrastructure Building Blocks](Infrastructure/README.md#system-resource-management) for:
 - Health Checks, System Resource Monitor, Network Performance
 - Integration with Telemetry and Correlation IDs from Application components
 
-**Communication & Security**: Use [Application Building Blocks](Application/README.md) for:
+**Communication & Security**: Use [Application Building Blocks](Application/README.md#security-integration) for:
 - Message Serialization, JSON/YAML Helpers, Exception Handling
 - JWT Authentication, Certificate Management, Encryption Services
 
 ### Data Processing Applications
-**Core Processing**: Use [Application Building Blocks](Application/README.md) for:
+**Core Processing**: Use [Application Building Blocks](Application/README.md#core-components) for:
 - Change Tracking, Collections, Object Models, Helper Utilities
 - Multiple Format Support, Compression, Protocol Buffers
 

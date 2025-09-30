@@ -6,10 +6,10 @@ The Enums system provides a comprehensive collection of standardized enumeration
 
 The Enums system consists of four primary enumerations that cover different aspects of the framework:
 
-- **[AuthenticationType](AuthenticationType.md)**: Authentication mechanisms for secure communications
-- **[CastType](CastType.md)**: Message distribution patterns for the messaging system
-- **[DataType](DataType.md)**: Universal data type classification for serialization and validation
-- **[RecoveryStorage](RecoveryStorage.md)**: Storage backend options for data recovery and persistence
+- **AuthenticationType**: Authentication mechanisms for secure communications
+- **CastType**: Message distribution patterns for the messaging system
+- **DataType**: Universal data type classification for serialization and validation
+- **RecoveryStorage**: Storage backend options for data recovery and persistence
 
 ## Architecture
 
@@ -223,7 +223,7 @@ Defines authentication mechanisms for secure service communications:
 - Middleware support for automatic authentication
 - Configurable per-service authentication strategies
 
-**[Read full documentation →](AuthenticationType.md)**
+**Read full documentation →**
 
 ### CastType
 
@@ -241,7 +241,7 @@ Controls message distribution patterns in the messaging system:
 - Performance optimization per delivery pattern
 - Telemetry and monitoring support
 
-**[Read full documentation →](CastType.md)**
+**Read full documentation →**
 
 ### DataType
 
@@ -263,7 +263,7 @@ Universal data type classification for cross-platform compatibility:
 - Formatting and display support
 - YAML type converter integration
 
-**[Read full documentation →](DataType.md)**
+**Read full documentation →**
 
 ### RecoveryStorage
 
@@ -282,7 +282,7 @@ Storage backend configuration for data recovery and persistence:
 - Health monitoring and failover
 - Configurable redundancy levels
 
-**[Read full documentation →](RecoveryStorage.md)**
+**Read full documentation →**
 
 ## Integration Patterns
 
@@ -817,12 +817,12 @@ public static class EnumCache<T> where T : struct, Enum
 
 ## Related Documentation
 
-- **[AuthenticationType](AuthenticationType.md)**: Detailed authentication enum documentation
-- **[CastType](CastType.md)**: Message distribution patterns documentation
-- **[DataType](DataType.md)**: Universal data type system documentation
-- **[RecoveryStorage](RecoveryStorage.md)**: Storage backend options documentation
-- **[FeederMessage](../Application/FeederMessage.md)**: Integration with messaging system
-- **[YAML Type Converters](../Serializations/YamlTypeConverter.md)**: Serialization integration
+- **AuthenticationType**: Detailed authentication enum documentation
+- **CastType**: Message distribution patterns documentation
+- **DataType**: Universal data type system documentation
+- **RecoveryStorage**: Storage backend options documentation
+- **FeederMessage**: Integration with messaging system
+- **YAML Type Converters**: Serialization integration
 
 ## Version History
 

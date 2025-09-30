@@ -1181,7 +1181,7 @@ public class Customer : EquatableObject<Customer>, INotifyPropertyChanged
 ## Related Systems
 
 ### Application Components
-- **[Helper Utilities](../Helpers/README.md)**: Object manipulation and processing utilities
+- **[Helper Utilities](../Helpers/README.md#utility-helpers)**: Object manipulation and processing utilities
   - **[Object Helper](../Helpers/README.md#objecthelper)** - Object manipulation and reflection utilities
   - **[String Helper](../Helpers/README.md#stringhelper)** - String processing utilities
   - **[JSON Helper](../Helpers/README.md#jsonhelper)** - JSON serialization utilities

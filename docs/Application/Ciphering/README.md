@@ -975,7 +975,7 @@ The Ciphering system integrates well with:
 - **[Identity Management](../Identity/README.md)**: Authentication and authorization components
   - **[JWT Configuration](../Identity/README.md#jwt-configuration)** - Token-based authentication
   - **[User Configuration](../Identity/README.md#user-configuration)** - User credential management
-- **[Helper Utilities](../Helpers/README.md)**: Configuration and validation utilities
+- **[Helper Utilities](../Helpers/README.md#configuration-helpers)**: Configuration and validation utilities
   - **[Configuration Management](../Helpers/README.md#configuration-management)** - Secure configuration handling
   - **[Validation Utilities](../Helpers/README.md#validation-utilities)** - Input validation and security
 - **[Serialization](../Serializations/README.md)**: Secure data serialization

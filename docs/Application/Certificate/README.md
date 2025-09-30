@@ -8,7 +8,7 @@ The Certificate namespace provides comprehensive certificate management function
 
 | Component | Purpose | Key Features |
 |-----------|---------|--------------|
-| **[CertificateModel](CertificateModel.md)** | Certificate data model | X.509 certificate representation, validation, metadata |
+| **CertificateModel** | Certificate data model | X.509 certificate representation, validation, metadata |
 
 ## Purpose
 

@@ -36,8 +36,8 @@ Serializations Namespace
 
 The framework provides two enum types for serialization format selection:
 
-- **[SerializerType](SerializerType.md)**: Base JSON serialization library selection
-- **[KafkaSerializerType](KafkaSerializerType.md)**: Extended serialization types including Kafka-specific formats
+- **SerializerType**: Base JSON serialization library selection
+- **KafkaSerializerType**: Extended serialization types including Kafka-specific formats
 
 ```csharp
 // Basic JSON serialization selection
@@ -83,10 +83,10 @@ Comprehensive JSON serialization support with multiple library backends:
 Advanced YAML serialization with extensive customization capabilities:
 
 #### [YAML Components](Yaml/)
-- **[YamlTypeConverterAttribute](Yaml/YamlTypeConverterAttribute.md)**: Declarative type converter assignment
-- **[YamlNodeDeserializerAttribute](Yaml/YamlNodeDeserializerAttribute.md)**: Advanced deserialization control
-- **[YamlSerializerSettings](Yaml/YamlSerializerSettings.md)**: Configuration management
-- **[YamlTypeConverter](Yaml/YamlTypeConverter.md)**: Converter base classes
+- **YamlTypeConverterAttribute**: Declarative type converter assignment
+- **YamlNodeDeserializerAttribute**: Advanced deserialization control
+- **YamlSerializerSettings**: Configuration management
+- **YamlTypeConverter**: Converter base classes
 
 ### Kafka Serialization
 
@@ -1061,7 +1061,7 @@ public class ConfigurableSerializationService
 ## Related Systems
 
 ### Application Components
-- **[Helper Utilities](../Helpers/README.md)**: Comprehensive serialization helper functions
+- **[Helper Utilities](../Helpers/README.md#serialization-helpers)**: Comprehensive serialization helper functions
   - **[JSON Helper](../Helpers/README.md#jsonhelper)** - System.Text.Json utilities and high-performance operations
   - **[NJson Helper](../Helpers/README.md#njsonhelper)** - Newtonsoft.Json utilities with advanced features
   - **[NetJSON Helper](../Helpers/README.md#netjsonhelper)** - NetJSON utilities for ultra-fast serialization
@@ -1092,7 +1092,7 @@ public class ConfigurableSerializationService
 
 ### Application Building Blocks
 - **[Application Overview](../README.md)** - Complete application components
-  - **[Serialization Module](../README.md#serialization)** - Serialization overview and integration patterns
+  - **[Serialization Module](../README.md#%F0%9F%93%84-serialization)** - Serialization overview and integration patterns
   - **[Performance Guidelines](../README.md#performance-characteristics)** - Serialization performance best practices
 
 ### Infrastructure Integration
