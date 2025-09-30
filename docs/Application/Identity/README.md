@@ -15,7 +15,7 @@ Identity Namespace
 
 ## Core Components
 
-### [BasicUserConfiguration](BasicUserConfiguration.md)
+### BasicUserConfiguration
 Abstract base class for user authentication configuration.
 
 **Key Features:**
@@ -31,7 +31,7 @@ Abstract base class for user authentication configuration.
 - Multi-tenant user configurations
 - Integration with Identity providers
 
-### [JwtConfiguration](JwtConfiguration.md)
+### JwtConfiguration
 Abstract base class for JWT authentication configuration.
 
 **Key Features:**
@@ -645,23 +645,37 @@ public class IdentityErrorHandler
 }
 ```
 
-## See Also
+## Related Systems
 
-- **Core Components:**
-  - [BasicUserConfiguration](BasicUserConfiguration.md) - User authentication configuration
-  - [JwtConfiguration](JwtConfiguration.md) - JWT authentication configuration
+### Application Components
+- **[Cryptography & Security](../Ciphering/README.md)**: Security operations and password management
+  - **[Password Generator](../Ciphering/README.md#passwordgenerator)** - Secure password generation for user accounts
+  - **[Encryption Services](../Ciphering/README.md#encryptionservice)** - Data protection for sensitive user information
+- **[Helper Utilities](../Helpers/README.md)**: Authentication and validation utilities
+  - **[JWT Identity Helper](../Helpers/README.md#jwtidentityhelper)** - JWT token processing and validation
+  - **[Guard Clause Helper](../Helpers/README.md#guardclausehelper)** - Input validation for authentication data
+  - **[String Helper](../Helpers/README.md#stringhelper)** - String manipulation for user data
+  - **[Connection String Helper](../Helpers/README.md#connectionstringhelper)** - Configuration processing
+- **[Objects System](../Objects/README.md)**: Base object patterns for identity models
+  - **[Equatable Objects](../Objects/README.md#equatableobject)** - Value equality for user identity comparison
+  - **[Immutable Objects](../Objects/README.md#immutableobject)** - Immutable identity configuration patterns
 
-- **Related BuildingBlocks:**
-  - [EquatableObject](../Objects/EquatableObject.md) - Base class for value equality
-  - [GuardClauseHelper](../Helpers/GuardClauseHelper.md) - Input validation utilities
-  - [JwtIdentityHelper](../Helpers/JwtIdentityHelper.md) - JWT token processing
-  - [StringHelper](../Helpers/StringHelper.md) - String manipulation utilities
-  - [ConnectionStringHelper](../Helpers/ConnectionStringHelper.md) - Configuration processing
+### Integration Patterns
+- **[Serialization System](../Serializations/README.md)**: Identity configuration serialization
+  - **[JSON Serialization](../Serializations/README.md#json-serialization-utilities)** - JSON serialization for identity data
+  - **[YAML Serialization](../Serializations/README.md#yaml-serialization)** - Configuration file processing
+- **[Correlation ID](../CorrelationId/README.md)**: Request correlation for authentication flows
+  - **[Correlation ID Management](../CorrelationId/README.md#correlation-id-management)** - Track authentication requests across services
 
-- **Serialization Support:**
-  - [JsonHelper](../Helpers/JsonHelper.md) - System.Text.Json serialization
-  - [NJsonHelper](../Helpers/NJsonHelper.md) - Newtonsoft.Json serialization
-  - [YamlHelper](../Helpers/YamlHelper.md) - YAML configuration support
+### Application Building Blocks
+- **[Application Overview](../README.md)** - Complete application components
+  - **[Identity Management Module](../README.md#identity-management)** - Identity overview and authentication patterns
+  - **[Security Best Practices](../README.md#best-practices)** - Application security guidelines
+
+### Infrastructure Integration
+- **[Infrastructure Components](../../Infrastructure/README.md)** - Infrastructure-level identity support
+  - **[Health Checks](../../Infrastructure/HealthChecks/README.md)** - Authentication system health monitoring
+  - **[System Monitoring](../../Infrastructure/SystemResourceMonitor/README.md)** - Identity system performance tracking
 
 ---
 

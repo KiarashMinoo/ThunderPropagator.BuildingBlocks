@@ -1058,27 +1058,47 @@ public class ConfigurableSerializationService
 }
 ```
 
-## See Also
+## Related Systems
 
-### JSON Serialization
-- [SerializerType](SerializerType.md) - JSON serialization library selection
-- [JsonHelper](../Helpers/JsonHelper.md) - System.Text.Json utilities
-- [NJsonHelper](../Helpers/NJsonHelper.md) - Newtonsoft.Json utilities  
-- [NetJsonHelper](../Helpers/NetJsonHelper.md) - NetJSON utilities
+### Application Components
+- **[Helper Utilities](../Helpers/README.md)**: Comprehensive serialization helper functions
+  - **[JSON Helper](../Helpers/README.md#jsonhelper)** - System.Text.Json utilities and high-performance operations
+  - **[NJson Helper](../Helpers/README.md#njsonhelper)** - Newtonsoft.Json utilities with advanced features
+  - **[NetJSON Helper](../Helpers/README.md#netjsonhelper)** - NetJSON utilities for ultra-fast serialization
+  - **[YAML Helper](../Helpers/README.md#yamlhelper)** - YAML processing and configuration management
+  - **[MessagePack Helper](../Helpers/README.md#messagepackhelper)** - Binary serialization utilities
+  - **[Protobuf Helper](../Helpers/README.md#protobufhelper)** - Protocol Buffers serialization
+- **[Objects System](../Objects/README.md)**: Object patterns and serialization support
+  - **[Compressed Objects](../Objects/README.md#compressedobject)** - Compressed data serialization containers
+  - **[Immutable Objects](../Objects/README.md#immutableobject)** - Immutable object serialization patterns
+  - **[Equatable Objects](../Objects/README.md#equatableobject)** - Value equality for serialization scenarios
+- **[Attributes System](../Attributes/README.md)**: Serialization control and metadata
+  - **[JSON Serialization Attributes](../Attributes/README.md#jsonserializationattribute)** - Control JSON serialization behavior
+  - **[Member Filtering](../Attributes/README.md#ignorememberattribute)** - Exclude properties from serialization
 
-### YAML Serialization
-- [YAML Components](Yaml/) - Complete YAML serialization framework
-- [YamlHelper](../Helpers/YamlHelper.md) - YAML serialization utilities
+### Integration Patterns
+- **[Collections System](../Collections/README.md)**: Collection serialization support
+  - **[Observable Collections](../Collections/README.md#bindingdictionary)** - Serialize observable dictionaries
+  - **[High-Performance Collections](../Collections/README.md#linkedarray)** - Efficient collection serialization
+- **[Change Tracking](../ChangeTrackingItems/README.md)**: Change tracking data serialization
+  - **[Change Tracking Framework](../ChangeTrackingItems/README.md#change-tracking-framework)** - Serialize change tracking data
+  - **[Audit Trail Serialization](../ChangeTrackingItems/README.md#related-systems)** - Persistent audit data
+- **[Correlation ID](../CorrelationId/README.md)**: Request correlation in serialized data
+  - **[Correlation ID Management](../CorrelationId/README.md#correlation-id-management)** - Include correlation IDs in serialized messages
 
-### Kafka Serialization
-- [KafkaSerializerType](KafkaSerializerType.md) - Kafka-specific serialization types
-- [MessagePackHelper](../Helpers/MessagePackHelper.md) - MessagePack binary serialization
-- [ProtobufHelper](../Helpers/ProtobufHelper.md) - Protocol Buffers serialization
+### Specialized Components
+- **[YAML Serialization](Yaml/README.md)** - Complete YAML serialization framework with type converters and configuration management
+- **Stream Processing**: [Stream Helper](../Helpers/README.md#streamhelper) for stream-based serialization operations
 
-### Related Components
-- [ObjectHelper](../Helpers/ObjectHelper.md) - Object manipulation utilities
-- [StreamHelper](../Helpers/StreamHelper.md) - Stream processing utilities
-- [CompressedObject](../Objects/CompressedObject.md) - Compressed serialization
+### Application Building Blocks
+- **[Application Overview](../README.md)** - Complete application components
+  - **[Serialization Module](../README.md#serialization)** - Serialization overview and integration patterns
+  - **[Performance Guidelines](../README.md#performance-characteristics)** - Serialization performance best practices
+
+### Infrastructure Integration
+- **[Infrastructure Components](../../Infrastructure/README.md)** - Infrastructure-level serialization
+  - **[Health Checks](../../Infrastructure/HealthChecks/README.md)** - Serialize health check data and configurations
+  - **[System Monitoring](../../Infrastructure/SystemResourceMonitor/README.md)** - Serialize monitoring data and metrics
 
 ---
 

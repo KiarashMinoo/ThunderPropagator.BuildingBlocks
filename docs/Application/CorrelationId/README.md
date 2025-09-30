@@ -1,51 +1,38 @@
 # CorrelationId System
 
-The CorrelationId system provides a comprehensive solution for tracking and correlating requests, messages, and operations across distributed systems. It enables end-to-end traceability through unique identifiers that can be generated, stored, and propagated throughout the application lifecycle.
+Comprehensive solution for tracking and correlating requests, messages, and operations across distributed systems through unique identifiers.
 
-## System Overview
+## Components
 
-The CorrelationId system consists of three main components that work together to provide seamless correlation ID management:
-
-- **[ICorrelationIdSupport](ICorrelationIdSupport.md)**: Interface defining correlation ID storage contract
-- **[CorrelationIdProvider](CorrelationIdProvider.md)**: Utility for generating unique correlation IDs
-- **[CorrelationIdSupportHelper](CorrelationIdSupportHelper.md)**: Extension methods for fluent correlation ID management
+| Component | Purpose | Key Features |
+|-----------|---------|--------------|
+| **ICorrelationIdSupport** | Interface for correlation ID storage | Standard contract, fluent integration, type safety |
+| **CorrelationIdProvider** | Unique correlation ID generation | Time-based uniqueness, type information, deterministic hashing |
+| **CorrelationIdSupportHelper** | Extension methods for fluent management | GenerateCorrelationId(), SetCorrelationId(), fluent API |
 
 ## Architecture
 
 ```mermaid
 graph TD
-    A[ICorrelationIdSupport Interface] --> B[Objects implementing interface]
+    A[ICorrelationIdSupport] --> B[Objects implementing interface]
     C[CorrelationIdProvider] --> D[Generate unique IDs]
     E[CorrelationIdSupportHelper] --> F[Fluent management]
     
     B --> G[FeederMessage]
-    B --> H[Entity Classes]
+    B --> H[Entity Classes] 
     B --> I[Request/Response Objects]
     
-    D --> J[Time-based uniqueness]
-    D --> K[Type information]
-    D --> L[Hash-based determinism]
-    
-    F --> M[GenerateCorrelationId()]
-    F --> N[SetCorrelationId()]
-    
-    G --> O[Message Processing]
-    H --> P[Data Persistence]
-    I --> Q[Web APIs]
-    
-    O --> R[Distributed Tracing]
-    P --> R
-    Q --> R
+    D --> J[Distributed Tracing]
+    F --> J
 ```
 
-## Quick Start Guide
+## Quick Start
 
-### Basic Usage
-
+### Basic Implementation
 ```csharp
 using RapidStreamer.BuildingBlocks.Application.CorrelationId;
 
-// 1. Implement the interface
+// Implement the interface
 public class OrderRequest : ICorrelationIdSupport
 {
     public string CorrelationId { get; set; } = string.Empty;
@@ -53,38 +40,14 @@ public class OrderRequest : ICorrelationIdSupport
     public decimal Amount { get; set; }
 }
 
-// 2. Generate correlation ID
+// Generate correlation ID using fluent extension
 var request = new OrderRequest { OrderId = "ORD-001", Amount = 299.99m }
-    .GenerateCorrelationId(); // Fluent extension method
+    .GenerateCorrelationId();
 
-// 3. Use for tracking
-Console.WriteLine($"Processing order with correlation ID: {request.CorrelationId}");
-```
-
-### Message Processing
-
-```csharp
-// FeederMessage already implements ICorrelationIdSupport
-public class OrderCreatedMessage : FeederMessage
-{
-    public string OrderId { get; set; } = string.Empty;
-    public decimal Amount { get; set; }
-}
-
-// Automatic correlation ID generation
-var message = new OrderCreatedMessage 
-{ 
-    OrderId = "ORD-001", 
-    Amount = 299.99m 
-}
-.GenerateCorrelationId();
-
-// The correlation ID is now set and can be used for tracing
-await messageProcessor.ProcessAsync(message);
+Console.WriteLine($"Processing order: {request.CorrelationId}");
 ```
 
 ### Web API Integration
-
 ```csharp
 [ApiController]
 [Route("api/[controller]")]
@@ -98,6 +61,258 @@ public class OrdersController : ControllerBase
         
         // Process with correlation context
         var result = await _orderService.ProcessAsync(request);
+        
+        return Ok(result);
+    }
+}
+```
+
+### Message Processing
+```csharp
+// FeederMessage already implements ICorrelationIdSupport
+public class OrderCreatedMessage : FeederMessage
+{
+    public string OrderId { get; set; } = string.Empty;
+    public decimal Amount { get; set; }
+}
+
+var message = new OrderCreatedMessage 
+{ 
+    OrderId = "ORD-001", 
+    Amount = 299.99m 
+}
+.GenerateCorrelationId();
+
+await messageProcessor.ProcessAsync(message);
+```
+
+## ICorrelationIdSupport Interface
+
+### Purpose
+Defines the contract for objects that can store and manage correlation IDs for distributed tracing.
+
+### API Reference
+```csharp
+public interface ICorrelationIdSupport
+{
+    string CorrelationId { get; set; }
+}
+```
+
+### Implementation Pattern
+```csharp
+public class ApiRequest : ICorrelationIdSupport
+{
+    public string CorrelationId { get; set; } = string.Empty;
+    
+    // Other request properties
+    public string RequestId { get; set; } = string.Empty;
+    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+}
+```
+
+## CorrelationIdProvider
+
+### Purpose
+Static utility for generating unique, time-based correlation IDs with optional type information and deterministic hashing.
+
+### Key Methods
+```csharp
+// Basic generation
+string Generate()
+
+// Type-specific generation
+string Generate<T>()
+string Generate(Type type)
+
+// Deterministic generation (for testing)
+string GenerateForType<T>(object sourceObject)
+```
+
+### Generation Patterns
+```csharp
+// Simple unique ID
+string correlationId = CorrelationIdProvider.Generate();
+// Output: "20241230143055123456789"
+
+// Type-specific ID
+string typedId = CorrelationIdProvider.Generate<OrderRequest>();
+// Output: "OrderRequest_20241230143055123456789"
+
+// Deterministic ID (same input = same output)
+var request = new { OrderId = "ORD-001" };
+string deterministicId = CorrelationIdProvider.GenerateForType<OrderRequest>(request);
+// Output: "OrderRequest_hash_of_request_content"
+```
+
+## CorrelationIdSupportHelper
+
+### Purpose
+Extension methods providing fluent API for correlation ID management on objects implementing ICorrelationIdSupport.
+
+### Key Methods
+```csharp
+// Fluent correlation ID generation
+T GenerateCorrelationId<T>(this T instance) where T : ICorrelationIdSupport
+
+// Set specific correlation ID
+T SetCorrelationId<T>(this T instance, string correlationId) where T : ICorrelationIdSupport
+
+// Conditional generation
+T GenerateCorrelationIdIfEmpty<T>(this T instance) where T : ICorrelationIdSupport
+```
+
+### Usage Patterns
+```csharp
+// Fluent generation
+var request = new OrderRequest()
+    .GenerateCorrelationId()
+    .SetAdditionalProperties();
+
+// Conditional generation
+var existingRequest = loadedRequest
+    .GenerateCorrelationIdIfEmpty(); // Only generates if CorrelationId is empty
+
+// Method chaining
+var processedRequest = request
+    .GenerateCorrelationId()
+    .ValidateRequest()
+    .LogRequest();
+```
+
+## Integration Patterns
+
+### ASP.NET Core Middleware
+```csharp
+public class CorrelationIdMiddleware
+{
+    private readonly RequestDelegate _next;
+    
+    public CorrelationIdMiddleware(RequestDelegate next)
+    {
+        _next = next;
+    }
+    
+    public async Task InvokeAsync(HttpContext context)
+    {
+        // Get or generate correlation ID
+        var correlationId = context.Request.Headers["X-Correlation-ID"].FirstOrDefault()
+                           ?? CorrelationIdProvider.Generate();
+        
+        // Add to response headers
+        context.Response.Headers.Add("X-Correlation-ID", correlationId);
+        
+        // Store in context for use throughout request
+        context.Items["CorrelationId"] = correlationId;
+        
+        await _next(context);
+    }
+}
+```
+
+### Message Queue Integration
+```csharp
+public class MessageProcessor<T> where T : ICorrelationIdSupport
+{
+    public async Task ProcessAsync(T message)
+    {
+        // Ensure correlation ID exists
+        message.GenerateCorrelationIdIfEmpty();
+        
+        // Use correlation ID in logging
+        using var scope = _logger.BeginScope(new Dictionary<string, object>
+        {
+            ["CorrelationId"] = message.CorrelationId
+        });
+        
+        _logger.LogInformation("Processing message with correlation ID: {CorrelationId}", 
+            message.CorrelationId);
+        
+        // Process message...
+        await ProcessMessageAsync(message);
+    }
+}
+```
+
+### Database Entity Tracking
+```csharp
+public class AuditableEntity : ICorrelationIdSupport
+{
+    public int Id { get; set; }
+    public string CorrelationId { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
+    public string CreatedBy { get; set; } = string.Empty;
+}
+
+public class EntityService
+{
+    public async Task<TEntity> CreateAsync<TEntity>(TEntity entity) 
+        where TEntity : AuditableEntity
+    {
+        // Ensure correlation ID for audit trail
+        entity.GenerateCorrelationIdIfEmpty();
+        entity.CreatedAt = DateTime.UtcNow;
+        
+        await _repository.AddAsync(entity);
+        
+        _logger.LogInformation("Created entity {EntityType} with correlation ID: {CorrelationId}",
+            typeof(TEntity).Name, entity.CorrelationId);
+        
+        return entity;
+    }
+}
+```
+
+### Distributed Service Calls
+```csharp
+public class ServiceClient
+{
+    private readonly HttpClient _httpClient;
+    
+    public async Task<TResponse> CallServiceAsync<TRequest, TResponse>(TRequest request)
+        where TRequest : ICorrelationIdSupport
+        where TResponse : ICorrelationIdSupport
+    {
+        // Ensure request has correlation ID
+        request.GenerateCorrelationIdIfEmpty();
+        
+        // Add correlation ID to headers
+        _httpClient.DefaultRequestHeaders.Remove("X-Correlation-ID");
+        _httpClient.DefaultRequestHeaders.Add("X-Correlation-ID", request.CorrelationId);
+        
+        // Make service call
+        var json = JsonHelper.Serialize(request);
+        var httpResponse = await _httpClient.PostAsync("/api/endpoint", 
+            new StringContent(json, Encoding.UTF8, "application/json"));
+        
+        var responseJson = await httpResponse.Content.ReadAsStringAsync();
+        var response = JsonHelper.Deserialize<TResponse>(responseJson);
+        
+        // Propagate correlation ID to response
+        response.SetCorrelationId(request.CorrelationId);
+        
+        return response;
+    }
+}
+```
+
+## Performance Considerations
+
+### ID Generation
+- **Time-based**: Provides natural uniqueness and sortability
+- **Memory Efficient**: Uses string concatenation with minimal allocations
+- **Thread Safe**: Static methods are safe for concurrent access
+
+### Deterministic Generation
+- **Testing Support**: Same input always produces same correlation ID
+- **Hash-based**: Uses object content for consistency
+- **Caching**: Results can be cached for repeated operations
+
+### Best Practices
+- Generate correlation IDs as early as possible in request lifecycle
+- Propagate correlation IDs across all service boundaries
+- Include correlation IDs in all log messages for traceability
+- Use conditional generation to avoid overwriting existing IDs
         
         // Return with same correlation ID
         return Ok(new ApiResponse 
@@ -615,9 +830,35 @@ items.EnsureCorrelationIds();
 
 ## Related Documentation
 
-- **[FeederMessage Documentation](../Application/FeederMessage.md)**: Base message class using correlation IDs
-- **[Telemetry Integration](../Application/Telemetry.md)**: Activity tracking and observability
-- **[Distributed Tracing Patterns](../Patterns/DistributedTracing.md)**: Advanced tracing scenarios
+### Application Components
+- **[Application Building Blocks](../README.md)**: Complete application components overview
+  - **[Core Components](../README.md#essential-components)** - FeederMessage and correlation ID integration
+  - **[Telemetry](../README.md#telemetry)** - Activity tracking and observability integration
+- **[Helper Utilities](../Helpers/README.md)**: Utility functions for correlation ID management
+  - **[Object Helper](../Helpers/README.md#objecthelper)** - Object manipulation utilities
+  - **[String Helper](../Helpers/README.md#stringhelper)** - String processing for correlation IDs
+- **[Serialization System](../Serializations/README.md)**: Correlation ID serialization
+  - **[JSON Serialization](../Serializations/README.md#json-serialization-utilities)** - Serialize correlation IDs in messages
+  - **[Performance Optimizations](../Serializations/README.md#performance-benchmarks)** - Efficient correlation ID handling
+
+### Integration Patterns
+- **[Change Tracking](../ChangeTrackingItems/README.md)**: Correlate changes across operations
+  - **[Change Tracking Framework](../ChangeTrackingItems/README.md#change-tracking-framework)** - Track changes with correlation IDs
+  - **[Audit Trails](../ChangeTrackingItems/README.md#related-systems)** - Correlation ID-based audit systems
+- **[Collections System](../Collections/README.md)**: Observable collections with correlation tracking
+  - **[Observable Collections](../Collections/README.md#bindingdictionary)** - Event-driven collections with correlation support
+
+### Infrastructure Integration
+- **[Infrastructure Components](../../Infrastructure/README.md)** - Infrastructure-level correlation tracking
+  - **[Health Checks](../../Infrastructure/HealthChecks/README.md)** - Health monitoring with correlation IDs
+  - **[System Monitoring](../../Infrastructure/SystemResourceMonitor/README.md)** - System performance tracking with correlation support
+
+### Use Cases and Patterns
+- **Distributed Tracing**: Request correlation across microservices and APIs
+- **Message Processing**: Correlate messages in event-driven architectures
+- **Audit Logging**: Track operations and changes with unique identifiers
+- **Error Tracking**: Associate errors with specific request flows
+- **Performance Monitoring**: Correlate performance metrics across system boundaries
 
 ## Contributing
 

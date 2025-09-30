@@ -446,10 +446,33 @@ The change tracking system is designed to be extensible. You can:
 
 ## Related Systems
 
-- **Audit Systems**: Perfect for generating audit trails
-- **Database ORMs**: Entity Framework-style change tracking
-- **Configuration Management**: Track configuration changes
-- **Real-time Sync**: Synchronize changes across systems
-- **Version Control**: Implement versioning and history tracking
+### Application Components
+- **[Objects System](../Objects/README.md)**: Foundational object patterns for change tracking
+  - **[Notifiable Objects](../Objects/README.md#notifiableobject)** - Property change notification infrastructure
+  - **[Equatable Objects](../Objects/README.md#equatableobject)** - Value equality for change detection
+  - **[Immutable Objects](../Objects/README.md#immutableobject)** - Immutability patterns for change tracking
+- **[Collections System](../Collections/README.md)**: Observable collections with change tracking
+  - **[Binding Dictionary](../Collections/README.md#bindingdictionary)** - Observable dictionary with change events
+  - **[Collection Performance](../Collections/README.md#performance-benchmarks)** - High-performance collection operations
+- **[Serialization System](../Serializations/README.md)**: Change tracking data serialization
+  - **[JSON Serialization](../Serializations/README.md#json-serialization-utilities)** - Serialize change tracking data
+  - **[Performance Optimizations](../Serializations/README.md#performance-benchmarks)** - Efficient serialization
+
+### Integration Use Cases
+- **Audit Systems**: Perfect for generating audit trails and compliance tracking
+- **Database ORMs**: Entity Framework-style change tracking for data access
+- **Configuration Management**: Track configuration changes and rollback capabilities
+- **Real-time Sync**: Synchronize changes across distributed systems
+- **Version Control**: Implement versioning and history tracking for business objects
+
+### Application Building Blocks
+- **[Application Overview](../README.md)** - Complete application components
+  - **[Change Tracking Module](../README.md#change-tracking)** - Change tracking overview and integration
+  - **[Best Practices](../README.md#best-practices)** - Change tracking implementation guidelines
+
+### Infrastructure Integration
+- **[Infrastructure Components](../../Infrastructure/README.md)** - Infrastructure-level change tracking
+  - **[Health Checks](../../Infrastructure/HealthChecks/README.md)** - Monitor change tracking system health
+  - **[System Monitoring](../../Infrastructure/SystemResourceMonitor/README.md)** - Track change tracking performance
 
 For detailed information about each component, see the individual documentation files linked in the components table above.

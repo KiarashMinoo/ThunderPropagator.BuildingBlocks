@@ -748,20 +748,35 @@ public class LegacyFormatConverter : YamlTypeConverter<ModernConfig>
 
 ## See Also
 
-- **Core Components**:
-  - [YamlTypeConverterAttribute](YamlTypeConverterAttribute.md) - Declarative type converter assignment
-  - [YamlNodeDeserializerAttribute](YamlNodeDeserializerAttribute.md) - Advanced deserialization control
-  - [YamlSerializerSettings](YamlSerializerSettings.md) - Configuration management
-  - [YamlTypeConverter](YamlTypeConverter.md) - Converter base classes
+## Related Systems
 
-- **Related Helpers**:
-  - [YamlHelper](../../Helpers/YamlHelper.md) - YAML utility methods
-  - [JsonHelper](../../Helpers/JsonHelper.md) - JSON serialization utilities
-  - [ObjectHelper](../../Helpers/ObjectHelper.md) - Object manipulation utilities
+### Serialization Components
+- **[Serialization System](../README.md)**: Complete serialization framework
+  - **[JSON Serialization](../README.md#json-serialization-utilities)** - JSON processing and utilities
+  - **[Kafka Serialization](../README.md#kafka-serialization)** - Message serialization for streaming
+  - **[Performance Benchmarks](../README.md#performance-benchmarks)** - Serialization performance analysis
+- **[Helper Utilities](../../Helpers/README.md)**: YAML processing utilities
+  - **[YAML Helper](../../Helpers/README.md#yamlhelper)** - YAML utility methods and processing
+  - **[Object Helper](../../Helpers/README.md#objecthelper)** - Object manipulation utilities
+  - **[JSON Helper](../../Helpers/README.md#jsonhelper)** - JSON serialization utilities
 
-- **Other Serialization**:
-  - [JsonConverter](../Json/JsonConverter.md) - JSON converter base class
-  - [JsonSerializationAttribute](../../Attributes/JsonSerializationAttribute.md) - JSON attributes
+### Application Integration
+- **[Attributes System](../../Attributes/README.md)**: Serialization control attributes
+  - **[Serialization Attributes](../../Attributes/README.md#jsonserializationattribute)** - Control serialization behavior
+  - **[Member Filtering](../../Attributes/README.md#ignorememberattribute)** - Exclude properties from serialization
+- **[Objects System](../../Objects/README.md)**: Object patterns for YAML serialization
+  - **[Immutable Objects](../../Objects/README.md#immutableobject)** - Immutable configuration patterns
+  - **[Compressed Objects](../../Objects/README.md#compressedobject)** - Compressed data serialization
+
+### Application Building Blocks
+- **[Application Overview](../../README.md)** - Complete application components
+  - **[Serialization Module](../../README.md#serialization)** - Serialization overview and patterns
+  - **[Configuration Management](../../README.md#best-practices)** - Application configuration guidelines
+
+### Infrastructure Integration
+- **[Infrastructure Components](../../../Infrastructure/README.md)** - Infrastructure-level configuration
+  - **[Health Checks](../../../Infrastructure/HealthChecks/README.md)** - Configuration-based health monitoring
+  - **[System Monitoring](../../../Infrastructure/SystemResourceMonitor/README.md)** - System configuration and monitoring
 
 ---
 
