@@ -25,9 +25,10 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 # Defaults from prompt
 DEFAULT_TAG_FILTER = r'^v?\d+\.(Q\d+|\d+)\.\d+$'  # Matches v1.2.3 or v2025.Q4.81
-DEFAULT_PATH_INCLUDE = '**/*.{h,hpp,hxx,hh,c,cc,cpp,cxx},CMakeLists.txt,**/*.cmake,conanfile.*,vcpkg.json,**/*.bazel,WORKSPACE,.clang-format,.clang-tidy'
+DEFAULT_PATH_INCLUDE = r'**/*.{h,hpp,hxx,hh,c,cc,cpp,cxx,cs},**/*.{csproj,sln},CMakeLists.txt,**/*.cmake,conanfile.*,vcpkg.json,**/*.bazel,WORKSPACE,.clang-format,.clang-tidy'
 CPP_EXT = {'.h', '.hpp', '.hh', '.hxx', '.c', '.cc', '.cpp', '.cxx'}
-BUILD_FILES = {'CMakeLists.txt', 'conanfile.txt', 'conanfile.py', 'vcpkg.json', 'WORKSPACE', '.clang-format', '.clang-tidy'}
+CSHARP_EXT = {'.cs'}
+BUILD_FILES = {'CMakeLists.txt', 'conanfile.txt', 'conanfile.py', 'vcpkg.json', 'WORKSPACE', '.clang-format', '.clang-tidy', '.sln'}
 COMMIT_TYPES = ['feat', 'fix', 'perf', 'refactor', 'docs', 'chore', 'build', 'ci', 'test', 'style', 'revert', 'deps', 'other']
 
 def run(cmd, cwd=ROOT):
@@ -182,33 +183,33 @@ def parse_diff_hunks(diff_output, hunk_limit, lines_per_hunk, lines_per_commit):
 def analyze_cpp_api_changes(commit):
     """Detect C/C++ API/ABI changes from hunks"""
     hints = []
-    
+
     for hunk in commit.get('hunks', []):
         file_path = hunk['file']
         ext = os.path.splitext(file_path)[1]
-        is_header = ext in {'.h', '.hpp', '.hh', '.hxx'}
-        
+        is_header = ext in CPP_EXT
+
         if not is_header:
             continue
-        
+
         added_lines = [l[1:] for l in hunk['lines'] if l.startswith('+') and not l.startswith('+++')]
         removed_lines = [l[1:] for l in hunk['lines'] if l.startswith('-') and not l.startswith('---')]
-        
+
         # Function signature detection
         func_pattern = re.compile(r'^\s*[\w:\*\&\s<>,~]+\s+(\w+)\s*\([^)]*\)\s*(const)?\s*(noexcept)?\s*[;{]')
-        
+
         for line in added_lines:
             m = func_pattern.match(line)
             if m:
                 hints.append(f"API: Added function `{m.group(1)}` in {file_path}")
                 break
-        
+
         for line in removed_lines:
             m = func_pattern.match(line)
             if m:
                 hints.append(f"API: Removed function `{m.group(1)}` from {file_path}")
                 break
-        
+
         # Class/struct detection
         class_pattern = re.compile(r'^\s*(class|struct)\s+(\w+)')
         for line in added_lines:
@@ -216,12 +217,69 @@ def analyze_cpp_api_changes(commit):
             if m:
                 hints.append(f"API: Added {m.group(1)} `{m.group(2)}` in {file_path}")
                 break
-    
+
     # Build system changes
     build_files = [f['path'] for f in commit.get('files', []) if os.path.basename(f['path']) in BUILD_FILES or f['path'].endswith('.cmake')]
     if build_files:
         hints.append(f"Build: Modified {', '.join(build_files[:3])}")
-    
+
+    return hints
+
+
+def analyze_csharp_api_changes(commit):
+    """Detect C# public API changes from hunks"""
+    hints = []
+
+    for hunk in commit.get('hunks', []):
+        file_path = hunk['file']
+        ext = os.path.splitext(file_path)[1]
+        is_cs = ext in CSHARP_EXT
+
+        if not is_cs:
+            continue
+
+        added_lines = [l[1:].strip() for l in hunk['lines'] if l.startswith('+') and not l.startswith('+++')]
+        removed_lines = [l[1:].strip() for l in hunk['lines'] if l.startswith('-') and not l.startswith('---')]
+
+        # Method/property/class detection
+        # public [modifier] return_type Name(...) or public [modifier] Type Name { get; set; }
+        method_pattern = re.compile(r'^(public|internal)\s+(static\s+)?[\w\<\>\[\],\s\.?]+\s+(\w+)\s*\([^)]*\)')
+        prop_pattern = re.compile(r'^(public|internal)\s+[\w\<\>\[\],\s\.?]+\s+(\w+)\s*\{')
+        class_pattern = re.compile(r'^(public|internal)\s+(class|struct|interface)\s+(\w+)')
+
+        for line in added_lines:
+            m = method_pattern.match(line)
+            if m:
+                hints.append(f"API: Added {m.group(1)} method `{m.group(3)}` in {file_path}")
+                break
+            m = prop_pattern.match(line)
+            if m:
+                hints.append(f"API: Added property `{m.group(2)}` in {file_path}")
+                break
+            m = class_pattern.match(line)
+            if m:
+                hints.append(f"API: Added {m.group(2)} `{m.group(3)}` in {file_path}")
+                break
+
+        for line in removed_lines:
+            m = method_pattern.match(line)
+            if m:
+                hints.append(f"API: Removed {m.group(1)} method `{m.group(3)}` from {file_path}")
+                break
+            m = prop_pattern.match(line)
+            if m:
+                hints.append(f"API: Removed property `{m.group(2)}` from {file_path}")
+                break
+            m = class_pattern.match(line)
+            if m:
+                hints.append(f"API: Removed {m.group(2)} `{m.group(3)}` from {file_path}")
+                break
+
+    # Project/build system changes (.csproj, .sln)
+    build_files = [f['path'] for f in commit.get('files', []) if f['path'].endswith('.csproj') or os.path.basename(f['path']) in BUILD_FILES]
+    if build_files:
+        hints.append(f"Build: Modified {', '.join(build_files[:3])}")
+
     return hints
 
 def group_commits(commits):
@@ -279,7 +337,7 @@ def render_commit_line(commit, include_files, include_snippets, snippet_limit, c
     return line
 
 def render_section(title, commits, repo_owner, repo_name, max_highlights, include_files, include_snippets, 
-                   snippet_limit, contents_mode, fold_empty):
+                   snippet_limit, contents_mode, fold_empty, language_mode='auto'):
     """Render a release section"""
     if not commits and fold_empty:
         return ''
@@ -297,7 +355,23 @@ def render_section(title, commits, repo_owner, repo_name, max_highlights, includ
         
         shown = items[:max_highlights] if max_highlights > 0 else items
         for c in shown:
-            api_hints = analyze_cpp_api_changes(c) if contents_mode == 'api-changes' else []
+            # Determine API hints depending on requested language mode
+            api_hints = []
+            if contents_mode == 'api-changes':
+                if language_mode == 'cpp':
+                    api_hints = analyze_cpp_api_changes(c)
+                elif language_mode == 'csharp':
+                    api_hints = analyze_csharp_api_changes(c)
+                else:
+                    # auto-detect from files in commit
+                    files = [f.get('path','') for f in c.get('files', [])]
+                    if any(os.path.splitext(p)[1] in CSHARP_EXT for p in files):
+                        api_hints = analyze_csharp_api_changes(c)
+                    elif any(os.path.splitext(p)[1] in CPP_EXT for p in files):
+                        api_hints = analyze_cpp_api_changes(c)
+                    else:
+                        api_hints = []
+
             commit_line = render_commit_line(c, include_files, include_snippets, snippet_limit, contents_mode, api_hints)
             # Replace placeholders
             commit_line = commit_line.replace('{owner}', repo_owner).replace('{repo}', repo_name)
@@ -365,10 +439,10 @@ def build_changelog(ranges, repo_owner, repo_name, args):
         section_title = f'{label}'
         if compare_url:
             section_title = f'[{label}]({compare_url})'
-        
+
         section = render_section(section_title, commits, repo_owner, repo_name, args.maxHighlights,
                                args.includeFiles, args.includeSnippets, args.snippetLimit,
-                               args.contentsMode, args.foldEmpty)
+                               args.contentsMode, args.foldEmpty, args.languageMode)
         if section:
             parts.append(section)
     
@@ -439,7 +513,7 @@ def main():
     ap.add_argument('--includeContents', type=bool, default=True, help='Include diff contents')
     ap.add_argument('--contentsMode', choices=['diff-hunks', 'added-lines', 'removed-lines', 'api-changes'], 
                    default='api-changes', help='Content analysis mode')
-    ap.add_argument('--languageMode', choices=['auto', 'cpp'], default='cpp', help='Language mode for analysis')
+    ap.add_argument('--languageMode', choices=['auto', 'cpp', 'csharp'], default='cpp', help='Language mode for analysis')
     
     args = ap.parse_args()
     
