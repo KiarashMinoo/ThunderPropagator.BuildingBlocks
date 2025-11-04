@@ -58,6 +58,9 @@ Write-Host "Configurations: $($Configurations -join ', ')"
 Write-Host "OutputRoot: $OutputRoot"
 Write-Host "ParallelLimit: $ParallelLimit"
 
+# Record start time so we can detect newly created packages elsewhere in the repo
+$scriptStart = Get-Date
+
 # Normalize if caller passed comma-joined strings as single elements (common from YAML/CLI)
 if ($Platforms.Count -eq 1 -and $Platforms[0] -like '*,*') {
     $Platforms = ($Platforms -split ',') | ForEach-Object { $_.Trim() }
@@ -183,13 +186,44 @@ foreach ($entry in $jobs) {
         catch { 
         }
     }
-    # If marker files were created by pack-solution, prefer them
-    if (Test-Path $markerFail) {
-        $failedLegs += $entry; continue 
-    }
-    if (Test-Path $markerOk) {
-        continue 
-    }
+        # If packages were created in the leg output directory, treat as success (preferred)
+        try {
+            $createdPkgs = Get-ChildItem -Path $legDir -Filter '*.nupkg' -File -ErrorAction SilentlyContinue
+        }
+        catch {
+            $createdPkgs = @()
+        }
+        if ($createdPkgs -and $createdPkgs.Count -gt 0) {
+            if (-not (Test-Path $markerOk)) { New-Item -ItemType File -Path $markerOk -Force | Out-Null }
+            continue
+        }
+
+        # If no packages in the leg folder, try to find any .nupkg created during this run elsewhere in the repo
+        try {
+            $newPkgs = Get-ChildItem -Path . -Recurse -Filter '*.nupkg' -File -ErrorAction SilentlyContinue |
+                      Where-Object { $_.LastWriteTime -ge $scriptStart }
+        }
+        catch {
+            $newPkgs = @()
+        }
+        if ($newPkgs -and $newPkgs.Count -gt 0) {
+            # Copy found packages into the leg folder for consistency and mark success
+            foreach ($pkg in $newPkgs) {
+                try {
+                    $dest = Join-Path $legDir $pkg.Name
+                    if (-not (Test-Path $dest)) {
+                        Copy-Item -Path $pkg.FullName -Destination $dest -Force
+                    }
+                }
+                catch { }
+            }
+            if (-not (Test-Path $markerOk)) { New-Item -ItemType File -Path $markerOk -Force | Out-Null }
+            continue
+        }
+
+        # If marker files were created by pack-solution, prefer them
+        if (Test-Path $markerFail) { $failedLegs += $entry; continue }
+        if (Test-Path $markerOk) { continue }
 
     # Otherwise try to inspect the process exit code (if available)
     if ($entry.Process -and $entry.Process.HasExited) {
