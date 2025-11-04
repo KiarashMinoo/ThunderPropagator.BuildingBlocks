@@ -30,6 +30,7 @@ public
 
     private const string UpperCase = "ABCDEFGHJKMNPQRSTUVWXYZ"; // Excludes I and O
     private const string LowerCase = "abcdefghjkmnpqrstuvwxyz"; // Excludes i and o
+    private const string Alpha = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz";
     private const string Digits = "23456789"; // Excludes 0 and 1
     private const string Symbols = "!\";#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
 
@@ -52,7 +53,7 @@ public
         var usedCharacters = new HashSet<char>();
 
         if (settings.BeginWithLetter)
-            AppendRandomChar(UpperCase + LowerCase);
+            AppendRandomChar(Alpha);
 
         while (password.Length < length)
         {
