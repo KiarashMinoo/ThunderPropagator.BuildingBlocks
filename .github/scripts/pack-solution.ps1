@@ -153,14 +153,25 @@ $packArgs = @(
     '--no-build'
 )
 
-if ($ReleaseNotes) {
+if (-not [string]::IsNullOrWhiteSpace($ReleaseNotes)) {
     $packArgs += '-p:PackageReleaseNotes=' + $ReleaseNotes
 }
 
+$markerOk = Join-Path $OutputDir '.PACK_OK'
+$markerFail = Join-Path $OutputDir '.PACK_FAIL'
+
+# Remove old markers
+Remove-Item -Path $markerOk -Force -ErrorAction SilentlyContinue
+Remove-Item -Path $markerFail -Force -ErrorAction SilentlyContinue
+
 & dotnet @packArgs
 if ($LASTEXITCODE -ne 0) {
+    New-Item -ItemType File -Path $markerFail -Force | Out-Null
     exit $LASTEXITCODE 
 }
+
+# Create success marker
+New-Item -ItemType File -Path $markerOk -Force | Out-Null
 
 # Summary
 Write-Host "`n=== Pack Complete ===" -ForegroundColor Green

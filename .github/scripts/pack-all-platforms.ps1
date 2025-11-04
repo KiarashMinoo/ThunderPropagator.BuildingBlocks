@@ -58,9 +58,6 @@ Write-Host "Configurations: $($Configurations -join ', ')"
 Write-Host "OutputRoot: $OutputRoot"
 Write-Host "ParallelLimit: $ParallelLimit"
 
-# Record start time so we can detect newly created packages elsewhere in the repo
-$scriptStart = Get-Date
-
 # Normalize if caller passed comma-joined strings as single elements (common from YAML/CLI)
 if ($Platforms.Count -eq 1 -and $Platforms[0] -like '*,*') {
     $Platforms = ($Platforms -split ',') | ForEach-Object { $_.Trim() }
@@ -116,24 +113,30 @@ foreach ($platform in $Platforms) {
         $markerFail = Join-Path $legDir '.PACK_FAIL'
 
         # Build argument list for inner script invocation
-        $innerArgs = @()
-        $innerArgs += "-Configuration"; $innerArgs += $configuration
-        $innerArgs += "-Platform"; $innerArgs += $platform
-        $innerArgs += "-OutputDir"; $innerArgs += $legDir
+        $innerArgs = @(
+            '-Configuration', $configuration
+            '-Platform', $platform
+            '-OutputDir', $legDir
+        )
+        
         if ($SolutionPath) {
-            $innerArgs += "-SolutionPath"; $innerArgs += $SolutionPath 
+            $innerArgs += '-SolutionPath', $SolutionPath
         }
-        if ($ReleaseNotes) {
-            $innerArgs += "-ReleaseNotes"; $innerArgs += $ReleaseNotes 
+        
+        if (-not [string]::IsNullOrWhiteSpace($ReleaseNotes)) {
+            $innerArgs += '-ReleaseNotes', $ReleaseNotes
         }
+        
         if ($SkipClean) {
-            $innerArgs += '-SkipClean' 
+            $innerArgs += '-SkipClean'
         }
+        
         if ($SkipRestore) {
-            $innerArgs += '-SkipRestore' 
+            $innerArgs += '-SkipRestore'
         }
+        
         if ($SkipBuild) {
-            $innerArgs += '-SkipBuild' 
+            $innerArgs += '-SkipBuild'
         }
 
         # Start each leg as a separate process (cross-platform) and redirect output to per-leg log
@@ -175,75 +178,57 @@ foreach ($entry in $jobs) {
     $legDir = $entry.LegDir
     $markerFail = Join-Path $legDir '.PACK_FAIL'
     $markerOk = Join-Path $legDir '.PACK_OK'
+    
     # If stderr file exists, append it into main log for easy inspection
-    if ($entry.Err) {
+    if ($entry.Err -and (Test-Path $entry.Err)) {
         try {
-            if (Test-Path $entry.Err) {
-                Get-Content $entry.Err -Raw | Out-File -FilePath $entry.Log -Append -Encoding utf8
-                Remove-Item $entry.Err -Force -ErrorAction SilentlyContinue
-            }
+            Get-Content $entry.Err -Raw | Out-File -FilePath $entry.Log -Append -Encoding utf8
+            Remove-Item $entry.Err -Force -ErrorAction SilentlyContinue
         }
-        catch { 
+        catch { }
+    }
+    
+    # Check marker files first (most reliable)
+    if (Test-Path $markerFail) {
+        $failedLegs += $entry
+        continue
+    }
+    
+    if (Test-Path $markerOk) {
+        continue
+    }
+    
+    # Fallback: check if packages were created in the leg output directory
+    try {
+        $createdPkgs = @(Get-ChildItem -Path $legDir -Filter '*.nupkg' -File -ErrorAction SilentlyContinue)
+        if ($createdPkgs.Count -gt 0) {
+            New-Item -ItemType File -Path $markerOk -Force | Out-Null
+            continue
         }
     }
-        # If packages were created in the leg output directory, treat as success (preferred)
-        try {
-            $createdPkgs = Get-ChildItem -Path $legDir -Filter '*.nupkg' -File -ErrorAction SilentlyContinue
-        }
-        catch {
-            $createdPkgs = @()
-        }
-        if ($createdPkgs -and $createdPkgs.Count -gt 0) {
-            if (-not (Test-Path $markerOk)) { New-Item -ItemType File -Path $markerOk -Force | Out-Null }
-            continue
-        }
-
-        # If no packages in the leg folder, try to find any .nupkg created during this run elsewhere in the repo
-        try {
-            $newPkgs = Get-ChildItem -Path . -Recurse -Filter '*.nupkg' -File -ErrorAction SilentlyContinue |
-                      Where-Object { $_.LastWriteTime -ge $scriptStart }
-        }
-        catch {
-            $newPkgs = @()
-        }
-        if ($newPkgs -and $newPkgs.Count -gt 0) {
-            # Copy found packages into the leg folder for consistency and mark success
-            foreach ($pkg in $newPkgs) {
-                try {
-                    $dest = Join-Path $legDir $pkg.Name
-                    if (-not (Test-Path $dest)) {
-                        Copy-Item -Path $pkg.FullName -Destination $dest -Force
-                    }
-                }
-                catch { }
-            }
-            if (-not (Test-Path $markerOk)) { New-Item -ItemType File -Path $markerOk -Force | Out-Null }
-            continue
-        }
-
-        # If marker files were created by pack-solution, prefer them
-        if (Test-Path $markerFail) { $failedLegs += $entry; continue }
-        if (Test-Path $markerOk) { continue }
-
-    # Otherwise try to inspect the process exit code (if available)
+    catch { }
+    
+    # Fallback: check process exit code if available
     if ($entry.Process -and $entry.Process.HasExited) {
         try {
             $exit = $entry.Process.ExitCode
-            if ($exit -ne 0) {
-                $failedLegs += $entry 
+            if ($exit -eq 0) {
+                New-Item -ItemType File -Path $markerOk -Force | Out-Null
+                continue
             }
             else {
-                New-Item -ItemType File -Path $markerOk -Force | Out-Null 
+                $failedLegs += $entry
+                continue
             }
         }
         catch {
             $failedLegs += $entry
+            continue
         }
     }
-    else {
-        # No information — count as failure
-        $failedLegs += $entry
-    }
+    
+    # No success indication found — treat as failure
+    $failedLegs += $entry
 }
 
 Write-Host "All jobs finished."
