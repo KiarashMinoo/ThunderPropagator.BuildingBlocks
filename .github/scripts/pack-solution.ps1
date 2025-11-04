@@ -85,16 +85,17 @@ if ($env:GITHUB_OUTPUT) {
 
 # Resolve solution file
 if (-not $SolutionPath) {
-    $slnFiles = Get-ChildItem -Filter '*.sln' -File | Select-Object -ExpandProperty Name
-    if ($slnFiles.Count -eq 0) {
-        Write-Error "No .sln file found at repo root. Specify -SolutionPath."
-        exit 1
-    }
-    elseif ($slnFiles.Count -gt 1) {
-        Write-Error "Multiple .sln files found: $($slnFiles -join ', '). Specify -SolutionPath."
-        exit 1
-    }
-    $SolutionPath = $slnFiles[0]
+  # Ensure the result is always an array so .Count works even when a single file is returned
+  $slnFiles = @(Get-ChildItem -Filter '*.sln' -File | Select-Object -ExpandProperty Name)
+  if ($slnFiles.Count -eq 0) {
+    Write-Error "No .sln file found at repo root. Specify -SolutionPath."
+    exit 1
+  }
+  elseif ($slnFiles.Count -gt 1) {
+    Write-Error "Multiple .sln files found: $($slnFiles -join ', '). Specify -SolutionPath."
+    exit 1
+  }
+  $SolutionPath = $slnFiles[0]
 }
 
 if (-not (Test-Path $SolutionPath)) {
