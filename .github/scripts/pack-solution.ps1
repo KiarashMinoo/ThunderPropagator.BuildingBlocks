@@ -55,7 +55,7 @@ param(
     [switch]$SkipClean,
     [switch]$SkipRestore,
     [switch]$SkipBuild,
-    [string]$ReleaseNotes
+    [string]$ReleaseNotes = ''
 )
 
 Set-StrictMode -Version Latest
