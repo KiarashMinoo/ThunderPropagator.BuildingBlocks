@@ -1,20 +1,39 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
-        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
     </ItemGroup>
-    
+
     <PropertyGroup Label="PackageId">
-        <PackageId Condition="'$(Configuration)' == 'Debug' And '$(Platform)' != 'AnyCPU'">RapidStreamer.BuildingBlocks.Modules.Debug.$(Platform)</PackageId>
-        <PackageId Condition="'$(Configuration)' == 'Debug' And '$(Platform)' == 'AnyCPU'">RapidStreamer.BuildingBlocks.Modules.Debug</PackageId>
-        <PackageId Condition="'$(Configuration)' == 'Release' And '$(Platform)' != 'AnyCPU'">RapidStreamer.BuildingBlocks.Modules.$(Platform)</PackageId>
-        <PackageId Condition="'$(Configuration)' == 'Release' And '$(Platform)' == 'AnyCPU'">RapidStreamer.BuildingBlocks.Modules</PackageId>
+        <!--
+            Simplified PackageId construction:
+            - Base: RapidStreamer.BuildingBlocks.Modules
+            - If Configuration is Debug -> append .Debug
+            - If Platform is not AnyCPU -> append .{Platform}
+            This produces the same results as the previous conditional PackageId entries
+            while being easier to read and maintain.
+        -->
+        <PackageIdBase>RapidStreamer.BuildingBlocks.Modules</PackageIdBase>
+        <PackageIdConfigurationSuffix Condition="'$(Configuration)' == 'Debug'">.Debug</PackageIdConfigurationSuffix>
+        <PackageIdPlatformSuffix Condition="'$(Platform)' != 'AnyCPU'">.$(Platform)</PackageIdPlatformSuffix>
+        <PackageId>$(PackageIdBase)$(PackageIdConfigurationSuffix)$(PackageIdPlatformSuffix)</PackageId>
     </PropertyGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'" Label="Microsoft.Extensions">
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.*"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'" Label="Microsoft.Extensions">
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.*"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'" Label="Microsoft.Extensions">
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.*"/>
+    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Apache.NMS.ActiveMQ" Version="2.1.1"/>
-        <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="3.1.28" />
-        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.10" />
+        <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="3.1.28"/>
     </ItemGroup>
 
     <ItemGroup>

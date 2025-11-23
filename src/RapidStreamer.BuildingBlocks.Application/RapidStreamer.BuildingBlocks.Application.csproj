@@ -1,31 +1,39 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
-        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
     </ItemGroup>
 
     <PropertyGroup Label="PackageId">
-        <PackageId Condition="'$(Configuration)' == 'Debug' And '$(Platform)' != 'AnyCPU'">RapidStreamer.BuildingBlocks.Debug.$(Platform)</PackageId>
-        <PackageId Condition="'$(Configuration)' == 'Debug' And '$(Platform)' == 'AnyCPU'">RapidStreamer.BuildingBlocks.Debug</PackageId>
-        <PackageId Condition="'$(Configuration)' == 'Release' And '$(Platform)' != 'AnyCPU'">RapidStreamer.BuildingBlocks.$(Platform)</PackageId>
-        <PackageId Condition="'$(Configuration)' == 'Release' And '$(Platform)' == 'AnyCPU'">RapidStreamer.BuildingBlocks</PackageId>
+        <!--
+            Simplified PackageId construction:
+            - Base: RapidStreamer.BuildingBlocks
+            - If Configuration is Debug -> append .Debug
+            - If Platform is not AnyCPU -> append .{Platform}
+            This produces the same results as the previous conditional PackageId entries
+            while being easier to read and maintain.
+        -->
+        <PackageIdBase>RapidStreamer.BuildingBlocks</PackageIdBase>
+        <PackageIdConfigurationSuffix Condition="'$(Configuration)' == 'Debug'">.Debug</PackageIdConfigurationSuffix>
+        <PackageIdPlatformSuffix Condition="'$(Platform)' != 'AnyCPU'">.$(Platform)</PackageIdPlatformSuffix>
+        <PackageId>$(PackageIdBase)$(PackageIdConfigurationSuffix)$(PackageIdPlatformSuffix)</PackageId>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="CaseConverter" Version="2.0.1"/>
-        <PackageReference Include="JetBrains.Annotations" Version="2025.2.2" />
+        <PackageReference Include="JetBrains.Annotations" Version="2025.2.2"/>
         <PackageReference Include="MessagePack" Version="3.1.4"/>
         <PackageReference Include="MessagePackAnalyzer" Version="3.1.4">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="NetJSON" Version="1.4.5"/>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-        <PackageReference Include="protobuf-net" Version="3.2.56" />
-        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.4"/>
+        <PackageReference Include="protobuf-net" Version="3.2.56"/>
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0"/>
         <PackageReference Include="YamlDotNet" Version="16.3.0"/>
         <PackageReference Include="Ardalis.GuardClauses" Version="5.0.0"/>
         <PackageReference Include="SharpZipLib" Version="1.4.2"/>
     </ItemGroup>
-    
+
 </Project>

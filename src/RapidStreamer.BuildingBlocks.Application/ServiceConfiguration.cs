@@ -60,7 +60,7 @@ namespace RapidStreamer.BuildingBlocks.Application
             }
         }
 
-        private ConcurrentDictionary<string, string> _properties;
+        private ConcurrentDictionary<string, string> _properties = null!;
 
         public event PropertyChangingEventHandler? PropertyChanging;
         public event PropertyChangedEventHandler? PropertyChanged;

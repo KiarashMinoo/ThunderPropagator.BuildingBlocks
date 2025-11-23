@@ -43,8 +43,13 @@ namespace RapidStreamer.BuildingBlocks.Application.Ciphering
 
         public static byte[] CreateKey(string password, int keyBytes = 32, int iterations = 300, HashAlgorithmName? algorithmName = null)
         {
+            // Pbkdf2
+#if NET10_0_OR_GREATER
+            return Rfc2898DeriveBytes.Pbkdf2(password, Salt, iterations, algorithmName ?? HashAlgorithmName.SHA3_256, keyBytes);
+#else
             var keyGenerator = new Rfc2898DeriveBytes(password, Salt, iterations, algorithmName ?? HashAlgorithmName.SHA3_256);
             return keyGenerator.GetBytes(keyBytes);
+#endif
         }
     }
 }
