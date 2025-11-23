@@ -81,10 +81,12 @@ jobs:
         shell: pwsh
         run: |
           $releaseNotes = if ($env:REL_NOTES) { $env:REL_NOTES } else { "" }
-          pwsh ./.github/scripts/pack-solution.ps1 `
-            -Configuration "${{ matrix.configuration }}" `
-            -Platform "${{ matrix.platform_in }}" `
-            -ReleaseNotes $releaseNotes
+          $params = @{
+            Configuration = "${{ matrix.configuration }}"
+            Platform = "${{ matrix.platform_in }}"
+            ReleaseNotes = $releaseNotes
+          }
+          pwsh ./.github/scripts/pack-solution.ps1 @params
       
       
       - name: Upload packages artifact (unique per leg)
