@@ -75,6 +75,7 @@ jobs:
             -After "${{ github.sha }}" `
             -SetGitHubEnv
 
+      # update inside the 'Build and Pack' step run: block
       - name: Build and Pack
         id: pack
         shell: pwsh
@@ -83,8 +84,9 @@ jobs:
           pwsh ./.github/scripts/pack-solution.ps1 `
             -Configuration "${{ matrix.configuration }}" `
             -Platform "${{ matrix.platform_in }}" `
-            -ReleaseNotes $releaseNotes
-
+            -ReleaseNotes "$releaseNotes"
+      
+      
       - name: Upload packages artifact (unique per leg)
         uses: actions/upload-artifact@v4
         with:
