@@ -35,6 +35,10 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <AvoidCycleErrorOnSelfReference>true</AvoidCycleErrorOnSelfReference>
   </PropertyGroup>
+  <PropertyGroup>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+  </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\RapidStreamer.png" Pack="true" Link="RapidStreamer.png" PackagePath="" />
     <None Include="..\..\README.md" Pack="true" Link="README.md" PackagePath="" />
