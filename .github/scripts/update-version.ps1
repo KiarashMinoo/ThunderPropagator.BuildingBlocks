@@ -28,16 +28,25 @@ param(
 )
 
 # Validate parameters
-$hasChannel = -not [string]::IsNullOrWhiteSpace($Channel)
-$hasSetVersion = -not [string]::IsNullOrWhiteSpace($SetVersion)
+# Use $PSBoundParameters to detect whether a caller explicitly provided a parameter.
+# This avoids treating the default empty string as "provided" which previously caused
+# the script to think both -Channel and -SetVersion were specified when callers only
+# passed -SetVersion.
+$channelBound = $PSBoundParameters.ContainsKey('Channel')
+$setVersionBound = $PSBoundParameters.ContainsKey('SetVersion')
+
+# Consider a parameter present only if it was explicitly bound and not empty/whitespace
+$hasChannel = $channelBound -and -not [string]::IsNullOrWhiteSpace($Channel)
+$hasSetVersion = $setVersionBound -and -not [string]::IsNullOrWhiteSpace($SetVersion)
+
+# If both are present, prefer SetVersion (CI environments may sometimes bind defaults unexpectedly)
+if ($hasChannel -and $hasSetVersion) {
+    Write-Host "Both -Channel and -SetVersion were provided; preferring -SetVersion and ignoring -Channel" -ForegroundColor Yellow
+    $hasChannel = $false
+}
 
 if (-not $hasChannel -and -not $hasSetVersion) {
     Write-Error "Either -Channel or -SetVersion must be specified"
-    exit 1
-}
-
-if ($hasChannel -and $hasSetVersion) {
-    Write-Error "Cannot specify both -Channel and -SetVersion"
     exit 1
 }
 
