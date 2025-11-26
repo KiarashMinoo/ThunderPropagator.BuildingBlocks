@@ -154,7 +154,12 @@ $packArgs = @(
 )
 
 if (-not [string]::IsNullOrWhiteSpace($ReleaseNotes)) {
-    $packArgs += '-p:PackageReleaseNotes=' + $ReleaseNotes
+  # MSBuild command-line parsing will break if release notes contain newlines
+  # (they can be interpreted as separate switches, e.g. a stray 'net9.0').
+  # Normalize release notes to a single-line value and remove double-quotes
+  $safeReleaseNotes = $ReleaseNotes -replace "\r?\n", ' '
+  $safeReleaseNotes = $safeReleaseNotes -replace '"', "'"
+  $packArgs += ('-p:PackageReleaseNotes="{0}"' -f $safeReleaseNotes)
 }
 
 $markerOk = Join-Path $OutputDir '.PACK_OK'
