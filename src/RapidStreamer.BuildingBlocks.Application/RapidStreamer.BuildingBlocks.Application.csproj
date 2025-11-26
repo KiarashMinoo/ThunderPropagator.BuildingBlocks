@@ -16,20 +16,17 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="CaseConverter" Version="2.0.1"/>
-        <PackageReference Include="JetBrains.Annotations" Version="2025.2.2"/>
-        <PackageReference Include="MessagePack" Version="3.1.4"/>
-        <PackageReference Include="MessagePackAnalyzer" Version="3.1.4">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="NetJSON" Version="1.4.5"/>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.4"/>
-        <PackageReference Include="protobuf-net" Version="3.2.56"/>
-        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
-        <PackageReference Include="YamlDotNet" Version="16.3.0"/>
-        <PackageReference Include="Ardalis.GuardClauses" Version="5.0.0"/>
-        <PackageReference Include="SharpZipLib" Version="1.4.2"/>
+        <PackageReference Include="CaseConverter"/>
+        <PackageReference Include="JetBrains.Annotations"/>
+        <PackageReference Include="MessagePack"/>
+        <PackageReference Include="MessagePackAnalyzer"/>
+        <PackageReference Include="NetJSON"/>
+        <PackageReference Include="Newtonsoft.Json"/>
+        <PackageReference Include="protobuf-net"/>
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt"/>
+        <PackageReference Include="YamlDotNet"/>
+        <PackageReference Include="Ardalis.GuardClauses"/>
+        <PackageReference Include="SharpZipLib"/>
     </ItemGroup>
 
 </Project>
