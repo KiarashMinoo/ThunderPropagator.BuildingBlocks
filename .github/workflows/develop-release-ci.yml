@@ -67,7 +67,7 @@ jobs:
         env:
           STABLE_VERSION: ${{ needs.finalize-and-tag.outputs.version }}
         run: |
-          pwsh ./.github/scripts/update-version.ps1 -SetVersion $env:STABLE_VERSION
+          pwsh ./.github/scripts/update-version.ps1 -SetVersion $env:STABLE_VERSION          
 
       - name: Commit & push to develop (skip CI)
         run: |
