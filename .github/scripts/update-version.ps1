@@ -18,8 +18,8 @@
     pwsh .github/scripts/update-version.ps1 -SetVersion 1.2.3
 #>
 param(
-    [ValidateSet('release', 'beta', $null)][string]$Channel,
-    [string]$SetVersion,
+    [ValidateSet('release', 'beta', '')][string]$Channel = '',
+    [string]$SetVersion = '',
     [string]$PropsPath = 'Directory.Build.props', 
     [switch]$CommitAndTag, 
     [string]$CommitMessage = 'chore: bump version to {VERSION} [skip ci]',
@@ -28,12 +28,15 @@ param(
 )
 
 # Validate parameters
-if (-not $Channel -and -not $SetVersion) {
+$hasChannel = -not [string]::IsNullOrWhiteSpace($Channel)
+$hasSetVersion = -not [string]::IsNullOrWhiteSpace($SetVersion)
+
+if (-not $hasChannel -and -not $hasSetVersion) {
     Write-Error "Either -Channel or -SetVersion must be specified"
     exit 1
 }
 
-if ($Channel -and $SetVersion) {
+if ($hasChannel -and $hasSetVersion) {
     Write-Error "Cannot specify both -Channel and -SetVersion"
     exit 1
 }
@@ -118,7 +121,7 @@ else {
     exit 5
 }
 
-if ($Channel -eq 'beta') {
+if ($hasChannel -and $Channel -eq 'beta') {
     # Beta channel: bump patch if no prerelease, otherwise increment beta.N
     if (-not $pre) {
         # First beta after stable release: bump patch and add -beta.1
@@ -157,7 +160,7 @@ if ($Channel -eq 'beta') {
         $newVersion = "{0}.{1}.{2}-{3}" -f $maj, $min, $bld, $pre
     }
 }
-else {
+elseif ($hasChannel -and $Channel -eq 'release') {
     # Release channel: just strip prerelease suffix, don't bump version
     if ($format -eq '4') {
         $newVersion = "{0}.{1}.{2}.{3}" -f $maj, $min, $bld, $rev
