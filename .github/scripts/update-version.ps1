@@ -18,7 +18,7 @@
     pwsh .github/scripts/update-version.ps1 -SetVersion 1.2.3
 #>
 param(
-    [ValidateSet('release', 'beta')][string]$Channel = 'beta',
+    [ValidateSet('release', 'beta', $null)][string]$Channel,
     [string]$SetVersion,
     [string]$PropsPath = 'Directory.Build.props', 
     [switch]$CommitAndTag, 
