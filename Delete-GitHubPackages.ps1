@@ -1,14 +1,18 @@
 ﻿[CmdletBinding()]
 param(
-# Optional: will be inferred from git config / remote if omitted
+    # Optional: will be inferred from git config / remote if omitted
     [string]$GitHubUserName,
 
-# Optional: will be taken from env vars if omitted
+    # Optional: will be taken from env vars if omitted
     [string]$GitHubToken,
 
-# Package name filter (supports wildcards: *, ?)
-# Use '*' to clean ALL user packages
-    [string]$PackageNameFilter = 'RapidStreamer.BuildingBlocks*'
+    # Package name filter (supports wildcards: *, ?)
+    # Use '*' to clean ALL user packages
+    [string]$PackageNameFilter = 'RapidStreamer.BuildingBlocks*',
+    [string[]]$PackageTypes = @('nuget'),
+    [int]$PageSize = 1000,
+    [switch]$SinglePass,
+    [switch]$DryRun
 )
 
 function Get-GitHubUserName {
@@ -19,8 +23,12 @@ function Get-GitHubUserName {
     # Normalize input safely (handles arrays, chars, non-string values)
     function ConvertTo-PlainString {
         param($v)
-        if ($null -eq $v) { return $null }
-        if ($v -is [System.Array]) { return ($v -join '') }
+        if ($null -eq $v) {
+            return $null 
+        }
+        if ($v -is [System.Array]) {
+            return ($v -join '') 
+        }
         return [string]$v
     }
 
@@ -32,7 +40,8 @@ function Get-GitHubUserName {
     # Try git config github.user
     try {
         $name = git config --get github.user 2>$null
-    } catch {
+    }
+    catch {
         $name = $null
     }
 
@@ -44,7 +53,8 @@ function Get-GitHubUserName {
     # Try to parse from remote.origin.url (https or ssh)
     try {
         $remote = git config --get remote.origin.url 2>$null
-    } catch {
+    }
+    catch {
         $remote = $null
     }
 
@@ -69,7 +79,13 @@ function Get-GitHubToken {
         [string]$ExplicitToken
     )
     # Normalize helper (reuse above)
-    function ConvertTo-PlainStringLocal { param($v) if ($null -eq $v) { return $null } if ($v -is [System.Array]) { return ($v -join '') } return [string]$v }
+    function ConvertTo-PlainStringLocal {
+        param($v) if ($null -eq $v) {
+            return $null 
+        } if ($v -is [System.Array]) {
+            return ($v -join '') 
+        } return [string]$v 
+    }
 
     $expTok = ConvertTo-PlainStringLocal $ExplicitToken
     if (-not [string]::IsNullOrWhiteSpace($expTok)) {
@@ -86,9 +102,8 @@ function Get-GitHubToken {
     throw "GitHub token could not be determined. Set GITHUB_TOKEN / GH_TOKEN / GH_PAT environment variable or pass -GitHubToken explicitly."
 }
 
-# Resolve username and token (throws if both ways fail)
 $GitHubUserName = Get-GitHubUserName -ExplicitName $GitHubUserName
-$GitHubToken    = Get-GitHubToken    -ExplicitToken $GitHubToken
+$GitHubToken = Get-GitHubToken    -ExplicitToken $GitHubToken
 
 Write-Host "Using GitHub user: $GitHubUserName"
 Write-Host "Using GitHub token from parameter/env."
@@ -102,75 +117,110 @@ $headers = @{
     "X-GitHub-Api-Version" = "2022-11-28"
 }
 
-$iteration = 1
-$maxIterations = 50   # safety guard against infinite loops
-
-do {
-    Write-Host "=== Iteration $iteration ==="
-
-    $page       = 1
-    $pageSize   = 100
-    $allPackages = @()
-
-    # Fetch all packages for the user (paged)
-    do {
-        $uri = "$baseUri/users/$GitHubUserName/packages?per_page=$pageSize&page=$page"
-        $packages = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get
-
-        if ($packages -and $packages.Count -gt 0) {
-            $allPackages += $packages
-            $page++
-        } else {
-            break
+# Preflight token validation: verify token is valid and get token owner's login
+try {
+    $userUri = "$baseUri/user"
+    $tokenInfo = Invoke-RestMethod -Uri $userUri -Headers $headers -Method Get -ErrorAction Stop
+    if ($tokenInfo -and $tokenInfo.login) {
+        $tokenOwner = [string]$tokenInfo.login
+        Write-Host "Token valid for user: $tokenOwner"
+        # If detected username differs from inferred username, prefer token owner (safer)
+        if ($GitHubUserName -and ($GitHubUserName -ne $tokenOwner)) {
+            Write-Warning "Specified -GitHubUserName '$GitHubUserName' differs from token owner '$tokenOwner'. Using token owner for package operations."
         }
-    } while ($true)
-
-    if (-not $allPackages -or $allPackages.Count -eq 0) {
-        Write-Host "No packages found for user '$GitHubUserName'."
-        break
+        $GitHubUserName = $tokenOwner
     }
+}
+catch [System.Net.WebException] {
+    Write-Error "GitHub token validation failed: $($_.Exception.Response.StatusCode) - $($_.Exception.Message)"
+    Write-Error "Ensure the token provided in environment (GH_PAT/GH_TOKEN/GITHUB_TOKEN) has appropriate package permissions and is not empty."
+    exit 2
+}
+catch {
+    Write-Error "GitHub token validation failed: $($_.Exception.Message)"
+    Write-Error "Ensure the token provided in environment (GH_PAT/GH_TOKEN/GITHUB_TOKEN) has appropriate package permissions and is not empty."
+    exit 2
+}
 
-    # Filter by name (supports wildcard)
-    $packagesToDelete = $allPackages | Where-Object {
-        $_.name -like $PackageNameFilter
-    }
+$maxIterations = if ($SinglePass) {
+    1 
+}
+else {
+    50 
+}   # safety guard against infinite loops
 
-    if (-not $packagesToDelete -or $packagesToDelete.Count -eq 0) {
-        Write-Host "No more packages match filter '$PackageNameFilter'. Cleanup complete."
-        break
-    }
 
-    Write-Host "Packages matching '$PackageNameFilter' in this iteration:"
-    $packagesToDelete | Select-Object id, name, package_type | Format-Table -AutoSize
-    Write-Host ""
+$pageSize = $PageSize
+Write-Host "Using page size: $pageSize (SinglePass: $SinglePass)"
+$allPackages = @()
 
-    foreach ($pkg in $packagesToDelete) {
-        $packageName = $pkg.name
-        $packageType = $pkg.package_type  # nuget, npm, container, etc.
-        $deleteUri   = "$baseUri/users/$GitHubUserName/packages/$packageType/$packageName"
-
-        # 🧪 DRY-RUN: uncomment to test and comment the real delete
-        # Write-Host "Would DELETE: $deleteUri"
-        # continue
-
-        Write-Host "Deleting '$packageName' (type: $packageType)..."
+# Fetch packages for each requested package_type (API requires package_type)
+foreach ($ptype in $PackageTypes) {
+    $page = 1
+    do {
+        $uri = "$baseUri/users/$GitHubUserName/packages?package_type=$ptype&per_page=$pageSize&page=$page"
         try {
-            Invoke-RestMethod -Uri $deleteUri -Headers $headers -Method Delete
-            Write-Host "Deleted '$packageName'."
+            $packages = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get -ErrorAction Stop
         }
         catch {
-            Write-Warning "Failed to delete '$packageName': $($_.Exception.Message)"
+            Write-Warning "Failed to list packages for type '$ptype': $($_.Exception.Message)"
+            break
         }
 
-        Write-Host ""
+        if ($packages -and $packages.Count -gt 0) {
+            # ensure the package_type is present for downstream logic
+            foreach ($p in $packages) {
+                $p.package_type = $ptype 
+            }
+            $allPackages += $packages
+            $page++
+        }
+        else {
+            break 
+        }
+    } while ($true)
+}
+
+if (-not $allPackages -or $allPackages.Count -eq 0) {
+    Write-Host "No packages found for user '$GitHubUserName'."
+    exit 0
+}
+
+# Filter by name (supports wildcard)
+$packagesToDelete = $allPackages | Where-Object {
+    $_.name -like $PackageNameFilter
+}
+
+if (-not $packagesToDelete -or $packagesToDelete.Count -eq 0) {
+    Write-Host "No packages match filter '$PackageNameFilter'. Nothing to delete."
+    exit 0
+}
+
+Write-Host "Packages matching '$PackageNameFilter' in this iteration:"
+$packagesToDelete | Select-Object id, name, package_type | Format-Table -AutoSize
+Write-Host ""
+
+foreach ($pkg in $packagesToDelete) {
+    $packageName = $pkg.name
+    $packageType = $pkg.package_type  # nuget, npm, container, etc.
+    $deleteUri = "$baseUri/users/$GitHubUserName/packages/$packageType/$packageName"
+
+    if ($DryRun) {
+        Write-Host "Would DELETE: $deleteUri" -ForegroundColor Yellow
+        continue
     }
 
-    $iteration++
-    if ($iteration -gt $maxIterations) {
-        Write-Warning "Reached max iterations ($maxIterations). Stopping to avoid infinite loop."
-        break
+    Write-Host "Deleting '$packageName' (type: $packageType)..."
+    try {
+        Invoke-RestMethod -Uri $deleteUri -Headers $headers -Method Delete -ErrorAction Stop
+        Write-Host "Deleted '$packageName'."
+    }
+    catch {
+        Write-Warning "Failed to delete '$packageName': $($_.Exception.Message)"
     }
 
-} while ($true)
+    Write-Host ""
+}
+
 
 Write-Host "Done."
