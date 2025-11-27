@@ -21,6 +21,10 @@
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
+  <PropertyGroup Label="PackageHelper">
+    <PackageIdConfigurationSuffix Condition="'$(Configuration)' == 'Debug'">.Debug</PackageIdConfigurationSuffix>
+    <PackageIdPlatformSuffix Condition="'$(Platform)' != 'AnyCPU'">.$(Platform)</PackageIdPlatformSuffix>
+  </PropertyGroup>
   <PropertyGroup Label="nuget">
     <IsPackable>true</IsPackable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

@@ -10,8 +10,6 @@
             while being easier to read and maintain.
         -->
         <PackageIdBase>RapidStreamer.BuildingBlocks.Modules</PackageIdBase>
-        <PackageIdConfigurationSuffix Condition="'$(Configuration)' == 'Debug'">.Debug</PackageIdConfigurationSuffix>
-        <PackageIdPlatformSuffix Condition="'$(Platform)' != 'AnyCPU'">.$(Platform)</PackageIdPlatformSuffix>
         <PackageId>$(PackageIdBase)$(PackageIdConfigurationSuffix)$(PackageIdPlatformSuffix)</PackageId>
     </PropertyGroup>
 

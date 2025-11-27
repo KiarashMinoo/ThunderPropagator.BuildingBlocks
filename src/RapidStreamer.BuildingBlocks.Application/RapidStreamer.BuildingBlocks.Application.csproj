@@ -1,17 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup Label="PackageId">
-        <!--
-            Simplified PackageId construction:
-            - Base: RapidStreamer.BuildingBlocks
-            - If Configuration is Debug -> append .Debug
-            - If Platform is not AnyCPU -> append .{Platform}
-            This produces the same results as the previous conditional PackageId entries
-            while being easier to read and maintain.
-        -->
         <PackageIdBase>RapidStreamer.BuildingBlocks</PackageIdBase>
-        <PackageIdConfigurationSuffix Condition="'$(Configuration)' == 'Debug'">.Debug</PackageIdConfigurationSuffix>
-        <PackageIdPlatformSuffix Condition="'$(Platform)' != 'AnyCPU'">.$(Platform)</PackageIdPlatformSuffix>
         <PackageId>$(PackageIdBase)$(PackageIdConfigurationSuffix)$(PackageIdPlatformSuffix)</PackageId>
     </PropertyGroup>
 
