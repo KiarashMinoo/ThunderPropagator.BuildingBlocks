@@ -48,7 +48,7 @@ function Get-GitHubUserName {
         $remote = $null
     }
 
-    $remoteStr = Normalize-ToString $remote
+    $remoteStr = ConvertTo-PlainString $remote
     if (-not [string]::IsNullOrWhiteSpace($remoteStr)) {
         # Examples:
         #  https://github.com/username/repo.git
