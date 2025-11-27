@@ -26,7 +26,7 @@ function Get-GitHubUserName {
 
     $expName = ConvertTo-PlainString $ExplicitName
     if (-not [string]::IsNullOrWhiteSpace($expName)) {
-        return $expName.Trim()
+        return ([string]$expName).Trim()
     }
 
     # Try git config github.user
@@ -38,7 +38,7 @@ function Get-GitHubUserName {
 
     $nameStr = ConvertTo-PlainString $name
     if (-not [string]::IsNullOrWhiteSpace($nameStr)) {
-        return $nameStr.Trim()
+        return ([string]$nameStr).Trim()
     }
 
     # Try to parse from remote.origin.url (https or ssh)
@@ -56,7 +56,7 @@ function Get-GitHubUserName {
         if ($remoteStr -match 'github\.com[:/](?<user>[^/]+)/') {
             $user = ConvertTo-PlainString $Matches['user']
             if (-not [string]::IsNullOrWhiteSpace($user)) {
-                return $user.Trim()
+                return ([string]$user).Trim()
             }
         }
     }
@@ -73,14 +73,14 @@ function Get-GitHubToken {
 
     $expTok = ConvertTo-PlainStringLocal $ExplicitToken
     if (-not [string]::IsNullOrWhiteSpace($expTok)) {
-        return $expTok.Trim()
+        return ([string]$expTok).Trim()
     }
 
     # Try common env vars and normalize them
     $candidates = @($env:GITHUB_TOKEN, $env:GH_TOKEN, $env:GH_PAT) | ForEach-Object { ConvertTo-PlainStringLocal $_ } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
 
     if ($candidates.Count -gt 0) {
-        return $candidates[0].Trim()
+        return ([string]$candidates[0]).Trim()
     }
 
     throw "GitHub token could not be determined. Set GITHUB_TOKEN / GH_TOKEN / GH_PAT environment variable or pass -GitHubToken explicitly."
