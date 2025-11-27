@@ -16,8 +16,17 @@ function Get-GitHubUserName {
         [string]$ExplicitName
     )
 
-    if ($ExplicitName -and $ExplicitName.Trim() -ne '') {
-        return $ExplicitName.Trim()
+    # Normalize input safely (handles arrays, chars, non-string values)
+    function ConvertTo-PlainString {
+        param($v)
+        if ($null -eq $v) { return $null }
+        if ($v -is [System.Array]) { return ($v -join '') }
+        return [string]$v
+    }
+
+    $expName = ConvertTo-PlainString $ExplicitName
+    if (-not [string]::IsNullOrWhiteSpace($expName)) {
+        return $expName.Trim()
     }
 
     # Try git config github.user
@@ -27,8 +36,9 @@ function Get-GitHubUserName {
         $name = $null
     }
 
-    if ($name -and $name.Trim() -ne '') {
-        return $name.Trim()
+    $nameStr = ConvertTo-PlainString $name
+    if (-not [string]::IsNullOrWhiteSpace($nameStr)) {
+        return $nameStr.Trim()
     }
 
     # Try to parse from remote.origin.url (https or ssh)
@@ -38,13 +48,14 @@ function Get-GitHubUserName {
         $remote = $null
     }
 
-    if ($remote -and $remote.Trim() -ne '') {
+    $remoteStr = Normalize-ToString $remote
+    if (-not [string]::IsNullOrWhiteSpace($remoteStr)) {
         # Examples:
         #  https://github.com/username/repo.git
         #  git@github.com:username/repo.git
-        if ($remote -match 'github\.com[:/](?<user>[^/]+)/') {
-            $user = $Matches['user']
-            if ($user -and $user.Trim() -ne '') {
+        if ($remoteStr -match 'github\.com[:/](?<user>[^/]+)/') {
+            $user = ConvertTo-PlainString $Matches['user']
+            if (-not [string]::IsNullOrWhiteSpace($user)) {
                 return $user.Trim()
             }
         }
@@ -57,17 +68,16 @@ function Get-GitHubToken {
     param(
         [string]$ExplicitToken
     )
+    # Normalize helper (reuse above)
+    function ConvertTo-PlainStringLocal { param($v) if ($null -eq $v) { return $null } if ($v -is [System.Array]) { return ($v -join '') } return [string]$v }
 
-    if ($ExplicitToken -and $ExplicitToken.Trim() -ne '') {
-        return $ExplicitToken.Trim()
+    $expTok = ConvertTo-PlainStringLocal $ExplicitToken
+    if (-not [string]::IsNullOrWhiteSpace($expTok)) {
+        return $expTok.Trim()
     }
 
-    # Try common env vars
-    $candidates = @(
-        $env:GITHUB_TOKEN,
-        $env:GH_TOKEN,
-        $env:GH_PAT
-    ) | Where-Object { $_ -and $_.Trim() -ne '' }
+    # Try common env vars and normalize them
+    $candidates = @($env:GITHUB_TOKEN, $env:GH_TOKEN, $env:GH_PAT) | ForEach-Object { ConvertTo-PlainStringLocal $_ } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
 
     if ($candidates.Count -gt 0) {
         return $candidates[0].Trim()
