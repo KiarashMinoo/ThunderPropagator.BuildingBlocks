@@ -28,6 +28,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\develop-beta-ci.yml = .github\workflows\develop-beta-ci.yml
 		.github\workflows\develop-release-ci.yml = .github\workflows\develop-release-ci.yml
+		.github\workflows\cleanup-packages.yml = .github\workflows\cleanup-packages.yml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RapidStreamer.BuildingBlocks.Infrastructure", "src\RapidStreamer.BuildingBlocks.Infrastructure\RapidStreamer.BuildingBlocks.Infrastructure.csproj", "{429E4576-6D65-43FA-AE6C-866F30C47D01}"
