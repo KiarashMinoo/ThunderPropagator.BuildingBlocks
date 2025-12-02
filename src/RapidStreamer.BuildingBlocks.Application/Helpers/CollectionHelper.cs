@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
 using RapidStreamer.BuildingBlocks.Application.Collections;
 
 namespace RapidStreamer.BuildingBlocks.Application.Helpers
@@ -26,7 +25,7 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
             for (var index = 0; index < arraySpan.Length; index++)
             {
                 var source = Unsafe.Add(ref arraySpanReference, index);
-                if (!func.Invoke(source))
+                if (!func(source))
                 {
                     continue;
                 }
@@ -65,23 +64,14 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
 
         public static IEnumerable<ArraySegment<T>> Splice<T>(this IEnumerable<T> enumerable, int count)
         {
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(count);
+
             var array = enumerable as T[] ?? enumerable.ToArray();
 
-            if (array.Length < count)
-                yield return array;
-            else
+            for (var i = 0; i < array.Length; i += count)
             {
-                var loopsCount = (int)Math.Ceiling(array.Length / (count * 1.0));
-
-                for (var i = 0; i < loopsCount; i++)
-                {
-                    if (i == 0)
-                        yield return new ArraySegment<T>(array, 0, count);
-                    else if (i == loopsCount - 1)
-                        yield return new ArraySegment<T>(array, i * count, array.Length % count);
-                    else
-                        yield return new ArraySegment<T>(array, i * count, count);
-                }
+                var length = Math.Min(count, array.Length - i);
+                yield return new ArraySegment<T>(array, i, length);
             }
         }
 
@@ -151,7 +141,7 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
                 for (var index = 0; index < arraySpan.Length; index++)
                 {
                     var source = Unsafe.Add(ref arraySpanReference, index);
-                    execution.Invoke(index, source);
+                    execution(index, source);
                 }
             }
         }
@@ -178,7 +168,7 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
                 for (var index = 0; index < arraySpan.Length; index++)
                 {
                     var source = Unsafe.Add(ref arraySpanReference, index);
-                    execution.Invoke(index, source);
+                    execution(index, source);
                 }
             }
         }
