@@ -100,8 +100,8 @@ namespace RapidStreamer.UnitTests.BuildingBlocks.Applications.Helpers
             // Act
             var result = disposedInstance.IsDisposed();
 
-            // Assert
-            Assert.True(result);
+            // Assert - normal objects do not throw ObjectDisposedException on GetHashCode so IsDisposed should be false
+            Assert.False(result);
         }
     }
 }

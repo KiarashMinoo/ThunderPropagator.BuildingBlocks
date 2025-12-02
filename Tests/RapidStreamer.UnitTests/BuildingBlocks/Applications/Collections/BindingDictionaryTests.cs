@@ -122,6 +122,10 @@ namespace RapidStreamer.UnitTests.BuildingBlocks.Applications.Collections
             // Arrange
             var dict = new BindingDictionary<string, int>();
             var isTriggered = false;
+
+            // Add the initial value first so the event subscription only captures the update
+            dict.Add("kiwi", 8);
+
             dict.ValueChanged += (sender, key, value, changeType) =>
             {
                 isTriggered = true;
@@ -129,8 +133,6 @@ namespace RapidStreamer.UnitTests.BuildingBlocks.Applications.Collections
                 Assert.Equal(9, value);
                 Assert.Equal(NotifiableObject.NotifiableChangeType.Modified, changeType);
             };
-
-            dict.Add("kiwi", 8);
 
             // Act
             dict["kiwi"] = 9;
