@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using System.IO.Compression;
 using System.Text;
+using ICSharpCode.SharpZipLib.BZip2;
+using ICSharpCode.SharpZipLib.GZip;
 using RapidStreamer.BuildingBlocks.Application.Objects;
 
 namespace RapidStreamer.BuildingBlocks.Application.Helpers
@@ -22,8 +24,9 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
             if (stream is MemoryStream memoryStream)
                 return memoryStream.ToArray();
 
-            using var binaryReader = new BinaryReader(stream);
-            return binaryReader.ReadBytes((int)stream.Length);
+            using var outputStream = new MemoryStream();
+            stream.CopyTo(outputStream);
+            return outputStream.ToArray();
         }
 
         public static Stream ToStream(this string str)
@@ -56,6 +59,12 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
                 case CompressedObject.CompressionType.BrotliStream:
                     using (var decompressStream = new BrotliStream(memoryStream, CompressionMode.Decompress))
                         decompressStream.CopyTo(outputStream);
+                    break;
+                case CompressedObject.CompressionType.BZip2:
+                    BZip2.Decompress(memoryStream, outputStream, false);
+                    break;
+                case CompressedObject.CompressionType.GZip:
+                    GZip.Decompress(memoryStream, outputStream, false);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(compressionType), compressionType, null);

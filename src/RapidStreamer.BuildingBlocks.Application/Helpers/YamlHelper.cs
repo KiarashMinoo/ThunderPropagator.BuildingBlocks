@@ -1,5 +1,6 @@
 ﻿using RapidStreamer.BuildingBlocks.Application.Serializations.Yaml;
 using System.Reflection;
+using System.IO;
 using System.Text;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -159,9 +160,15 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
         public static byte[] ToYamlBytes<T>(this T instance, YamlSerializerSettings? serializerSettings = null)
             where T : notnull
         {
-            var jsonStr = instance.ToYaml(serializerSettings);
-            var bytes = Encoding.UTF8.GetBytes(jsonStr);
-            return bytes;
+            const string activityName = $"{nameof(YamlHelper)}_{nameof(ToYamlBytes)}";
+            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+
+            var serializer = YamlSerializer(typeof(T), serializerSettings);
+            using var memoryStream = new MemoryStream();
+            using var streamWriter = new StreamWriter(memoryStream, Encoding.UTF8);
+            serializer.Serialize(streamWriter, instance);
+            streamWriter.Flush();
+            return memoryStream.ToArray();
         }
 
         public static T? FromYamlBytes<T>(this byte[] bytes, YamlSerializerSettings? serializerSettings = null)
@@ -171,21 +178,23 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
                 return default;
             }
 
-            var jsonStr = Encoding.UTF8.GetString(bytes);
-            if (string.IsNullOrWhiteSpace(jsonStr))
-            {
-                return default;
-            }
+            const string activityName = $"{nameof(YamlHelper)}_{nameof(FromYamlBytes)}";
+            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
 
-            return jsonStr.FromYaml<T>(serializerSettings);
+            var deserializer = YamlDeserializer(typeof(T), serializerSettings);
+            using var memoryStream = new MemoryStream(bytes);
+            using var streamReader = new StreamReader(memoryStream, Encoding.UTF8);
+            return deserializer.Deserialize<T>(streamReader);
         }
 
         public static string ToYamlBase64<T>(this T instance, YamlSerializerSettings? serializerSettings = null)
             where T : notnull
         {
-            var jsonStr = instance.ToYaml(serializerSettings);
-            var bytes = Encoding.UTF8.GetBytes(jsonStr);
-            return Convert.ToBase64String(bytes)[..^2];
+            const string activityName = $"{nameof(YamlHelper)}_{nameof(ToYamlBase64)}";
+            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+
+            var bytes = instance.ToYamlBytes(serializerSettings);
+            return Convert.ToBase64String(bytes);
         }
 
         public static T? FromYamlBase64<T>(this string str, YamlSerializerSettings? serializerSettings = null)
@@ -195,14 +204,11 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
                 return default;
             }
 
-            var bytes = Convert.FromBase64String(str);
-            var jsonStr = Encoding.UTF8.GetString(bytes);
-            if (string.IsNullOrWhiteSpace(jsonStr))
-            {
-                return default;
-            }
+            const string activityName = $"{nameof(YamlHelper)}_{nameof(FromYamlBase64)}";
+            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
 
-            return jsonStr.FromYaml<T>(serializerSettings);
+            var bytes = Convert.FromBase64String(str);
+            return bytes.FromYamlBytes<T>(serializerSettings);
         }
     }
 }

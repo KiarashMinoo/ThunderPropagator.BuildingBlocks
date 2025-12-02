@@ -66,8 +66,8 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
             if (instance is ICloneable cloneable)
                 return (T)cloneable.Clone();
 
-            var json = JsonConvert.SerializeObject(instance);
-            return JsonConvert.DeserializeObject<T>(json)!;
+            var bytes = instance.ToNJsonBytes();
+            return bytes.FromNJsonBytes<T>()!;
         }
 
         public static bool IsDisposed<T>(this T instance)

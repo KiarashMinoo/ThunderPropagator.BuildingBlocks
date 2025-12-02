@@ -65,16 +65,31 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
         public static byte[] ToJsonBytes<T>(this T instance, Func<JsonSerializerOptions, JsonSerializerOptions>? options = null)
             where T : notnull
         {
-            var jsonStr = instance.ToJson(options);
-            var bytes = Encoding.UTF8.GetBytes(jsonStr);
-            return bytes;
+            const string activityName = $"{nameof(JsonHelper)}_{nameof(ToJsonBytes)}";
+            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+
+            JsonSerializerOptions? serializerOptions = null;
+
+            if (options is not null)
+            {
+                serializerOptions = BuildDefaultSerializerOptions();
+                options(serializerOptions);
+            }
+
+            if (instance is Exception exception)
+            {
+                ExceptionInfo exceptionInfo = new(exception);
+                return JsonSerializer.SerializeToUtf8Bytes(exceptionInfo, JsonSerializerOptions<T>(serializerOptions));
+            }
+
+            return JsonSerializer.SerializeToUtf8Bytes(instance, JsonSerializerOptions<T>(serializerOptions));
         }
 
         public static string ToJsonBase64<T>(this T instance, Func<JsonSerializerOptions, JsonSerializerOptions>? options = null)
             where T : notnull
         {
             var bytes = instance.ToJsonBytes(options);
-            return Convert.ToBase64String(bytes)[..^2];
+            return Convert.ToBase64String(bytes);
         }
 
         public static T? FromJson<T>(this string json, Func<JsonSerializerOptions, JsonSerializerOptions>? options = null)
@@ -111,18 +126,23 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
 
         public static T? FromJsonBytes<T>(this byte[] bytes, Func<JsonSerializerOptions, JsonSerializerOptions>? options = null)
         {
+            const string activityName = $"{nameof(JsonHelper)}_{nameof(FromJsonBytes)}";
+            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+
             if (bytes.Length == 0)
             {
                 return default;
             }
 
-            var jsonStr = Encoding.UTF8.GetString(bytes);
-            if (string.IsNullOrWhiteSpace(jsonStr))
+            JsonSerializerOptions? serializerOptions = null;
+
+            if (options is not null)
             {
-                return default;
+                serializerOptions = BuildDefaultSerializerOptions();
+                options(serializerOptions);
             }
 
-            return jsonStr.FromJson<T>(options);
+            return JsonSerializer.Deserialize<T>(bytes, JsonSerializerOptions<T>(serializerOptions));
         }
 
         public static T? FromJsonBase64<T>(this string str, Func<JsonSerializerOptions, JsonSerializerOptions>? options = null)

@@ -1,6 +1,8 @@
 ﻿using RapidStreamer.BuildingBlocks.Application.Objects;
 using System.Diagnostics;
 using System.IO.Compression;
+using ICSharpCode.SharpZipLib.BZip2;
+using ICSharpCode.SharpZipLib.GZip;
 using System.Text;
 
 namespace RapidStreamer.BuildingBlocks.Application.Helpers
@@ -18,7 +20,7 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
 
         public static ReadOnlyMemory<byte> ToByteReadOnlyMemory(this string str)
         {
-            const string activityName = $"{nameof(StringHelper)}_{nameof(ToByteArray)}";
+            const string activityName = $"{nameof(StringHelper)}_{nameof(ToByteReadOnlyMemory)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal)?
                 .SetTag(nameof(string.Length), str.Length);
 
@@ -41,7 +43,7 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
                 .SetTag(nameof(string.Length), str.Length);
 
             var bytes = ToByteArray(str);
-            return Convert.ToBase64String(bytes)[..^2];
+            return Convert.ToBase64String(bytes);
         }
 
         public static string FromBase64(this string str)
@@ -73,6 +75,12 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
                 case CompressedObject.CompressionType.BrotliStream:
                     using (var decompressStream = new BrotliStream(memoryStream, CompressionMode.Decompress))
                         decompressStream.CopyTo(outputStream);
+                    break;
+                case CompressedObject.CompressionType.BZip2:
+                    BZip2.Decompress(memoryStream, outputStream, false);
+                    break;
+                case CompressedObject.CompressionType.GZip:
+                    GZip.Decompress(memoryStream, outputStream, false);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(compressionType), compressionType, null);

@@ -17,8 +17,8 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
 
         public static string ToProtobufBase64(this object instance)
         {
-            var stream = ToProtobuf(instance);
-            return Convert.ToBase64String(stream.ToByteArray())[..^2];
+            using var stream = ToProtobuf(instance);
+            return Convert.ToBase64String(stream.ToByteArray());
         }
 
         public static T FromProtobuf<T>(this Stream stream)

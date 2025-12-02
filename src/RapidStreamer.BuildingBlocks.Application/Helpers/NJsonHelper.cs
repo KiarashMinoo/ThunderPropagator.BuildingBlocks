@@ -4,6 +4,7 @@ using Newtonsoft.Json.Serialization;
 using RapidStreamer.BuildingBlocks.Application.Attributes;
 using RapidStreamer.BuildingBlocks.Application.Collections;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 
 namespace RapidStreamer.BuildingBlocks.Application.Helpers
@@ -69,16 +70,30 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
             const string activityName = $"{nameof(NJsonHelper)}_{nameof(ToNJsonBytes)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
 
-            try
+            using var memoryStream = new MemoryStream();
+            using var streamWriter = new StreamWriter(memoryStream, Encoding.UTF8);
+            using var jsonWriter = new JsonTextWriter(streamWriter);
+
+            var serializerSettings = NJsonSerializerSettings<T>(settings is not null ? BuildDefaultNSerializerSettings() : null);
+            if (settings is not null)
             {
-                var jsonStr = instance.ToNJson(settings);
-                var bytes = Encoding.UTF8.GetBytes(jsonStr);
-                return bytes;
+                settings(serializerSettings);
             }
-            finally
+
+            var serializer = JsonSerializer.Create(serializerSettings);
+
+            if (instance is Exception exception)
             {
-                activity?.Stop();
+                ExceptionInfo exceptionInfo = new(exception);
+                serializer.Serialize(jsonWriter, exceptionInfo);
             }
+            else
+            {
+                serializer.Serialize(jsonWriter, instance);
+            }
+
+            jsonWriter.Flush();
+            return memoryStream.ToArray();
         }
 
         public static string ToNJsonBase64<T>(this T instance, Func<JsonSerializerSettings, JsonSerializerSettings>? settings = null)
@@ -88,7 +103,7 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
 
             var bytes = instance.ToNJsonBytes(settings);
-            return Convert.ToBase64String(bytes)[..^2];
+            return Convert.ToBase64String(bytes);
         }
 
         public static T? FromNJson<T>(this string json, Func<JsonSerializerSettings, JsonSerializerSettings>? settings = null)
@@ -130,13 +145,18 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
                 return default;
             }
 
-            var jsonStr = Encoding.UTF8.GetString(bytes);
-            if (string.IsNullOrWhiteSpace(jsonStr))
+            using var memoryStream = new MemoryStream(bytes);
+            using var streamReader = new StreamReader(memoryStream, Encoding.UTF8);
+            using var jsonReader = new JsonTextReader(streamReader);
+
+            var serializerSettings = NJsonSerializerSettings<T>(settings is not null ? BuildDefaultNSerializerSettings() : null);
+            if (settings is not null)
             {
-                return default;
+                settings(serializerSettings);
             }
 
-            return jsonStr.FromNJson<T>(settings);
+            var serializer = JsonSerializer.Create(serializerSettings);
+            return serializer.Deserialize<T>(jsonReader);
         }
 
         public static T? FromNJsonBase64<T>(this string str, Func<JsonSerializerSettings, JsonSerializerSettings>? settings = null)

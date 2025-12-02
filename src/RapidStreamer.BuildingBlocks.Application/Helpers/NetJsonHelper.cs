@@ -65,16 +65,9 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
             const string activityName = $"{nameof(NetJsonHelper)}_{nameof(ToNetJsonBytes)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
 
-            try
-            {
-                var jsonStr = instance.ToNetJson(settings);
-                var bytes = Encoding.UTF8.GetBytes(jsonStr);
-                return bytes;
-            }
-            finally
-            {
-                activity?.Stop();
-            }
+            var jsonStr = instance.ToNetJson(settings);
+            var bytes = Encoding.UTF8.GetBytes(jsonStr);
+            return bytes;
         }
 
         public static string ToNetJsonBase64<T>(this T instance, Func<NetJSONSettings, NetJSONSettings>? settings = null)
@@ -83,7 +76,7 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
             const string activityName = $"{nameof(NetJsonHelper)}_{nameof(ToNetJsonBase64)}";
             using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
             var bytes = instance.ToNetJsonBytes(settings);
-            return Convert.ToBase64String(bytes)[..^2];
+            return Convert.ToBase64String(bytes);
         }
 
         public static T? FromNetJson<T>(this string json, Func<NetJSONSettings, NetJSONSettings>? settings = null)
