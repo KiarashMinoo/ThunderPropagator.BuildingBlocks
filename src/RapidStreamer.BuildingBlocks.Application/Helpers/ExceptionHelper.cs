@@ -1,30 +1,20 @@
-﻿using System.Text;
-
-namespace RapidStreamer.BuildingBlocks.Application.Helpers
+﻿namespace RapidStreamer.BuildingBlocks.Application.Helpers
 {
     public static class ExceptionHelper
     {
         public static string Describe(this Exception exception, string separator = " => ")
         {
-            var sb = new StringBuilder();
+            ArgumentNullException.ThrowIfNull(exception);
 
+            var messages = new List<string>();
             var ex = exception;
             while (ex is not null)
             {
-                if (sb.Length == 0)
-                {
-                    sb.Append(ex.Message);
-                }
-                else
-                {
-                    sb.Append(separator);
-                    sb.Append(ex.Message);
-                }
-
+                messages.Add(ex.Message);
                 ex = ex.InnerException;
             }
 
-            return sb.ToString();
+            return string.Join(separator, messages);
         }
     }
 }

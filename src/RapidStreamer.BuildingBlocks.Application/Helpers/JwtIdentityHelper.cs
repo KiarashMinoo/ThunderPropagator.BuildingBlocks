@@ -10,6 +10,9 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
     {
         public static ClaimsPrincipal? GetPrincipalFromToken(string token, JwtConfiguration jwtConfiguration)
         {
+            ArgumentException.ThrowIfNullOrWhiteSpace(token);
+            ArgumentNullException.ThrowIfNull(jwtConfiguration);
+
             var validationParameters = new TokenValidationParameters
             {
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfiguration.IssuerSigningKey)),

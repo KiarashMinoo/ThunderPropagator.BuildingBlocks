@@ -6,19 +6,13 @@ public static class EnvironmentHelper
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(str);
         var index = 0;
-        while (true)
+        while ((index = str.IndexOf('$', index)) >= 0)
         {
-            index = str.IndexOf('$', index);
-            if (index <= 0)
-                break;
-
-            var nextIndex = str.IndexOf('$', index + 1) + 1;
-            if (nextIndex <= 0)
-                break;
-
-            yield return str.Substring(index, nextIndex - index);
-
-            index = nextIndex;
+            var start = index;
+            index = str.IndexOf('$', index + 1);
+            if (index < 0) break;
+            yield return str.Substring(start, index - start + 1);
+            index++;
         }
     }
 }
