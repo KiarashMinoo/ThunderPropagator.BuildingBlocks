@@ -1,4 +1,4 @@
 using BenchmarkDotNet.Running;
 using RapidStreamer.UnitTests;
 
-BenchmarkRunner.Run<SizeBenchmark>();
+BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run();

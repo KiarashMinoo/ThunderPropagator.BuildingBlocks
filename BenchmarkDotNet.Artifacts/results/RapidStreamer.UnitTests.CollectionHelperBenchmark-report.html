@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>RapidStreamer.UnitTests.CollectionHelperBenchmark-20251202-130715</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet v0.14.0, Windows 11 (10.0.26200.7171)
+11th Gen Intel Core i7-1185G7 3.00GHz, 1 CPU, 8 logical and 4 physical cores
+.NET SDK 10.0.100
+  [Host]     : .NET 8.0.22 (8.0.2225.52707), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI
+  DefaultJob : .NET 8.0.22 (8.0.2225.52707), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI
+</code></pre>
+<pre><code></code></pre>
+
+<table>
+<thead><tr><th>Method       </th><th>Mean</th><th>Error</th><th>StdDev</th><th>Gen0</th><th>Gen1</th><th>Gen2</th><th>Allocated</th>
+</tr>
+</thead><tbody><tr><td>Filter_Array</td><td>230.27 &mu;s</td><td>4.597 &mu;s</td><td>9.895 &mu;s</td><td>124.7559</td><td>124.7559</td><td>124.7559</td><td>524738 B</td>
+</tr><tr><td>Filter_List</td><td>330.64 &mu;s</td><td>3.041 &mu;s</td><td>2.696 &mu;s</td><td>249.5117</td><td>249.5117</td><td>249.5117</td><td>924804 B</td>
+</tr><tr><td>Convert_Array</td><td>161.01 &mu;s</td><td>3.110 &mu;s</td><td>6.066 &mu;s</td><td>124.7559</td><td>124.7559</td><td>124.7559</td><td>400066 B</td>
+</tr><tr><td>ForEach_Array</td><td>195.91 &mu;s</td><td>3.841 &mu;s</td><td>4.423 &mu;s</td><td>-</td><td>-</td><td>-</td><td>176 B</td>
+</tr><tr><td>ForEach_List</td><td>183.50 &mu;s</td><td>1.558 &mu;s</td><td>1.458 &mu;s</td><td>-</td><td>-</td><td>-</td><td>88 B</td>
+</tr><tr><td>Linq_Filter_Array</td><td>206.29 &mu;s</td><td>4.074 &mu;s</td><td>8.856 &mu;s</td><td>99.8535</td><td>99.8535</td><td>99.8535</td><td>462922 B</td>
+</tr><tr><td>Linq_Convert_Array</td><td>153.68 &mu;s</td><td>2.796 &mu;s</td><td>4.185 &mu;s</td><td>124.7559</td><td>124.7559</td><td>124.7559</td><td>400114 B</td>
+</tr><tr><td>Linq_ForEach_Array</td><td>41.88 &mu;s</td><td>0.499 &mu;s</td><td>0.417 &mu;s</td><td>-</td><td>-</td><td>-</td><td>-</td>
+</tr><tr><td>ForEach_LinkedArray</td><td>233.99 &mu;s</td><td>4.596 &mu;s</td><td>9.071 &mu;s</td><td>186.5234</td><td>168.2129</td><td>167.4805</td><td>724978 B</td>
+</tr></tbody></table>
+</body>
+</html>

@@ -5,33 +5,64 @@ using System.Runtime.InteropServices;
 
 namespace RapidStreamer.BuildingBlocks.Application.Collections
 {
-    public readonly struct LinkedArray<T> : IList<T>,
+    public class LinkedArray<T> : IList<T>,
         IReadOnlyList<T>,
         ICollection<T>,
         IReadOnlyCollection<T>
     {
         public static LinkedArray<T> Empty { get; } = new([]);
 
-        private readonly T[] _array;
-        private readonly List<int> _list = [];
+        private T[] _array;
+        private List<int> _indices;
 
-        public int Count => _list.Count;
-        public bool IsReadOnly => true;
+        public int Count => _indices.Count;
+        public bool IsReadOnly => false;
 
         public T this[int index]
         {
-            get => _array[_list[index]];
-            set => throw new InvalidOperationException();
+            get
+            {
+                if (index < 0 || index >= _indices.Count)
+                    throw new IndexOutOfRangeException();
+                return _array[_indices[index]];
+            }
+            set
+            {
+                if (index < 0 || index >= _indices.Count)
+                    throw new IndexOutOfRangeException();
+                var sourceIndex = Array.IndexOf(_array, value);
+                if (sourceIndex < 0)
+                {
+                    // Extend _array
+                    var newArray = new T[_array.Length + 1];
+                    Array.Copy(_array, newArray, _array.Length);
+                    newArray[_array.Length] = value;
+                    _array = newArray;
+                    sourceIndex = _array.Length - 1;
+                }
+                _indices[index] = sourceIndex;
+            }
         }
 
-        public LinkedArray(T[] array) => _array = Guard.Against.Null(array);
+        public LinkedArray(T[] array)
+        {
+            _array = Guard.Against.Null(array);
+            _indices = new List<int>(array.Length);
+            for (int i = 0; i < array.Length; i++)
+                _indices.Add(i);
+        }
+
+        public LinkedArray(T[] array, List<int> indices)
+        {
+            _array = Guard.Against.Null(array);
+            _indices = Guard.Against.Null(indices);
+        }
 
         public IEnumerator<T> GetEnumerator()
         {
-            using var enumerator = _list.GetEnumerator();
-            while (enumerator.MoveNext())
+            for (int i = 0; i < _indices.Count; i++)
             {
-                yield return _array[enumerator.Current];
+                yield return _array[_indices[i]];
             }
         }
 
@@ -68,18 +99,17 @@ namespace RapidStreamer.BuildingBlocks.Application.Collections
 
         public TR[] ForEach<TR>(Func<int, T, TR> execution)
         {
-            if (Count <= 0)
+            if (_indices.Count <= 0)
             {
                 return [];
             }
 
-            var rtn = new TR[Count];
+            var rtn = new TR[_indices.Count];
 
-            var listSpan = CollectionsMarshal.AsSpan(_list);
-            ref var listSpanReference = ref MemoryMarshal.GetReference(listSpan);
-            for (var index = 0; index < listSpan.Length; index++)
+            var indicesSpan = CollectionsMarshal.AsSpan(_indices);
+            for (var index = 0; index < indicesSpan.Length; index++)
             {
-                var itemIndex = Unsafe.Add(ref listSpanReference, index);
+                var itemIndex = indicesSpan[index];
                 rtn[index] = execution(index, _array[itemIndex]);
             }
 
@@ -90,29 +120,43 @@ namespace RapidStreamer.BuildingBlocks.Application.Collections
 
         public int IndexOf(T item)
         {
-            var sourceIndex = Array.IndexOf(_array, item);
-            return sourceIndex >= 0 ? _list.IndexOf(sourceIndex) : -1;
+            for (int i = 0; i < _indices.Count; i++)
+            {
+                if (EqualityComparer<T>.Default.Equals(_array[_indices[i]], item))
+                    return i;
+            }
+            return -1;
         }
 
         public void Insert(int index, T item)
         {
+            if (index < 0 || index > _indices.Count)
+                throw new IndexOutOfRangeException();
             var sourceIndex = Array.IndexOf(_array, item);
-            if (sourceIndex >= 0)
+            if (sourceIndex < 0)
             {
-                _list.Insert(index, sourceIndex);
+                // Extend _array
+                var newArray = new T[_array.Length + 1];
+                Array.Copy(_array, newArray, _array.Length);
+                newArray[_array.Length] = item;
+                _array = newArray;
+                sourceIndex = _array.Length - 1;
             }
+            _indices.Insert(index, sourceIndex);
         }
 
         public void RemoveAt(int index)
         {
-            _list.RemoveAt(index);
+            if (index < 0 || index >= _indices.Count)
+                throw new IndexOutOfRangeException();
+            _indices.RemoveAt(index);
         }
 
         #endregion
 
         #region IReadOnlyList<T>
 
-        T IReadOnlyList<T>.this[int index] => _array[_list[index]];
+        T IReadOnlyList<T>.this[int index] => _array[_indices[index]];
 
         #endregion IReadOnlyList<T>
 
@@ -123,51 +167,58 @@ namespace RapidStreamer.BuildingBlocks.Application.Collections
             var sourceIndex = Array.IndexOf(_array, item);
             if (sourceIndex < 0)
             {
-                throw new IndexOutOfRangeException();
+                // Extend _array
+                var newArray = new T[_array.Length + 1];
+                Array.Copy(_array, newArray, _array.Length);
+                newArray[_array.Length] = item;
+                _array = newArray;
+                sourceIndex = _array.Length - 1;
             }
-
-            Add(sourceIndex);
+            _indices.Add(sourceIndex);
         }
 
         public bool Contains(T item)
         {
-            var sourceIndex = Array.IndexOf(_array, item);
-            return sourceIndex >= 0 && Contains(sourceIndex);
+            for (int i = 0; i < _indices.Count; i++)
+            {
+                if (EqualityComparer<T>.Default.Equals(_array[_indices[i]], item))
+                    return true;
+            }
+            return false;
         }
 
         public bool Remove(T item)
         {
-            var sourceIndex = Array.IndexOf(_array, item);
-            return sourceIndex >= 0 && Remove(sourceIndex);
+            for (int i = 0; i < _indices.Count; i++)
+            {
+                if (EqualityComparer<T>.Default.Equals(_array[_indices[i]], item))
+                {
+                    _indices.RemoveAt(i);
+                    return true;
+                }
+            }
+            return false;
         }
 
         #endregion
 
         #region ICollection<int>
 
-        public void Add(int itemIndex)
-        {
-            if (itemIndex < 0 || itemIndex >= _array.Length)
-            {
-                throw new IndexOutOfRangeException();
-            }
-
-            _list.Add(itemIndex);
-        }
-
         public void Clear()
         {
-            _list.Clear();
+            _indices.Clear();
         }
 
-        public bool Contains(int itemIndex)
+        internal bool Contains(int itemIndex)
         {
-            return _list.Contains(itemIndex);
+            return itemIndex >= 0 && itemIndex < _array.Length && _indices.Contains(itemIndex);
         }
 
-        public bool Remove(int itemIndex)
+        internal bool Remove(int itemIndex)
         {
-            return _list.Remove(itemIndex);
+            if (itemIndex < 0 || itemIndex >= _array.Length)
+                return false;
+            return _indices.Remove(itemIndex);
         }
 
         #endregion

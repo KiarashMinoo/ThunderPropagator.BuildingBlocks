@@ -111,7 +111,9 @@ namespace RapidStreamer.UnitTests.BuildingBlocks.Applications.Collections
         public void Add()
         {
             var array = new[] { 1, 2, 3, 4, 5 };
-            var linkedArray = new LinkedArray<int>(array) { 6 };
+            var linkedArray = new LinkedArray<int>(array);
+
+            linkedArray.Add(6);
 
             Assert.Equal(6, linkedArray.Count);
             Assert.Equal(new[] { 1, 2, 3, 4, 5, 6 }, linkedArray.ToArray());
@@ -136,19 +138,7 @@ namespace RapidStreamer.UnitTests.BuildingBlocks.Applications.Collections
             linkedArray.Remove(3);
 
             Assert.Equal(4, linkedArray.Count);
-            Assert.Equal(new[] { 1, 2, 4, 5 }, linkedArray.ToArray());
-        }
-
-        [Fact]
-        public void AddByIndex()
-        {
-            var array = new[] { 1, 2, 3, 4, 5 };
-            var linkedArray = new LinkedArray<int>(array);
-
-            linkedArray.Add(2);
-
-            Assert.Equal(6, linkedArray.Count);
-            Assert.Equal(new[] { 1, 2, 3, 4, 5, 3 }, linkedArray.ToArray());
+            Assert.Equal(new[] { 1, 2, 3, 5 }, linkedArray.ToArray());
         }
 
         [Fact]
@@ -173,12 +163,15 @@ namespace RapidStreamer.UnitTests.BuildingBlocks.Applications.Collections
         }
 
         [Fact]
-        public void SetItemThrowsException()
+        public void SetItemAllowsNewItem()
         {
             var array = new[] { 1, 2, 3, 4, 5 };
             var linkedArray = new LinkedArray<int>(array);
 
-            Assert.Throws<InvalidOperationException>(() => linkedArray[2] = 10);
+            linkedArray[2] = 10;
+
+            Assert.Equal(10, linkedArray[2]);
+            Assert.Equal(new[] { 1, 2, 10, 4, 5 }, linkedArray.ToArray());
         }
 
         [Fact]
@@ -191,33 +184,23 @@ namespace RapidStreamer.UnitTests.BuildingBlocks.Applications.Collections
         }
 
         [Fact]
-        public void AddInvalidIndexThrowsException()
+        public void ContainsInvalidIndexReturnsFalse()
         {
             var array = new[] { 1, 2, 3, 4, 5 };
             var linkedArray = new LinkedArray<int>(array);
 
-            Assert.Throws<IndexOutOfRangeException>(() => linkedArray.Add(10));
-            Assert.Throws<IndexOutOfRangeException>(() => linkedArray.Add(-1));
+            Assert.False(linkedArray.Contains(10));
+            Assert.False(linkedArray.Contains(-1));
         }
 
         [Fact]
-        public void ContainsInvalidIndexThrowsException()
+        public void RemoveInvalidIndexReturnsFalse()
         {
             var array = new[] { 1, 2, 3, 4, 5 };
             var linkedArray = new LinkedArray<int>(array);
 
-            Assert.Throws<IndexOutOfRangeException>(() => linkedArray.Contains(10));
-            Assert.Throws<IndexOutOfRangeException>(() => linkedArray.Contains(-1));
-        }
-
-        [Fact]
-        public void RemoveInvalidIndexThrowsException()
-        {
-            var array = new[] { 1, 2, 3, 4, 5 };
-            var linkedArray = new LinkedArray<int>(array);
-
-            Assert.Throws<IndexOutOfRangeException>(() => linkedArray.Remove(10));
-            Assert.Throws<IndexOutOfRangeException>(() => linkedArray.Remove(-1));
+            Assert.False(linkedArray.Remove(10));
+            Assert.False(linkedArray.Remove(-1));
         }
     }
 }

@@ -18,7 +18,7 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
             if (array.Length == 0)
                 return LinkedArray<T>.Empty;
 
-            var rtn = new LinkedArray<T>(array);
+            var tempIndices = new List<int>();
 
             var arraySpan = array.AsSpan();
             ref var arraySpanReference = ref MemoryMarshal.GetReference(arraySpan);
@@ -30,10 +30,10 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
                     continue;
                 }
 
-                rtn.Add(index);
+                tempIndices.Add(index);
             }
 
-            return rtn;
+            return new LinkedArray<T>(array, tempIndices);
         }
 
         public static IEnumerable<T> Convert<T>(this IEnumerable<IConvertible<T>> enumerable) => enumerable.Select(item => item.Convert());
