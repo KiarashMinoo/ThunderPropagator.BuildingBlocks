@@ -1,6 +1,4 @@
-﻿using Apache.NMS;
-using Apache.NMS.ActiveMQ;
-using Apache.NMS.ActiveMQ.Commands;
+﻿using Apache.NMS.ActiveMQ;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace RapidStreamer.BuildingBlocks.Infrastructure.HealthChecks
@@ -40,15 +38,8 @@ namespace RapidStreamer.BuildingBlocks.Infrastructure.HealthChecks
                 }
 
                 using var connection = await connectionFactory.CreateConnectionAsync();
+                await connection.StartAsync();
                 using var session = await connection.CreateSessionAsync();
-                using var queue = new ActiveMQQueue(_activeMQHealthCheckOptions.Queue);
-                using var producer = await session.CreateProducerAsync(queue);
-
-                producer.DeliveryMode = MsgDeliveryMode.NonPersistent;
-                producer.Priority = MsgPriority.AboveLow;
-
-                var message = new ActiveMQMessage { NMSTimeToLive = TimeSpan.FromMilliseconds(1000) };
-                await producer.SendAsync(message);
 
                 return HealthCheckResult.Healthy();
             }
