@@ -17,6 +17,7 @@
         <PackageReference Include="YamlDotNet"/>
         <PackageReference Include="Ardalis.GuardClauses"/>
         <PackageReference Include="SharpZipLib"/>
+        <PackageReference Include="ToonNet"/>
     </ItemGroup>
 
 </Project>

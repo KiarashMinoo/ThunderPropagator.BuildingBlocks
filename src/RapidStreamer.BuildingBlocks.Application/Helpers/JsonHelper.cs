@@ -1,7 +1,5 @@
 ﻿using System.Collections.Concurrent;
-using System.Diagnostics;
 using RapidStreamer.BuildingBlocks.Application.Attributes;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using JsonSerializer = System.Text.Json.JsonSerializer;
@@ -12,16 +10,15 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
     {
         private static readonly ConcurrentDictionary<Type, JsonSerializationAttribute?> JsonSerializationAttributes = new();
 
-        private static JsonSerializerOptions BuildDefaultSerializerOptions()
-            => new()
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                ReferenceHandler = ReferenceHandler.IgnoreCycles,
-            };
+        internal static JsonSerializerOptions BuildDefaultSerializerOptions() => new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            ReferenceHandler = ReferenceHandler.IgnoreCycles,
+        };
 
-        private static JsonSerializerOptions JsonSerializerOptions<T>(JsonSerializerOptions? serializerOptions = null) => JsonSerializerOptions(typeof(T), serializerOptions);
+        internal static JsonSerializerOptions JsonSerializerOptions<T>(JsonSerializerOptions? serializerOptions = null) => JsonSerializerOptions(typeof(T), serializerOptions);
 
-        private static JsonSerializerOptions JsonSerializerOptions(Type type, JsonSerializerOptions? serializerOptions = null)
+        internal static JsonSerializerOptions JsonSerializerOptions(Type type, JsonSerializerOptions? serializerOptions = null)
         {
             var jsonSerializationAttribute = JsonSerializationAttributes.GetOrAdd(type, key =>
             {

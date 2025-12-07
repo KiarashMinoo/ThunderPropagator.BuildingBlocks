@@ -2,9 +2,6 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using RapidStreamer.BuildingBlocks.Application.Attributes;
-using RapidStreamer.BuildingBlocks.Application.Collections;
-using System.Diagnostics;
-using System.IO;
 using System.Text;
 
 namespace RapidStreamer.BuildingBlocks.Application.Helpers
@@ -13,12 +10,11 @@ namespace RapidStreamer.BuildingBlocks.Application.Helpers
     {
         private static readonly ConcurrentDictionary<Type, JsonSerializationAttribute?> JsonSerializationAttributes = new();
 
-        private static JsonSerializerSettings BuildDefaultNSerializerSettings()
-            => new()
-            {
-                ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-            };
+        private static JsonSerializerSettings BuildDefaultNSerializerSettings() => new()
+        {
+            ContractResolver = new CamelCasePropertyNamesContractResolver(),
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+        };
 
         private static JsonSerializerSettings NJsonSerializerSettings<T>(JsonSerializerSettings? serializerSettings = null)
             => NJsonSerializerSettings(typeof(T), serializerSettings);
