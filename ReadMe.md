@@ -49,8 +49,8 @@ dotnet nuget add source --name github --source https://nuget.pkg.github.com/Kiar
 
 | Package | Description | Docs Usage |
 |---------|-------------|------------|
-| RapidStreamer.BuildingBlocks.Application | Core application building blocks | [docs/Application/README.md](docs/Application/README.md) |
-| RapidStreamer.BuildingBlocks.Infrastructure | Infrastructure and monitoring | [docs/Infrastructure/README.md](docs/Infrastructure/README.md) |
+| RapidStreamer.BuildingBlocks.Application | Core application building blocks | [docs/BuildingBlocks.Application/README.md](docs/BuildingBlocks.Application/README.md) |
+| RapidStreamer.BuildingBlocks.Infrastructure | Infrastructure and monitoring | [docs/BuildingBlocks.Infrastructure/README.md](docs/BuildingBlocks.Infrastructure/README.md) |
 
 ---
 
