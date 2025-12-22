@@ -3,10 +3,12 @@ using System.Runtime.InteropServices;
 
 namespace RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Disk;
 
+public interface IDiskHealthMetricsClient : IMetricsClient<DiskHealthMetrics[]>;
+
 /// <summary>
 /// Client for collecting disk health metrics.
 /// </summary>
-internal sealed class DiskHealthMetricsClient : IMetricsClient<DiskHealthMetrics[]>
+internal sealed class DiskHealthMetricsClient : IDiskHealthMetricsClient
 {
     private readonly IDiskHealthProvider _provider = CreatePlatformProvider();
 

@@ -3,10 +3,12 @@ using System.Runtime.InteropServices;
 
 namespace RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Disk;
 
+public interface IDiskSpeedMetricsClient : IMetricsClient<DiskSpeedMetrics[]>;
+
 /// <summary>
 /// Client for collecting disk speed/performance metrics.
 /// </summary>
-internal sealed class DiskSpeedMetricsClient : IMetricsClient<DiskSpeedMetrics[]>
+internal sealed class DiskSpeedMetricsClient : IDiskSpeedMetricsClient
 {
     private readonly IDiskSpeedProvider _provider = CreatePlatformProvider();
 

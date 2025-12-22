@@ -33,14 +33,14 @@ public interface ISystemResourceMonitor : IMetricsClient<SystemResourceMonitorMe
 }
 
 internal sealed class SystemResourceMonitorImpl(
-    CpuMetricsClient cpuMetricsClient,
-    CpuTemperatureMetricsClient cpuTemperatureMetricsClient,
-    MemoryMetricsClient memoryMetricsClient,
-    SystemDriveMetricsClient systemDriveMetricsClient,
-    DiskHealthMetricsClient diskHealthMetricsClient,
-    DiskSpeedMetricsClient diskSpeedMetricsClient,
-    GpuMetricsClient gpuMetricsClient,
-    BatteryMetricsClient batteryMetricsClient,
+    ICpuMetricsClient cpuMetricsClient,
+    ICpuTemperatureMetricsClient cpuTemperatureMetricsClient,
+    IMemoryMetricsClient memoryMetricsClient,
+    ISystemDriveMetricsClient systemDriveMetricsClient,
+    IDiskHealthMetricsClient diskHealthMetricsClient,
+    IDiskSpeedMetricsClient diskSpeedMetricsClient,
+    IGpuMetricsClient gpuMetricsClient,
+    IBatteryMetricsClient batteryMetricsClient,
     IOptions<SystemResourceMonitorOptions> options
 ) : ISystemResourceMonitor
 {

@@ -1,6 +1,8 @@
 namespace RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.SystemDrives;
 
-public sealed class SystemDriveMetricsClient : IMetricsClient<SystemDriveMetrics[]>
+public interface ISystemDriveMetricsClient : IMetricsClient<SystemDriveMetrics[]>;
+
+internal sealed class SystemDriveMetricsClient : ISystemDriveMetricsClient
 {
     public Task<SystemDriveMetrics[]> GetMetricsAsync(CancellationToken cancellationToken = default)
     {

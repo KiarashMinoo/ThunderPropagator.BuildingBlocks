@@ -3,7 +3,9 @@ using System.Runtime.InteropServices;
 
 namespace RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Memory;
 
-internal sealed class MemoryMetricsClient : IMetricsClient<MemoryMetrics>
+internal interface IMemoryMetricsClient : IMetricsClient<MemoryMetrics>;
+
+internal sealed class MemoryMetricsClient : IMemoryMetricsClient
 {
     public async Task<MemoryMetrics> GetMetricsAsync(CancellationToken cancellationToken = default)
     {

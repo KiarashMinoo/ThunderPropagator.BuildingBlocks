@@ -3,5 +3,5 @@
 public interface IMetricsClient<TMetrics>
     where TMetrics : class
 {
-    Task<TMetrics> GetMetricsAsync(CancellationToken cancellationToken = default);
+    public Task<TMetrics> GetMetricsAsync(CancellationToken cancellationToken = default);
 }

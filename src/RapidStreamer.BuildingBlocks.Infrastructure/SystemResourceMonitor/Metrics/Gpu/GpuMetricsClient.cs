@@ -3,16 +3,37 @@ using System.Runtime.InteropServices;
 
 namespace RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Gpu;
 
+public interface IGpuMetricsClient : IMetricsClient<GpuMetrics[]>
+{
+    Task<GpuMetrics[]> GetMetricsAsync(int maxProcesses = 10, CancellationToken cancellationToken = default);
+}
+
 /// <summary>
 /// Client for collecting GPU metrics.
 /// </summary>
-internal sealed class GpuMetricsClient(
-    int maxProcesses = 10
-) : IMetricsClient<GpuMetrics[]>
+internal sealed class GpuMetricsClient : IGpuMetricsClient
 {
     private readonly IGpuMetricsProvider _provider = CreatePlatformProvider();
+    private readonly int _maxProcesses;
 
-    public async Task<GpuMetrics[]> GetMetricsAsync(CancellationToken cancellationToken = default)
+    public GpuMetricsClient()
+    {
+    }
+
+    /// <summary>
+    /// Client for collecting GPU metrics.
+    /// </summary>
+    public GpuMetricsClient(int maxProcesses = 10) : this()
+    {
+        _maxProcesses = maxProcesses;
+    }
+
+    public Task<GpuMetrics[]> GetMetricsAsync(CancellationToken cancellationToken = default)
+    {
+        return GetMetricsAsync(_maxProcesses, cancellationToken);
+    }
+
+    public async Task<GpuMetrics[]> GetMetricsAsync(int maxProcesses = 10, CancellationToken cancellationToken = default)
     {
         try
         {

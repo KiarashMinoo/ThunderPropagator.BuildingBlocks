@@ -3,10 +3,12 @@ using System.Runtime.InteropServices;
 
 namespace RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Battery;
 
+public  interface IBatteryMetricsClient : IMetricsClient<BatteryMetrics>;
+
 /// <summary>
 /// Client for collecting battery metrics.
 /// </summary>
-internal sealed class BatteryMetricsClient : IMetricsClient<BatteryMetrics>
+internal sealed class BatteryMetricsClient : IBatteryMetricsClient
 {
     private readonly IBatteryMetricsProvider _provider = CreatePlatformProvider();
 

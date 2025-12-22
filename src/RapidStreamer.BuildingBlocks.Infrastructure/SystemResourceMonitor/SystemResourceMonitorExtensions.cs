@@ -41,19 +41,24 @@ public static class SystemResourceMonitorExtensions
             var options = sp.GetRequiredService<IOptions<SystemResourceMonitorOptions>>().Value;
             return new CpuMetricsClient(options.DefaultSamplingWindowMs, options.CollectAllProcesses);
         });
-        services.TryAddSingleton<MemoryMetricsClient>();
-        services.TryAddSingleton<SystemDriveMetricsClient>();
+        services.TryAddSingleton<ICpuMetricsClient>(sp => sp.GetRequiredService<CpuMetricsClient>());
+
+        services.TryAddSingleton<IMemoryMetricsClient, MemoryMetricsClient>();
+        services.TryAddSingleton<ISystemDriveMetricsClient, SystemDriveMetricsClient>();
 
         // Register new metric clients
-        services.TryAddSingleton<CpuTemperatureMetricsClient>();
-        services.TryAddSingleton<DiskHealthMetricsClient>();
-        services.TryAddSingleton<DiskSpeedMetricsClient>();
+        services.TryAddSingleton<ICpuTemperatureMetricsClient, CpuTemperatureMetricsClient>();
+        services.TryAddSingleton<IDiskHealthMetricsClient, DiskHealthMetricsClient>();
+        services.TryAddSingleton<IDiskSpeedMetricsClient, DiskSpeedMetricsClient>();
+
         services.TryAddSingleton(sp =>
         {
             var options = sp.GetRequiredService<IOptions<SystemResourceMonitorOptions>>();
             return new GpuMetricsClient(options.Value.MaxGpuProcesses);
         });
-        services.TryAddSingleton<BatteryMetricsClient>();
+        services.TryAddSingleton<IGpuMetricsClient>(sp => sp.GetRequiredService<GpuMetricsClient>());
+
+        services.TryAddSingleton<IBatteryMetricsClient, BatteryMetricsClient>();
 
         // Register main monitor
         services.TryAddSingleton<ISystemResourceMonitor, SystemResourceMonitorImpl>();

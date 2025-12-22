@@ -3,10 +3,12 @@ using System.Runtime.InteropServices;
 
 namespace RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Cpu;
 
+public interface ICpuTemperatureMetricsClient : IMetricsClient<CpuTemperatureMetrics>;
+
 /// <summary>
 /// Client for collecting CPU temperature metrics.
 /// </summary>
-internal sealed class CpuTemperatureMetricsClient : IMetricsClient<CpuTemperatureMetrics>
+internal sealed class CpuTemperatureMetricsClient : ICpuTemperatureMetricsClient
 {
     private readonly ICpuTemperatureProvider _provider = CreatePlatformProvider();
 

@@ -2,7 +2,12 @@ using System.Diagnostics;
 
 namespace RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Cpu;
 
-internal sealed class CpuMetricsClient : IMetricsClient<CpuMetrics>
+public interface ICpuMetricsClient : IMetricsClient<CpuMetrics>
+{
+    Task<CpuMetrics> GetMetricsAsync(long window, bool all = false, CancellationToken cancellationToken = default);
+}
+
+internal sealed class CpuMetricsClient : ICpuMetricsClient
 {
     private readonly long _window;
     private readonly bool _all;
