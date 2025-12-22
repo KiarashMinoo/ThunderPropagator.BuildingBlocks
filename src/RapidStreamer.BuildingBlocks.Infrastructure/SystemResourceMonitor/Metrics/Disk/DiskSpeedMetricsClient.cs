@@ -6,15 +6,19 @@ namespace RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metr
 /// <summary>
 /// Client for collecting disk speed/performance metrics.
 /// </summary>
-internal sealed class DiskSpeedMetricsClient
+internal sealed class DiskSpeedMetricsClient : IMetricsClient<DiskSpeedMetrics[]>
 {
     private readonly IDiskSpeedProvider _provider = CreatePlatformProvider();
 
-    public DiskSpeedMetrics[] GetMetrics()
+    public async Task<DiskSpeedMetrics[]> GetMetricsAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            return _provider.GetDiskSpeedMetrics();
+            return await _provider.GetDiskSpeedMetricsAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -43,7 +47,7 @@ internal sealed class DiskSpeedMetricsClient
 /// </summary>
 internal interface IDiskSpeedProvider
 {
-    DiskSpeedMetrics[] GetDiskSpeedMetrics();
+    Task<DiskSpeedMetrics[]> GetDiskSpeedMetricsAsync(CancellationToken cancellationToken);
 }
 
 /// <summary>
@@ -52,8 +56,10 @@ internal interface IDiskSpeedProvider
 /// </summary>
 internal sealed class WindowsDiskSpeedProvider : IDiskSpeedProvider
 {
-    public DiskSpeedMetrics[] GetDiskSpeedMetrics()
+    public Task<DiskSpeedMetrics[]> GetDiskSpeedMetricsAsync(CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var metrics = new List<DiskSpeedMetrics>();
 
         try
@@ -62,6 +68,8 @@ internal sealed class WindowsDiskSpeedProvider : IDiskSpeedProvider
 
             foreach (var drive in drives)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 try
                 {
                     // Windows disk speed metrics require System.Diagnostics.PerformanceCounter package
@@ -89,7 +97,7 @@ internal sealed class WindowsDiskSpeedProvider : IDiskSpeedProvider
             Debug.WriteLine($"Windows disk speed provider error: {ex.Message}");
         }
 
-        return metrics.ToArray();
+        return Task.FromResult(metrics.ToArray());
     }
 }
 
@@ -98,8 +106,10 @@ internal sealed class WindowsDiskSpeedProvider : IDiskSpeedProvider
 /// </summary>
 internal sealed class LinuxDiskSpeedProvider : IDiskSpeedProvider
 {
-    public DiskSpeedMetrics[] GetDiskSpeedMetrics()
+    public Task<DiskSpeedMetrics[]> GetDiskSpeedMetricsAsync(CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var metrics = new List<DiskSpeedMetrics>();
 
         try
@@ -108,6 +118,8 @@ internal sealed class LinuxDiskSpeedProvider : IDiskSpeedProvider
 
             foreach (var drive in drives)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 try
                 {
                     // Linux disk speed metrics require parsing /proc/diskstats
@@ -135,7 +147,7 @@ internal sealed class LinuxDiskSpeedProvider : IDiskSpeedProvider
             Debug.WriteLine($"Linux disk speed provider error: {ex.Message}");
         }
 
-        return metrics.ToArray();
+        return Task.FromResult(metrics.ToArray());
     }
 }
 
@@ -144,8 +156,10 @@ internal sealed class LinuxDiskSpeedProvider : IDiskSpeedProvider
 /// </summary>
 internal sealed class MacOsDiskSpeedProvider : IDiskSpeedProvider
 {
-    public DiskSpeedMetrics[] GetDiskSpeedMetrics()
+    public Task<DiskSpeedMetrics[]> GetDiskSpeedMetricsAsync(CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var metrics = new List<DiskSpeedMetrics>();
 
         try
@@ -154,6 +168,8 @@ internal sealed class MacOsDiskSpeedProvider : IDiskSpeedProvider
 
             foreach (var drive in drives)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 try
                 {
                     metrics.Add(new DiskSpeedMetrics
@@ -179,7 +195,7 @@ internal sealed class MacOsDiskSpeedProvider : IDiskSpeedProvider
             Debug.WriteLine($"macOS disk speed provider error: {ex.Message}");
         }
 
-        return metrics.ToArray();
+        return Task.FromResult(metrics.ToArray());
     }
 }
 
@@ -188,8 +204,9 @@ internal sealed class MacOsDiskSpeedProvider : IDiskSpeedProvider
 /// </summary>
 internal sealed class UnsupportedDiskSpeedProvider : IDiskSpeedProvider
 {
-    public DiskSpeedMetrics[] GetDiskSpeedMetrics()
+    public Task<DiskSpeedMetrics[]> GetDiskSpeedMetricsAsync(CancellationToken cancellationToken)
     {
-        return Array.Empty<DiskSpeedMetrics>();
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(Array.Empty<DiskSpeedMetrics>());
     }
 }

@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents battery status and health metrics.
 /// </summary>
-public record BatteryMetrics
+public record BatteryMetrics : IMetrics
 {
     /// <summary>
     /// Whether a battery is present in the system.
@@ -80,4 +80,3 @@ public enum BatteryStatus
     NotCharging = 4,
     NotPresent = 5
 }
-

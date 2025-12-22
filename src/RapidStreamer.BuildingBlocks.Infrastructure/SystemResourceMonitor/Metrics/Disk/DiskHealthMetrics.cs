@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents disk health and SMART status metrics.
 /// </summary>
-public record DiskHealthMetrics
+public record DiskHealthMetrics : IMetrics
 {
     /// <summary>
     /// Drive identifier (e.g., "C:", "/dev/sda")
@@ -54,4 +54,3 @@ public enum DiskHealthStatus
     Critical = 3,
     NotSupported = 4
 }
-

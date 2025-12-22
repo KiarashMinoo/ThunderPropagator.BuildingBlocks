@@ -3,26 +3,36 @@ using System.Runtime.InteropServices;
 
 namespace RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Memory;
 
-internal class MemoryMetricsClient
+internal sealed class MemoryMetricsClient : IMetricsClient<MemoryMetrics>
 {
-    public MemoryMetrics GetMetrics() => IsUnix() ? GetUnixMetrics() : GetWindowsMetrics();
+    public async Task<MemoryMetrics> GetMetricsAsync(CancellationToken cancellationToken = default)
+    {
+        return IsUnix()
+            ? await GetUnixMetricsAsync(cancellationToken).ConfigureAwait(false)
+            : await GetWindowsMetricsAsync(cancellationToken).ConfigureAwait(false);
+    }
 
     private static bool IsUnix() => RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 
-    private static MemoryMetrics GetWindowsMetrics()
+    private static async Task<MemoryMetrics> GetWindowsMetricsAsync(CancellationToken cancellationToken)
     {
         var info = new ProcessStartInfo
         {
             FileName = "wmic",
             Arguments = "OS get FreePhysicalMemory,TotalVisibleMemorySize /Value",
-            RedirectStandardOutput = true
+            RedirectStandardOutput = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
         };
 
-        string output;
-        using (var process = Process.Start(info))
+        using var process = Process.Start(info);
+        if (process == null)
         {
-            output = process!.StandardOutput.ReadToEnd();
+            return new MemoryMetrics(0, 0);
         }
+
+        await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+        var output = await process.StandardOutput.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
 
         var lines = output.Trim().Split("\n");
         var freeMemoryParts = lines[0].Split("=", StringSplitOptions.RemoveEmptyEntries);
@@ -34,20 +44,25 @@ internal class MemoryMetricsClient
         );
     }
 
-    private static MemoryMetrics GetUnixMetrics()
+    private static async Task<MemoryMetrics> GetUnixMetricsAsync(CancellationToken cancellationToken)
     {
         var info = new ProcessStartInfo
         {
             FileName = "/bin/bash",
             Arguments = "-c \"free -m\"",
-            RedirectStandardOutput = true
+            RedirectStandardOutput = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
         };
 
-        string output;
-        using (var process = Process.Start(info))
+        using var process = Process.Start(info);
+        if (process == null)
         {
-            output = process!.StandardOutput.ReadToEnd();
+            return new MemoryMetrics(0, 0);
         }
+
+        await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+        var output = await process.StandardOutput.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
 
         var lines = output.Split("\n");
         var memory = lines[1].Split(" ", StringSplitOptions.RemoveEmptyEntries);

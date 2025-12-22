@@ -6,15 +6,19 @@ namespace RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metr
 /// <summary>
 /// Client for collecting disk health metrics.
 /// </summary>
-internal sealed class DiskHealthMetricsClient
+internal sealed class DiskHealthMetricsClient : IMetricsClient<DiskHealthMetrics[]>
 {
     private readonly IDiskHealthProvider _provider = CreatePlatformProvider();
 
-    public DiskHealthMetrics[] GetMetrics()
+    public async Task<DiskHealthMetrics[]> GetMetricsAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            return _provider.GetDiskHealthMetrics();
+            return await _provider.GetDiskHealthMetricsAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -44,7 +48,7 @@ internal sealed class DiskHealthMetricsClient
 /// </summary>
 internal interface IDiskHealthProvider
 {
-    DiskHealthMetrics[] GetDiskHealthMetrics();
+    Task<DiskHealthMetrics[]> GetDiskHealthMetricsAsync(CancellationToken cancellationToken);
 }
 
 /// <summary>
@@ -52,8 +56,10 @@ internal interface IDiskHealthProvider
 /// </summary>
 internal sealed class WindowsDiskHealthProvider : IDiskHealthProvider
 {
-    public DiskHealthMetrics[] GetDiskHealthMetrics()
+    public Task<DiskHealthMetrics[]> GetDiskHealthMetricsAsync(CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var metrics = new List<DiskHealthMetrics>();
 
         try
@@ -62,6 +68,8 @@ internal sealed class WindowsDiskHealthProvider : IDiskHealthProvider
 
             foreach (var drive in drives)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 try
                 {
                     // On Windows, we can use WMI to get SMART data
@@ -97,7 +105,7 @@ internal sealed class WindowsDiskHealthProvider : IDiskHealthProvider
             Debug.WriteLine($"Windows disk health provider error: {ex.Message}");
         }
 
-        return metrics.ToArray();
+        return Task.FromResult(metrics.ToArray());
     }
 }
 
@@ -106,8 +114,10 @@ internal sealed class WindowsDiskHealthProvider : IDiskHealthProvider
 /// </summary>
 internal sealed class LinuxDiskHealthProvider : IDiskHealthProvider
 {
-    public DiskHealthMetrics[] GetDiskHealthMetrics()
+    public Task<DiskHealthMetrics[]> GetDiskHealthMetricsAsync(CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var metrics = new List<DiskHealthMetrics>();
 
         try
@@ -117,6 +127,8 @@ internal sealed class LinuxDiskHealthProvider : IDiskHealthProvider
 
             foreach (var device in devices)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 try
                 {
                     var healthMetric = new DiskHealthMetrics
@@ -146,7 +158,7 @@ internal sealed class LinuxDiskHealthProvider : IDiskHealthProvider
             Debug.WriteLine($"Linux disk health provider error: {ex.Message}");
         }
 
-        return metrics.ToArray();
+        return Task.FromResult(metrics.ToArray());
     }
 
     private static string[] GetLinuxDiskDevices()
@@ -172,8 +184,10 @@ internal sealed class LinuxDiskHealthProvider : IDiskHealthProvider
 /// </summary>
 internal sealed class MacOsDiskHealthProvider : IDiskHealthProvider
 {
-    public DiskHealthMetrics[] GetDiskHealthMetrics()
+    public Task<DiskHealthMetrics[]> GetDiskHealthMetricsAsync(CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var metrics = new List<DiskHealthMetrics>();
 
         try
@@ -182,6 +196,8 @@ internal sealed class MacOsDiskHealthProvider : IDiskHealthProvider
 
             foreach (var drive in drives)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 try
                 {
                     var healthMetric = new DiskHealthMetrics
@@ -211,7 +227,7 @@ internal sealed class MacOsDiskHealthProvider : IDiskHealthProvider
             Debug.WriteLine($"macOS disk health provider error: {ex.Message}");
         }
 
-        return metrics.ToArray();
+        return Task.FromResult(metrics.ToArray());
     }
 }
 
@@ -220,8 +236,9 @@ internal sealed class MacOsDiskHealthProvider : IDiskHealthProvider
 /// </summary>
 internal sealed class UnsupportedDiskHealthProvider : IDiskHealthProvider
 {
-    public DiskHealthMetrics[] GetDiskHealthMetrics()
+    public Task<DiskHealthMetrics[]> GetDiskHealthMetricsAsync(CancellationToken cancellationToken)
     {
-        return Array.Empty<DiskHealthMetrics>();
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(Array.Empty<DiskHealthMetrics>());
     }
 }

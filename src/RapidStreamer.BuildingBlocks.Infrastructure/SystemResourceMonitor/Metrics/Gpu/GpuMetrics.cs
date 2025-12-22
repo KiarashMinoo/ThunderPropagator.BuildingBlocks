@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents GPU temperature and utilization metrics.
 /// </summary>
-public record GpuMetrics
+public record GpuMetrics : IMetrics
 {
     /// <summary>
     /// GPU identifier/index.
@@ -91,4 +91,3 @@ public record GpuProcessInfo
     /// </summary>
     public double? UtilizationPercent { get; init; }
 }
-

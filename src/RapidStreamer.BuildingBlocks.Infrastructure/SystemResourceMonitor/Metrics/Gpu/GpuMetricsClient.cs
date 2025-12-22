@@ -6,15 +6,21 @@ namespace RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metr
 /// <summary>
 /// Client for collecting GPU metrics.
 /// </summary>
-internal sealed class GpuMetricsClient(int maxProcesses = 10)
+internal sealed class GpuMetricsClient(
+    int maxProcesses = 10
+) : IMetricsClient<GpuMetrics[]>
 {
     private readonly IGpuMetricsProvider _provider = CreatePlatformProvider();
 
-    public GpuMetrics[] GetMetrics()
+    public async Task<GpuMetrics[]> GetMetricsAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            return _provider.GetGpuMetrics(maxProcesses);
+            return await _provider.GetGpuMetricsAsync(maxProcesses, cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -43,7 +49,7 @@ internal sealed class GpuMetricsClient(int maxProcesses = 10)
 /// </summary>
 internal interface IGpuMetricsProvider
 {
-    GpuMetrics[] GetGpuMetrics(int maxProcesses);
+    Task<GpuMetrics[]> GetGpuMetricsAsync(int maxProcesses, CancellationToken cancellationToken);
 }
 
 /// <summary>
@@ -51,14 +57,14 @@ internal interface IGpuMetricsProvider
 /// </summary>
 internal sealed class WindowsGpuMetricsProvider : IGpuMetricsProvider
 {
-    public GpuMetrics[] GetGpuMetrics(int maxProcesses)
+    public async Task<GpuMetrics[]> GetGpuMetricsAsync(int maxProcesses, CancellationToken cancellationToken)
     {
         var metrics = new List<GpuMetrics>();
 
         try
         {
             // Try to detect GPUs using WMIC
-            var gpuInfo = TryGetWindowsGpuInfo();
+            var gpuInfo = await TryGetWindowsGpuInfoAsync(cancellationToken).ConfigureAwait(false);
 
             if (gpuInfo == null || gpuInfo.Count == 0)
             {
@@ -87,6 +93,10 @@ internal sealed class WindowsGpuMetricsProvider : IGpuMetricsProvider
                 });
             }
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             Debug.WriteLine($"Windows GPU metrics provider error: {ex.Message}");
@@ -101,7 +111,7 @@ internal sealed class WindowsGpuMetricsProvider : IGpuMetricsProvider
         return metrics.ToArray();
     }
 
-    private static List<string>? TryGetWindowsGpuInfo()
+    private static async Task<List<string>?> TryGetWindowsGpuInfoAsync(CancellationToken cancellationToken)
     {
         try
         {
@@ -117,8 +127,8 @@ internal sealed class WindowsGpuMetricsProvider : IGpuMetricsProvider
             using var process = Process.Start(psi);
             if (process == null) return null;
 
-            var output = process.StandardOutput.ReadToEnd();
-            process.WaitForExit();
+            await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+            var output = await process.StandardOutput.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
 
             if (process.ExitCode != 0 || string.IsNullOrWhiteSpace(output))
                 return null;
@@ -151,14 +161,14 @@ internal sealed class WindowsGpuMetricsProvider : IGpuMetricsProvider
 /// </summary>
 internal sealed class LinuxGpuMetricsProvider : IGpuMetricsProvider
 {
-    public GpuMetrics[] GetGpuMetrics(int maxProcesses)
+    public async Task<GpuMetrics[]> GetGpuMetricsAsync(int maxProcesses, CancellationToken cancellationToken)
     {
         var metrics = new List<GpuMetrics>();
 
         try
         {
             // Try NVIDIA first
-            var nvidiaMetrics = TryGetNvidiaMetrics();
+            var nvidiaMetrics = await TryGetNvidiaMetricsAsync(cancellationToken).ConfigureAwait(false);
             if (nvidiaMetrics is { Length: > 0 })
             {
                 metrics.AddRange(nvidiaMetrics);
@@ -166,7 +176,7 @@ internal sealed class LinuxGpuMetricsProvider : IGpuMetricsProvider
             }
 
             // Try AMD/ROCm
-            var amdMetrics = TryGetAmdMetrics(maxProcesses);
+            var amdMetrics = await TryGetAmdMetricsAsync(maxProcesses, cancellationToken).ConfigureAwait(false);
             switch (amdMetrics)
             {
                 case { Length: > 0 }:
@@ -185,6 +195,10 @@ internal sealed class LinuxGpuMetricsProvider : IGpuMetricsProvider
                     ];
             }
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             Debug.WriteLine($"Linux GPU metrics provider error: {ex.Message}");
@@ -200,7 +214,7 @@ internal sealed class LinuxGpuMetricsProvider : IGpuMetricsProvider
         }
     }
 
-    private static GpuMetrics[]? TryGetNvidiaMetrics()
+    private static async Task<GpuMetrics[]?> TryGetNvidiaMetricsAsync(CancellationToken cancellationToken)
     {
         try
         {
@@ -217,8 +231,8 @@ internal sealed class LinuxGpuMetricsProvider : IGpuMetricsProvider
             using var process = Process.Start(psi);
             if (process == null) return null;
 
-            var output = process.StandardOutput.ReadToEnd();
-            process.WaitForExit();
+            await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+            var output = await process.StandardOutput.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
 
             if (process.ExitCode != 0 || string.IsNullOrWhiteSpace(output))
                 return null;
@@ -242,7 +256,7 @@ internal sealed class LinuxGpuMetricsProvider : IGpuMetricsProvider
         }
     }
 
-    private static GpuMetrics[]? TryGetAmdMetrics(int maxProcesses)
+    private static async Task<GpuMetrics[]?> TryGetAmdMetricsAsync(int maxProcesses, CancellationToken cancellationToken)
     {
         try
         {
@@ -259,8 +273,8 @@ internal sealed class LinuxGpuMetricsProvider : IGpuMetricsProvider
             using var process = Process.Start(psi);
             if (process == null) return null;
 
-            var output = process.StandardOutput.ReadToEnd();
-            process.WaitForExit();
+            await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+            var output = await process.StandardOutput.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
 
             if (process.ExitCode != 0 || string.IsNullOrWhiteSpace(output))
                 return null;
@@ -290,12 +304,14 @@ internal sealed class LinuxGpuMetricsProvider : IGpuMetricsProvider
 /// </summary>
 internal sealed class MacOsGpuMetricsProvider : IGpuMetricsProvider
 {
-    public GpuMetrics[] GetGpuMetrics(int maxProcesses)
+    public Task<GpuMetrics[]> GetGpuMetricsAsync(int maxProcesses, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         try
         {
             // macOS GPU metrics require Metal framework or system_profiler
-            return
+            return Task.FromResult<GpuMetrics[]>(
             [
                 new GpuMetrics
                 {
@@ -304,12 +320,16 @@ internal sealed class MacOsGpuMetricsProvider : IGpuMetricsProvider
                     IsAvailable = false,
                     ErrorMessage = "GPU metrics on macOS require Metal framework or system_profiler parsing"
                 }
-            ];
+            ]);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"macOS GPU metrics provider error: {ex.Message}");
-            return
+            return Task.FromResult<GpuMetrics[]>(
             [
                 new GpuMetrics
                 {
@@ -317,7 +337,7 @@ internal sealed class MacOsGpuMetricsProvider : IGpuMetricsProvider
                     IsAvailable = false,
                     ErrorMessage = ex.Message
                 }
-            ];
+            ]);
         }
     }
 }
@@ -327,8 +347,9 @@ internal sealed class MacOsGpuMetricsProvider : IGpuMetricsProvider
 /// </summary>
 internal sealed class UnsupportedGpuMetricsProvider : IGpuMetricsProvider
 {
-    public GpuMetrics[] GetGpuMetrics(int maxProcesses)
+    public Task<GpuMetrics[]> GetGpuMetricsAsync(int maxProcesses, CancellationToken cancellationToken)
     {
-        return Array.Empty<GpuMetrics>();
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(Array.Empty<GpuMetrics>());
     }
 }

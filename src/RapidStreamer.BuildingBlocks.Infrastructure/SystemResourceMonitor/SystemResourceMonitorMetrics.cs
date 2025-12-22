@@ -1,3 +1,4 @@
+using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics;
 using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Battery;
 using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Cpu;
 using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Disk;
@@ -10,7 +11,7 @@ namespace RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor;
 /// <summary>
 /// Comprehensive system resource monitoring metrics including hardware health and performance data.
 /// </summary>
-public record SystemResourceMonitorMetrics
+public record SystemResourceMonitorMetrics : IMetrics
 {
     /// <summary>
     /// CPU usage and process metrics.

@@ -1,7 +1,11 @@
 using System.Globalization;
 using JetBrains.Annotations;
+using Microsoft.Extensions.Options;
 using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor;
+using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Battery;
 using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Cpu;
+using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Disk;
+using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Gpu;
 using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Memory;
 using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.SystemDrives;
 using Xunit.Abstractions;
@@ -19,20 +23,106 @@ public class SystemResourceMonitorImplTest
     }
 
     [Fact]
-    public void SystemResources_Must_Returns_CpuUsage_For_1_Second()
+    public void SystemResources_Must_Return_CpuUsage_For_1_Second_And_NotThrow_For_New_Metrics()
     {
-        //Arrange
-        CpuMetricsClient cpuMetricsClient = new();
-        MemoryMetricsClient memoryMetricsClient = new();
-        SystemDriveMetricsClient systemDriveMetricsClient = new();
-        SystemResourceMonitorImpl systemResourceMonitorImpl = new(cpuMetricsClient, memoryMetricsClient, systemDriveMetricsClient);
+        // Arrange
+        var cpuMetricsClient = new CpuMetricsClient();
+        var cpuTemperatureMetricsClient = new CpuTemperatureMetricsClient();
+        var memoryMetricsClient = new MemoryMetricsClient();
+        var systemDriveMetricsClient = new SystemDriveMetricsClient();
+        var diskHealthMetricsClient = new DiskHealthMetricsClient();
+        var diskSpeedMetricsClient = new DiskSpeedMetricsClient();
+        var gpuMetricsClient = new GpuMetricsClient();
+        var batteryMetricsClient = new BatteryMetricsClient();
 
-        //Act
-        var metrics = systemResourceMonitorImpl.GetMetrics(1000, true);
+        var options = Options.Create(new SystemResourceMonitorOptions
+        {
+            DefaultSamplingWindowMs = 1000,
+            CollectAllProcesses = true,
+            // keep defaults enabled; providers must still behave gracefully on unsupported platforms
+        });
 
-        //Assert
+        var systemResourceMonitorImpl = new SystemResourceMonitorImpl(
+            cpuMetricsClient,
+            cpuTemperatureMetricsClient,
+            memoryMetricsClient,
+            systemDriveMetricsClient,
+            diskHealthMetricsClient,
+            diskSpeedMetricsClient,
+            gpuMetricsClient,
+            batteryMetricsClient,
+            options);
+
+        // Act
+        var metrics = systemResourceMonitorImpl.GetMetrics(window: 1000, all: true);
+
+        // Assert
         Assert.NotNull(metrics);
+        Assert.NotNull(metrics.Cpu);
         Assert.True(metrics.Cpu.Usage >= 0);
+
+        // New metric groups should always be safe to read
+        Assert.NotNull(metrics.Drives);
+        Assert.NotNull(metrics.DiskHealth);
+        Assert.NotNull(metrics.DiskSpeed);
+        Assert.NotNull(metrics.Gpus);
+        // Battery is optional (only present if battery exists)
+        // CpuTemperature is optional (platform-dependent)
+
         _testOutputHelper.WriteLine(metrics.Cpu.Usage.ToString(CultureInfo.InvariantCulture));
+
+        if (metrics.CpuTemperature != null)
+            _testOutputHelper.WriteLine($"CPU temp sensors available: {metrics.CpuTemperature.TemperatureSensorsAvailable}");
+
+        if (metrics.Battery != null)
+            _testOutputHelper.WriteLine($"Battery: {metrics.Battery.ChargePercent}% ({metrics.Battery.Status})");
+    }
+
+    [Fact]
+    public void Options_Disabling_Metric_Groups_Should_Return_Empty_Or_Null_As_Expected()
+    {
+        // Arrange
+        var cpuMetricsClient = new CpuMetricsClient();
+        var cpuTemperatureMetricsClient = new CpuTemperatureMetricsClient();
+        var memoryMetricsClient = new MemoryMetricsClient();
+        var systemDriveMetricsClient = new SystemDriveMetricsClient();
+        var diskHealthMetricsClient = new DiskHealthMetricsClient();
+        var diskSpeedMetricsClient = new DiskSpeedMetricsClient();
+        var gpuMetricsClient = new GpuMetricsClient();
+        var batteryMetricsClient = new BatteryMetricsClient();
+
+        var options = Options.Create(new SystemResourceMonitorOptions
+        {
+            EnableCpuTemperature = false,
+            EnableDiskHealthMetrics = false,
+            EnableDiskSpeedMetrics = false,
+            EnableGpuMetrics = false,
+            EnableBatteryMetrics = false,
+        });
+
+        var sut = new SystemResourceMonitorImpl(
+            cpuMetricsClient,
+            cpuTemperatureMetricsClient,
+            memoryMetricsClient,
+            systemDriveMetricsClient,
+            diskHealthMetricsClient,
+            diskSpeedMetricsClient,
+            gpuMetricsClient,
+            batteryMetricsClient,
+            options);
+
+        // Act
+        var metrics = sut.GetMetrics(window: 10, all: false);
+
+        // Assert
+        Assert.NotNull(metrics);
+        Assert.NotNull(metrics.Cpu);
+        Assert.NotNull(metrics.Memory);
+
+        Assert.Null(metrics.CpuTemperature);
+        Assert.Empty(metrics.DiskHealth);
+        Assert.Empty(metrics.DiskSpeed);
+        Assert.Empty(metrics.Gpus);
+        Assert.Null(metrics.Battery);
     }
 }

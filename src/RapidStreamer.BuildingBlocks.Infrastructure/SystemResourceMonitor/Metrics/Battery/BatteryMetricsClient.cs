@@ -6,15 +6,19 @@ namespace RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metr
 /// <summary>
 /// Client for collecting battery metrics.
 /// </summary>
-internal sealed class BatteryMetricsClient
+internal sealed class BatteryMetricsClient : IMetricsClient<BatteryMetrics>
 {
     private readonly IBatteryMetricsProvider _provider = CreatePlatformProvider();
 
-    public BatteryMetrics GetMetrics()
+    public async Task<BatteryMetrics> GetMetricsAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            return _provider.GetBatteryMetrics();
+            return await _provider.GetBatteryMetricsAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -49,7 +53,7 @@ internal sealed class BatteryMetricsClient
 /// </summary>
 internal interface IBatteryMetricsProvider
 {
-    BatteryMetrics GetBatteryMetrics();
+    Task<BatteryMetrics> GetBatteryMetricsAsync(CancellationToken cancellationToken);
 }
 
 /// <summary>
@@ -57,14 +61,15 @@ internal interface IBatteryMetricsProvider
 /// </summary>
 internal sealed class WindowsBatteryMetricsProvider : IBatteryMetricsProvider
 {
-    public BatteryMetrics GetBatteryMetrics()
+    public async Task<BatteryMetrics> GetBatteryMetricsAsync(CancellationToken cancellationToken)
     {
         try
         {
-            // Use WMIC to query battery status
-            var batteryInfo = GetWindowsBatteryInfo();
-
-            return batteryInfo;
+            return await GetWindowsBatteryInfoAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -78,7 +83,7 @@ internal sealed class WindowsBatteryMetricsProvider : IBatteryMetricsProvider
         }
     }
 
-    private static BatteryMetrics GetWindowsBatteryInfo()
+    private static async Task<BatteryMetrics> GetWindowsBatteryInfoAsync(CancellationToken cancellationToken)
     {
         try
         {
@@ -86,7 +91,7 @@ internal sealed class WindowsBatteryMetricsProvider : IBatteryMetricsProvider
             var psi = new ProcessStartInfo
             {
                 FileName = "wmic",
-                Arguments = "path Win32_Battery get BatteryStatus,EstimatedChargeRemaining,EstimatedRunTime /format:csv",
+                Arguments = "path Win32_Battery get BatteryStatus,EstimatedChargeRemaining,EstimatedRunTime /format:list",
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
                 CreateNoWindow = true
@@ -104,10 +109,11 @@ internal sealed class WindowsBatteryMetricsProvider : IBatteryMetricsProvider
                 };
             }
 
-            var output = process.StandardOutput.ReadToEnd();
-            process.WaitForExit();
+            // Ensure we can cancel the wait.
+            await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+            var output = await process.StandardOutput.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
 
-            if (string.IsNullOrWhiteSpace(output) || !output.Contains("EstimatedChargeRemaining"))
+            if (string.IsNullOrWhiteSpace(output) || !output.Contains("EstimatedChargeRemaining", StringComparison.OrdinalIgnoreCase))
             {
                 return new BatteryMetrics
                 {
@@ -118,7 +124,7 @@ internal sealed class WindowsBatteryMetricsProvider : IBatteryMetricsProvider
             }
 
             var lines = output.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-            if (lines.Length < 2)
+            if (lines.Length == 0)
             {
                 return new BatteryMetrics
                 {
@@ -128,24 +134,50 @@ internal sealed class WindowsBatteryMetricsProvider : IBatteryMetricsProvider
                 };
             }
 
-            // Parse CSV output
-            var dataLine = lines[^1].Trim();
-            var parts = dataLine.Split(',');
+            // Parse list output: key=value pairs
+            int? batteryStatusCode = null;
+            double? chargePercent = null;
+            int? remainingMinutes = null;
 
-            if (parts.Length < 3)
+            foreach (var line in lines)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var trimmed = line.Trim();
+                if (string.IsNullOrEmpty(trimmed)) continue;
+
+                var parts = trimmed.Split('=', 2);
+                if (parts.Length != 2) continue;
+
+                var key = parts[0].Trim();
+                var value = parts[1].Trim();
+
+                switch (key)
+                {
+                    case "BatteryStatus":
+                        if (int.TryParse(value, out var code))
+                            batteryStatusCode = code;
+                        break;
+                    case "EstimatedChargeRemaining":
+                        if (double.TryParse(value, out var charge))
+                            chargePercent = charge;
+                        break;
+                    case "EstimatedRunTime":
+                        if (int.TryParse(value, out var minutes))
+                            remainingMinutes = minutes;
+                        break;
+                }
+            }
+
+            if (!batteryStatusCode.HasValue && !chargePercent.HasValue)
             {
                 return new BatteryMetrics
                 {
-                    BatteryPresent = true,
-                    Status = BatteryStatus.Unknown,
-                    OnACPower = true,
-                    ErrorMessage = "Unable to parse battery data"
+                    BatteryPresent = false,
+                    Status = BatteryStatus.NotPresent,
+                    OnACPower = true
                 };
             }
-
-            var batteryStatusCode = parts.Length > 1 && int.TryParse(parts[1], out var code) ? code : 0;
-            var chargePercent = parts.Length > 2 && double.TryParse(parts[2], out var charge) ? (double?)charge : null;
-            var remainingMinutes = parts.Length > 3 && int.TryParse(parts[3], out var minutes) ? (int?)minutes : null;
 
             var status = batteryStatusCode switch
             {
@@ -161,8 +193,12 @@ internal sealed class WindowsBatteryMetricsProvider : IBatteryMetricsProvider
                 ChargePercent = chargePercent,
                 Status = status,
                 RemainingTimeMinutes = remainingMinutes,
-                OnACPower = status == BatteryStatus.Charging || status == BatteryStatus.Full
+                OnACPower = status is BatteryStatus.Charging or BatteryStatus.Full
             };
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -182,7 +218,14 @@ internal sealed class WindowsBatteryMetricsProvider : IBatteryMetricsProvider
 /// </summary>
 internal sealed class LinuxBatteryMetricsProvider : IBatteryMetricsProvider
 {
-    public BatteryMetrics GetBatteryMetrics()
+    public Task<BatteryMetrics> GetBatteryMetricsAsync(CancellationToken cancellationToken)
+    {
+        // File IO is fast; keep it sync but respect cancellation.
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(GetBatteryMetricsCore(cancellationToken));
+    }
+
+    private static BatteryMetrics GetBatteryMetricsCore(CancellationToken cancellationToken)
     {
         try
         {
@@ -213,6 +256,8 @@ internal sealed class LinuxBatteryMetricsProvider : IBatteryMetricsProvider
             }
 
             var batteryPath = batteryDirs[0]; // Use first battery
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             var chargePercent = TryReadDouble(Path.Combine(batteryPath, "capacity"));
             var statusStr = TryReadString(Path.Combine(batteryPath, "status"));
@@ -250,16 +295,15 @@ internal sealed class LinuxBatteryMetricsProvider : IBatteryMetricsProvider
                 onAcPower = onlineStr == "1";
             }
 
-            // Convert microWh to milliWh for consistency
-            var designCapacityMWh = energyFullDesign / 1000;
-            var fullChargeCapacityMWh = energyFull / 1000;
-            var chargeRateMw = powerNow / 1000;
-            var voltageMv = voltageNow / 1000;
+            var designCapacityMWh = MicroToMilli(energyFullDesign);
+            var fullChargeCapacityMWh = MicroToMilli(energyFull);
+            var chargeRateMw = MicroToMilli(powerNow);
+            var voltageMv = MicroToMilli(voltageNow);
 
             // Adjust charge rate sign based on status
             if (chargeRateMw.HasValue && status == BatteryStatus.Discharging)
             {
-                chargeRateMw = -chargeRateMw;
+                chargeRateMw = -chargeRateMw.Value;
             }
 
             return new BatteryMetrics
@@ -277,6 +321,12 @@ internal sealed class LinuxBatteryMetricsProvider : IBatteryMetricsProvider
                 CycleCount = cycleCount,
                 OnACPower = onAcPower
             };
+
+            static long? MicroToMilli(long? micro) => micro / 1000;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -347,7 +397,7 @@ internal sealed class LinuxBatteryMetricsProvider : IBatteryMetricsProvider
 /// </summary>
 internal sealed class MacOsBatteryMetricsProvider : IBatteryMetricsProvider
 {
-    public BatteryMetrics GetBatteryMetrics()
+    public async Task<BatteryMetrics> GetBatteryMetricsAsync(CancellationToken cancellationToken)
     {
         try
         {
@@ -373,14 +423,11 @@ internal sealed class MacOsBatteryMetricsProvider : IBatteryMetricsProvider
                 };
             }
 
-            var output = process.StandardOutput.ReadToEnd();
-            process.WaitForExit();
+            await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+            var output = await process.StandardOutput.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
 
-            // Parse pmset output
-            // Example: "Now drawing from 'Battery Power'"
-            // Example: "InternalBattery-0 (id=12345)	85%; discharging; 3:45 remaining present: true"
-
-            var batteryPresent = output.Contains("InternalBattery") || output.Contains("Battery");
+            var batteryPresent = output.Contains("InternalBattery", StringComparison.OrdinalIgnoreCase) ||
+                                 output.Contains("Battery", StringComparison.OrdinalIgnoreCase);
 
             if (!batteryPresent)
             {
@@ -393,7 +440,8 @@ internal sealed class MacOsBatteryMetricsProvider : IBatteryMetricsProvider
             }
 
             // This is a simplified parser - production code would be more robust
-            var onAcPower = output.Contains("'AC Power'") || output.Contains("AC attached");
+            var onAcPower = output.Contains("'AC Power'", StringComparison.OrdinalIgnoreCase) ||
+                            output.Contains("AC attached", StringComparison.OrdinalIgnoreCase);
 
             return new BatteryMetrics
             {
@@ -402,6 +450,10 @@ internal sealed class MacOsBatteryMetricsProvider : IBatteryMetricsProvider
                 OnACPower = onAcPower,
                 ErrorMessage = "macOS battery metrics require IOKit or more sophisticated pmset parsing"
             };
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -421,14 +473,16 @@ internal sealed class MacOsBatteryMetricsProvider : IBatteryMetricsProvider
 /// </summary>
 internal sealed class UnsupportedBatteryMetricsProvider : IBatteryMetricsProvider
 {
-    public BatteryMetrics GetBatteryMetrics()
+    public Task<BatteryMetrics> GetBatteryMetricsAsync(CancellationToken cancellationToken)
     {
-        return new BatteryMetrics
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return Task.FromResult(new BatteryMetrics
         {
             BatteryPresent = false,
             Status = BatteryStatus.NotPresent,
             OnACPower = true,
             ErrorMessage = "Battery metrics not supported on this platform"
-        };
+        });
     }
 }

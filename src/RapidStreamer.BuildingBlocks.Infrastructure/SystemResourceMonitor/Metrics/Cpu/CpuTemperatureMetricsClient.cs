@@ -6,15 +6,19 @@ namespace RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metr
 /// <summary>
 /// Client for collecting CPU temperature metrics.
 /// </summary>
-internal sealed class CpuTemperatureMetricsClient
+internal sealed class CpuTemperatureMetricsClient : IMetricsClient<CpuTemperatureMetrics>
 {
     private readonly ICpuTemperatureProvider _provider = CreatePlatformProvider();
 
-    public CpuTemperatureMetrics GetMetrics()
+    public async Task<CpuTemperatureMetrics> GetMetricsAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            return _provider.GetCpuTemperatureMetrics();
+            return await _provider.GetCpuTemperatureMetricsAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -47,7 +51,7 @@ internal sealed class CpuTemperatureMetricsClient
 /// </summary>
 internal interface ICpuTemperatureProvider
 {
-    CpuTemperatureMetrics GetCpuTemperatureMetrics();
+    Task<CpuTemperatureMetrics> GetCpuTemperatureMetricsAsync(CancellationToken cancellationToken);
 }
 
 /// <summary>
@@ -56,27 +60,33 @@ internal interface ICpuTemperatureProvider
 /// </summary>
 internal sealed class WindowsCpuTemperatureProvider : ICpuTemperatureProvider
 {
-    public CpuTemperatureMetrics GetCpuTemperatureMetrics()
+    public Task<CpuTemperatureMetrics> GetCpuTemperatureMetricsAsync(CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         try
         {
             // Windows CPU temperature requires WMI queries to MSAcpi_ThermalZoneTemperature
             // or third-party libraries like OpenHardwareMonitor/LibreHardwareMonitor
             // This is a placeholder for the actual implementation
 
-            return new CpuTemperatureMetrics
+            return Task.FromResult(new CpuTemperatureMetrics
             {
                 TemperatureSensorsAvailable = false,
                 ErrorMessage = "CPU temperature on Windows requires WMI or hardware monitoring library"
-            };
+            });
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
-            return new CpuTemperatureMetrics
+            return Task.FromResult(new CpuTemperatureMetrics
             {
                 TemperatureSensorsAvailable = false,
                 ErrorMessage = ex.Message
-            };
+            });
         }
     }
 }
@@ -86,8 +96,10 @@ internal sealed class WindowsCpuTemperatureProvider : ICpuTemperatureProvider
 /// </summary>
 internal sealed class LinuxCpuTemperatureProvider : ICpuTemperatureProvider
 {
-    public CpuTemperatureMetrics GetCpuTemperatureMetrics()
+    public Task<CpuTemperatureMetrics> GetCpuTemperatureMetricsAsync(CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         try
         {
             // Try to read from /sys/class/thermal/thermal_zone*/temp
@@ -95,11 +107,11 @@ internal sealed class LinuxCpuTemperatureProvider : ICpuTemperatureProvider
 
             if (thermalZones.Length == 0)
             {
-                return new CpuTemperatureMetrics
+                return Task.FromResult(new CpuTemperatureMetrics
                 {
                     TemperatureSensorsAvailable = false,
                     ErrorMessage = "No thermal zones found"
-                };
+                });
             }
 
             var coreTemperatures = new Dictionary<int, double>();
@@ -109,6 +121,8 @@ internal sealed class LinuxCpuTemperatureProvider : ICpuTemperatureProvider
 
             for (int i = 0; i < thermalZones.Length; i++)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 try
                 {
                     var tempFile = Path.Combine(thermalZones[i], "temp");
@@ -135,29 +149,33 @@ internal sealed class LinuxCpuTemperatureProvider : ICpuTemperatureProvider
 
             if (validReadings == 0)
             {
-                return new CpuTemperatureMetrics
+                return Task.FromResult(new CpuTemperatureMetrics
                 {
                     TemperatureSensorsAvailable = false,
                     ErrorMessage = "Could not read any temperature values"
-                };
+                });
             }
 
-            return new CpuTemperatureMetrics
+            return Task.FromResult(new CpuTemperatureMetrics
             {
                 PackageTemperatureCelsius = maxTemp,
                 CoreTemperatures = coreTemperatures,
                 MaxTemperatureCelsius = maxTemp,
                 AverageTemperatureCelsius = totalTemp / validReadings,
                 TemperatureSensorsAvailable = true
-            };
+            });
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
-            return new CpuTemperatureMetrics
+            return Task.FromResult(new CpuTemperatureMetrics
             {
                 TemperatureSensorsAvailable = false,
                 ErrorMessage = ex.Message
-            };
+            });
         }
     }
 }
@@ -167,27 +185,33 @@ internal sealed class LinuxCpuTemperatureProvider : ICpuTemperatureProvider
 /// </summary>
 internal sealed class MacOsCpuTemperatureProvider : ICpuTemperatureProvider
 {
-    public CpuTemperatureMetrics GetCpuTemperatureMetrics()
+    public Task<CpuTemperatureMetrics> GetCpuTemperatureMetricsAsync(CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         try
         {
             // macOS CPU temperature requires IOKit framework calls
             // or using smc command line tool
             // This is a placeholder for the actual implementation
 
-            return new CpuTemperatureMetrics
+            return Task.FromResult(new CpuTemperatureMetrics
             {
                 TemperatureSensorsAvailable = false,
                 ErrorMessage = "CPU temperature on macOS requires IOKit or smc tool"
-            };
+            });
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
-            return new CpuTemperatureMetrics
+            return Task.FromResult(new CpuTemperatureMetrics
             {
                 TemperatureSensorsAvailable = false,
                 ErrorMessage = ex.Message
-            };
+            });
         }
     }
 }
@@ -197,12 +221,14 @@ internal sealed class MacOsCpuTemperatureProvider : ICpuTemperatureProvider
 /// </summary>
 internal sealed class UnsupportedCpuTemperatureProvider : ICpuTemperatureProvider
 {
-    public CpuTemperatureMetrics GetCpuTemperatureMetrics()
+    public Task<CpuTemperatureMetrics> GetCpuTemperatureMetricsAsync(CancellationToken cancellationToken)
     {
-        return new CpuTemperatureMetrics
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return Task.FromResult(new CpuTemperatureMetrics
         {
             TemperatureSensorsAvailable = false,
-            ErrorMessage = "CPU temperature not supported on this platform"
-        };
+            ErrorMessage = "CPU temperature metrics not supported on this platform"
+        });
     }
 }

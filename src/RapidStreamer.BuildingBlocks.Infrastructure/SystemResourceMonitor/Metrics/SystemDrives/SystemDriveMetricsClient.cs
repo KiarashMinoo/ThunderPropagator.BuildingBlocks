@@ -1,9 +1,16 @@
 namespace RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.SystemDrives;
 
-public class SystemDriveMetricsClient
+public sealed class SystemDriveMetricsClient : IMetricsClient<SystemDriveMetrics[]>
 {
-    public SystemDriveMetrics[] GetMetrics() => DriveInfo.GetDrives()
-        .Where(drive => drive.IsReady)
-        .Select(drive => new SystemDriveMetrics(drive.Name, drive.TotalSize, drive.TotalFreeSpace, drive.IsReady))
-        .ToArray();
+    public Task<SystemDriveMetrics[]> GetMetricsAsync(CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var drives = DriveInfo.GetDrives()
+            .Where(drive => drive.IsReady)
+            .Select(drive => new SystemDriveMetrics(drive.Name, drive.TotalSize, drive.TotalFreeSpace, drive.IsReady))
+            .ToArray();
+
+        return Task.FromResult(drives);
+    }
 }

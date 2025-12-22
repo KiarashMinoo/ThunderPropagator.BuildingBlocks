@@ -2,73 +2,168 @@ using System.Diagnostics;
 
 namespace RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Cpu;
 
-internal class CpuMetricsClient
+internal sealed class CpuMetricsClient : IMetricsClient<CpuMetrics>
 {
-    public CpuMetrics GetMetrics(long window, bool all = false)
-    {
-        var resetEvent = new ManualResetEvent(false);
+    private readonly long _window;
+    private readonly bool _all;
 
-        long processorCount = Environment.ProcessorCount;
-        double usage = 0;
-        long threadsCount = 0;
-        long processesCount = 0;
-        long totalThreadsCount = 0;
-        Task.Run(async () =>
+    public CpuMetricsClient()
+    {
+    }
+
+    public CpuMetricsClient(long window, bool all = false) : this()
+    {
+        _window = window;
+        _all = all;
+    }
+
+    public Task<CpuMetrics> GetMetricsAsync(CancellationToken cancellationToken = default)
+    {
+        return GetMetricsAsync(_window, _all, cancellationToken);
+    }
+
+    public async Task<CpuMetrics> GetMetricsAsync(long window, bool all = false, CancellationToken cancellationToken = default)
+    {
+        var samplingWindowMs = window <= 0 ? 1 : window;
+
+        using var currentProcess = Process.GetCurrentProcess();
+
+        var processorCount = Environment.ProcessorCount;
+
+        // Enumerate processes once, keep them alive for the duration of the sampling window,
+        // then dispose them in a finally.
+        Process[]? processes;
+        long processesCount;
+
+        try
         {
-            var process = Process.GetCurrentProcess();
-            var processes = Process.GetProcesses();
-            threadsCount = process.Threads.Count;
-            processesCount = processes.Length;
-            totalThreadsCount = processes.Sum(p =>
+            processes = Process.GetProcesses();
+            processesCount = processes.LongLength;
+        }
+        catch
+        {
+            processes = null;
+            processesCount = 1;
+        }
+
+        long currentProcessThreads;
+        try
+        {
+            currentProcessThreads = currentProcess.Threads.Count;
+        }
+        catch
+        {
+            currentProcessThreads = 0;
+        }
+
+        long totalThreads = 0;
+        if (processes is not null)
+        {
+            foreach (var p in processes)
             {
                 try
                 {
-                    return p.Threads.Count;
+                    totalThreads += p.Threads.Count;
                 }
                 catch
                 {
-                    return 0;
+                    // ignore
                 }
-            });
+            }
+        }
+        else
+        {
+            totalThreads = currentProcessThreads;
+        }
 
-            // Start watching CPU
-            var startTime = DateTime.UtcNow;
-            var startCpuUsage = CpuUsage();
-            var stopWatch = Stopwatch.StartNew();
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
 
-            // Measure something else, such as .Net Core Middleware
-            await Task.Delay(TimeSpan.FromMilliseconds(window));
+            var startCpuMs = GetTotalCpuMilliseconds(all, currentProcess, processes);
+            var sw = Stopwatch.StartNew();
 
-            // Stop watching to measure
-            stopWatch.Stop();
-            var endTime = DateTime.UtcNow;
-            var endCpuUsage = CpuUsage();
+            // True async wait that supports cancellation.
+            await Task.Delay(TimeSpan.FromMilliseconds(samplingWindowMs), cancellationToken).ConfigureAwait(false);
 
-            var cpuUsedMs = endCpuUsage - startCpuUsage;
-            var totalMsPassed = (endTime - startTime).TotalMilliseconds;
-            usage = cpuUsedMs / (processorCount * totalMsPassed);
+            sw.Stop();
+            var endCpuMs = GetTotalCpuMilliseconds(all, currentProcess, processes);
 
-            resetEvent.Set();
+            var elapsedMs = Math.Max(1.0, sw.Elapsed.TotalMilliseconds);
+            var cpuUsedMs = Math.Max(0.0, endCpuMs - startCpuMs);
 
-            return;
+            // Normalize: 100% == one full core.
+            var usage = cpuUsedMs / (processorCount * elapsedMs) * 100.0;
+            if (double.IsNaN(usage) || double.IsInfinity(usage))
+                usage = 0;
+            else
+                usage = Math.Clamp(usage, 0.0, 100.0);
 
-            double CpuUsage() => all
-                ? processes.Sum(p =>
+            return new CpuMetrics(
+                ProcessorCount: processorCount,
+                Usage: usage,
+                Threads: currentProcessThreads,
+                Processes: processesCount,
+                TotalThreads: totalThreads);
+        }
+        finally
+        {
+            if (processes is not null)
+            {
+                foreach (var p in processes)
                 {
                     try
                     {
-                        return p.TotalProcessorTime.TotalMilliseconds;
+                        p.Dispose();
                     }
                     catch
                     {
-                        return 0;
+                        // ignore
                     }
-                })
-                : process.TotalProcessorTime.TotalMilliseconds;
-        });
+                }
+            }
+        }
+    }
 
-        resetEvent.WaitOne();
+    private static double GetTotalCpuMilliseconds(bool all, Process currentProcess, Process[]? processes)
+    {
+        if (!all)
+        {
+            try
+            {
+                return currentProcess.TotalProcessorTime.TotalMilliseconds;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
 
-        return new CpuMetrics(processesCount, usage * 100, threadsCount, processesCount, totalThreadsCount);
+        if (processes is null)
+        {
+            try
+            {
+                return currentProcess.TotalProcessorTime.TotalMilliseconds;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        double sum = 0;
+        foreach (var p in processes)
+        {
+            try
+            {
+                sum += p.TotalProcessorTime.TotalMilliseconds;
+            }
+            catch
+            {
+                // ignore
+            }
+        }
+
+        return sum;
     }
 }

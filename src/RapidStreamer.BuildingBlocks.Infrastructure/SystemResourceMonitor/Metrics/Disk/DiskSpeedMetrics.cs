@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents disk performance metrics (throughput, IOPS, latency).
 /// </summary>
-public record DiskSpeedMetrics
+public record DiskSpeedMetrics : IMetrics
 {
     /// <summary>
     /// Drive identifier (e.g., "C:", "/dev/sda")
@@ -60,4 +60,3 @@ public record DiskSpeedMetrics
     /// </summary>
     public string? ErrorMessage { get; init; }
 }
-

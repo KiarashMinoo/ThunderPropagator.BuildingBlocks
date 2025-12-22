@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents CPU temperature metrics.
 /// </summary>
-public record CpuTemperatureMetrics
+public record CpuTemperatureMetrics : IMetrics
 {
     /// <summary>
     /// Overall CPU package temperature in Celsius. Null if not supported.
@@ -35,4 +35,3 @@ public record CpuTemperatureMetrics
     /// </summary>
     public string? ErrorMessage { get; init; }
 }
-

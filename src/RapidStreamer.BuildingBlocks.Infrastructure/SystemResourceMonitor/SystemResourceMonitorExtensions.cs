@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Battery;
 using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Cpu;
 using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Disk;
@@ -35,7 +36,11 @@ public static class SystemResourceMonitorExtensions
         }
 
         // Register existing metric clients
-        services.TryAddSingleton<CpuMetricsClient>();
+        services.TryAddSingleton<CpuMetricsClient>(sp =>
+        {
+            var options = sp.GetRequiredService<IOptions<SystemResourceMonitorOptions>>().Value;
+            return new CpuMetricsClient(options.DefaultSamplingWindowMs, options.CollectAllProcesses);
+        });
         services.TryAddSingleton<MemoryMetricsClient>();
         services.TryAddSingleton<SystemDriveMetricsClient>();
 
@@ -45,7 +50,7 @@ public static class SystemResourceMonitorExtensions
         services.TryAddSingleton<DiskSpeedMetricsClient>();
         services.TryAddSingleton(sp =>
         {
-            var options = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<SystemResourceMonitorOptions>>();
+            var options = sp.GetRequiredService<IOptions<SystemResourceMonitorOptions>>();
             return new GpuMetricsClient(options.Value.MaxGpuProcesses);
         });
         services.TryAddSingleton<BatteryMetricsClient>();
