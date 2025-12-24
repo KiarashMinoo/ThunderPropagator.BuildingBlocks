@@ -1,0 +1,3 @@
+﻿namespace RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics;
+
+public interface IMetrics;

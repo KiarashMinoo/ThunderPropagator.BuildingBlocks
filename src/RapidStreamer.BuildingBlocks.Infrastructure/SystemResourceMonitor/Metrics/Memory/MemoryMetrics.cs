@@ -1,6 +1,9 @@
 namespace RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Memory;
 
-public record MemoryMetrics(double Total, double Free)
+public record MemoryMetrics(
+    double Total,
+    double Free
+) : IMetrics
 {
     public double Used => Total - Free;
 

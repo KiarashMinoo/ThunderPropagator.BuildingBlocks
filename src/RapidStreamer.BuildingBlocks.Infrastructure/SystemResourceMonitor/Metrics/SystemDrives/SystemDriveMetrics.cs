@@ -1,6 +1,11 @@
 namespace RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.SystemDrives;
 
-public record SystemDriveMetrics(string Letter, double Total, double Free, bool IsReady)
+public record SystemDriveMetrics(
+    string Letter,
+    double Total,
+    double Free,
+    bool IsReady
+) : IMetrics
 {
     public double Used => Total - Free;
 
