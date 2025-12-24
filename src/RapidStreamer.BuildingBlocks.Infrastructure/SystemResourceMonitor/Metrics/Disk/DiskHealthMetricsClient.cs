@@ -10,7 +10,16 @@ public interface IDiskHealthMetricsClient : IMetricsClient<DiskHealthMetrics[]>;
 /// </summary>
 internal sealed class DiskHealthMetricsClient : IDiskHealthMetricsClient
 {
-    private readonly IDiskHealthProvider _provider = CreatePlatformProvider();
+    private readonly IDiskHealthProvider _provider;
+
+    internal DiskHealthMetricsClient(IDiskHealthProvider provider)
+    {
+        _provider = provider;
+    }
+
+    public DiskHealthMetricsClient() : this(CreatePlatformProvider())
+    {
+    }
 
     public async Task<DiskHealthMetrics[]> GetMetricsAsync(CancellationToken cancellationToken = default)
     {

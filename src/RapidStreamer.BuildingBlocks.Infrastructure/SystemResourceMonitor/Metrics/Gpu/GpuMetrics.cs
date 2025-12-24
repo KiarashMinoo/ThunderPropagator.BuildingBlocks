@@ -33,7 +33,7 @@ public record GpuMetrics : IMetrics
     /// <summary>
     /// Total GPU memory in MB. Null if not supported.
     /// </summary>
-    public long? TotalMemoryMB { get; init; }
+    public double? TotalMemoryMB { get; init; }
 
     /// <summary>
     /// Used GPU memory in MB. Null if not supported.

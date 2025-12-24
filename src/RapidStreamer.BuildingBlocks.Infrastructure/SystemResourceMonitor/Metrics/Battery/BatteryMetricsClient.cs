@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+﻿﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Battery;
@@ -10,7 +10,16 @@ public  interface IBatteryMetricsClient : IMetricsClient<BatteryMetrics>;
 /// </summary>
 internal sealed class BatteryMetricsClient : IBatteryMetricsClient
 {
-    private readonly IBatteryMetricsProvider _provider = CreatePlatformProvider();
+    private readonly IBatteryMetricsProvider _provider;
+
+    internal BatteryMetricsClient(IBatteryMetricsProvider provider)
+    {
+        _provider = provider;
+    }
+
+    public BatteryMetricsClient() : this(CreatePlatformProvider())
+    {
+    }
 
     public async Task<BatteryMetrics> GetMetricsAsync(CancellationToken cancellationToken = default)
     {

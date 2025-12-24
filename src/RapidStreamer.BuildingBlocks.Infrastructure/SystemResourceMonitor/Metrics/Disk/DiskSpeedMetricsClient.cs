@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+﻿﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Disk;
@@ -10,7 +10,16 @@ public interface IDiskSpeedMetricsClient : IMetricsClient<DiskSpeedMetrics[]>;
 /// </summary>
 internal sealed class DiskSpeedMetricsClient : IDiskSpeedMetricsClient
 {
-    private readonly IDiskSpeedProvider _provider = CreatePlatformProvider();
+    private readonly IDiskSpeedProvider _provider;
+
+    internal DiskSpeedMetricsClient(IDiskSpeedProvider provider)
+    {
+        _provider = provider;
+    }
+
+    public DiskSpeedMetricsClient() : this(CreatePlatformProvider())
+    {
+    }
 
     public async Task<DiskSpeedMetrics[]> GetMetricsAsync(CancellationToken cancellationToken = default)
     {

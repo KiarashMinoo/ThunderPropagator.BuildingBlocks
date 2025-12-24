@@ -125,4 +125,32 @@ public class SystemResourceMonitorImplTest
         Assert.Empty(metrics.Gpus);
         Assert.Null(metrics.Battery);
     }
+
+    [Fact]
+    public async Task CpuTemperature_Windows_Should_Attempt_To_Read_Temperature()
+    {
+        // Arrange
+        var client = new CpuTemperatureMetricsClient();
+
+        // Act
+        var metrics = await client.GetMetricsAsync();
+
+        // Assert
+        Assert.NotNull(metrics);
+
+        // On Windows, thermal sensors may or may not be available
+        // The implementation should handle both cases gracefully
+        if (metrics.TemperatureSensorsAvailable)
+        {
+            Assert.NotNull(metrics.CoreTemperatures);
+            Assert.True(metrics.MaxTemperatureCelsius >= 0);
+            Assert.True(metrics.AverageTemperatureCelsius >= 0);
+            Assert.True(metrics.PackageTemperatureCelsius >= 0);
+        }
+        else
+        {
+            Assert.False(string.IsNullOrEmpty(metrics.ErrorMessage));
+            _testOutputHelper.WriteLine($"CPU Temperature not available: {metrics.ErrorMessage}");
+        }
+    }
 }

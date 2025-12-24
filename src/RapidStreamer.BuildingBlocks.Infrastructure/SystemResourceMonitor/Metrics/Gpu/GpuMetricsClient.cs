@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text.Json;
 
 namespace RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Gpu;
 
@@ -13,19 +14,20 @@ public interface IGpuMetricsClient : IMetricsClient<GpuMetrics[]>
 /// </summary>
 internal sealed class GpuMetricsClient : IGpuMetricsClient
 {
-    private readonly IGpuMetricsProvider _provider = CreatePlatformProvider();
+    private readonly IGpuMetricsProvider _provider;
     private readonly int _maxProcesses;
 
-    public GpuMetricsClient()
+    internal GpuMetricsClient(IGpuMetricsProvider provider, int maxProcesses = 10)
     {
+        _provider = provider;
+        _maxProcesses = maxProcesses;
     }
 
     /// <summary>
     /// Client for collecting GPU metrics.
     /// </summary>
-    public GpuMetricsClient(int maxProcesses = 10) : this()
+    public GpuMetricsClient(int maxProcesses = 10) : this(CreatePlatformProvider(), maxProcesses)
     {
-        _maxProcesses = maxProcesses;
     }
 
     public Task<GpuMetrics[]> GetMetricsAsync(CancellationToken cancellationToken = default)
@@ -97,6 +99,7 @@ internal sealed class WindowsGpuMetricsProvider : IGpuMetricsProvider
                         GpuIndex = 0,
                         GpuName = "Unknown",
                         IsAvailable = false,
+                        ActiveProcesses = new List<GpuProcessInfo>(),
                         ErrorMessage = "No GPU detected. GPU drivers may not be installed or accessible."
                     }
                 ];
@@ -110,6 +113,7 @@ internal sealed class WindowsGpuMetricsProvider : IGpuMetricsProvider
                     GpuIndex = i,
                     GpuName = gpuInfo[i],
                     IsAvailable = false,
+                    ActiveProcesses = new List<GpuProcessInfo>(),
                     ErrorMessage = "GPU metrics require NVML (NVIDIA), AMD Display Library, or DirectX/DXGI implementation"
                 });
             }
@@ -125,6 +129,7 @@ internal sealed class WindowsGpuMetricsProvider : IGpuMetricsProvider
             {
                 GpuIndex = 0,
                 IsAvailable = false,
+                ActiveProcesses = new List<GpuProcessInfo>(),
                 ErrorMessage = ex.Message
             });
         }
@@ -155,18 +160,16 @@ internal sealed class WindowsGpuMetricsProvider : IGpuMetricsProvider
                 return null;
 
             // Parse GPU names from output
-            var gpuNames = new List<string>();
             var lines = output.Split('\n', StringSplitOptions.RemoveEmptyEntries);
 
-            foreach (var line in lines)
-            {
-                if (line.StartsWith("Name=", StringComparison.OrdinalIgnoreCase))
-                {
-                    var name = line.Substring(5).Trim();
-                    if (!string.IsNullOrWhiteSpace(name))
-                        gpuNames.Add(name);
-                }
-            }
+            var gpuNames = (
+                    from line in lines
+                    where line.StartsWith("Name=", StringComparison.OrdinalIgnoreCase)
+                    select line[5..].Trim()
+                    into name
+                    where !string.IsNullOrWhiteSpace(name)
+                    select name)
+                .ToList();
 
             return gpuNames.Count > 0 ? gpuNames : null;
         }
@@ -211,6 +214,7 @@ internal sealed class LinuxGpuMetricsProvider : IGpuMetricsProvider
                         {
                             GpuIndex = 0,
                             IsAvailable = false,
+                            ActiveProcesses = new List<GpuProcessInfo>(),
                             ErrorMessage = "No GPU detected or nvidia-smi/rocm-smi not available"
                         }
                     ];
@@ -229,6 +233,7 @@ internal sealed class LinuxGpuMetricsProvider : IGpuMetricsProvider
                 {
                     GpuIndex = 0,
                     IsAvailable = false,
+                    ActiveProcesses = new List<GpuProcessInfo>(),
                     ErrorMessage = ex.Message
                 }
             ];
@@ -267,6 +272,7 @@ internal sealed class LinuxGpuMetricsProvider : IGpuMetricsProvider
                     GpuIndex = 0,
                     GpuName = "NVIDIA GPU",
                     IsAvailable = false,
+                    ActiveProcesses = new List<GpuProcessInfo>(),
                     ErrorMessage = "nvidia-smi parsing not yet implemented"
                 }
             ];
@@ -309,6 +315,7 @@ internal sealed class LinuxGpuMetricsProvider : IGpuMetricsProvider
                     GpuIndex = 0,
                     GpuName = "AMD GPU",
                     IsAvailable = false,
+                    ActiveProcesses = new List<GpuProcessInfo>(),
                     ErrorMessage = $"rocm-smi detected but full parsing not yet implemented. Max processes: {maxProcesses}"
                 }
             ];
@@ -325,40 +332,78 @@ internal sealed class LinuxGpuMetricsProvider : IGpuMetricsProvider
 /// </summary>
 internal sealed class MacOsGpuMetricsProvider : IGpuMetricsProvider
 {
-    public Task<GpuMetrics[]> GetGpuMetricsAsync(int maxProcesses, CancellationToken cancellationToken)
+    public async Task<GpuMetrics[]> GetGpuMetricsAsync(int maxProcesses, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
         try
         {
-            // macOS GPU metrics require Metal framework or system_profiler
-            return Task.FromResult<GpuMetrics[]>(
-            [
-                new GpuMetrics
-                {
-                    GpuIndex = 0,
-                    GpuName = "macOS GPU",
-                    IsAvailable = false,
-                    ErrorMessage = "GPU metrics on macOS require Metal framework or system_profiler parsing"
-                }
-            ]);
-        }
-        catch (OperationCanceledException)
-        {
-            throw;
+            var psi = new ProcessStartInfo("system_profiler", "SPDisplaysDataType -json")
+            {
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using var process = Process.Start(psi);
+            if (process == null)
+            {
+                return [new GpuMetrics { GpuIndex = 0, IsAvailable = false, ActiveProcesses = new List<GpuProcessInfo>(), ErrorMessage = "Failed to start system_profiler." }];
+            }
+
+            var output = await process.StandardOutput.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
+            await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+
+            if (process.ExitCode != 0)
+            {
+                return [new GpuMetrics { GpuIndex = 0, IsAvailable = false, ActiveProcesses = new List<GpuProcessInfo>(), ErrorMessage = "system_profiler exited with a non-zero code." }];
+            }
+
+            return ParseSystemProfilerOutput(output);
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"macOS GPU metrics provider error: {ex.Message}");
-            return Task.FromResult<GpuMetrics[]>(
-            [
-                new GpuMetrics
+            return [new GpuMetrics { GpuIndex = 0, IsAvailable = false, ActiveProcesses = new List<GpuProcessInfo>(), ErrorMessage = $"Failed to get GPU metrics on macOS: {ex.Message}" }];
+        }
+    }
+
+    private static GpuMetrics[] ParseSystemProfilerOutput(string jsonOutput)
+    {
+        try
+        {
+            var json = JsonDocument.Parse(jsonOutput);
+            var displays = json.RootElement.GetProperty("SPDisplaysDataType");
+            var metrics = new List<GpuMetrics>();
+            var index = 0;
+
+            foreach (var display in displays.EnumerateArray())
+            {
+                var name = display.TryGetProperty("sppci_model", out var model) ? model.GetString() : "Unknown GPU";
+                var vram = display.TryGetProperty("spdisplays_vram", out var vramProp) ? vramProp.GetString() : "N/A";
+
+                // VRAM is often reported as "X GB", so we parse it.
+                double.TryParse(vram?.Split(' ')[0], out var totalMemoryMb);
+                if (vram != null && vram.Contains("GB"))
                 {
-                    GpuIndex = 0,
-                    IsAvailable = false,
-                    ErrorMessage = ex.Message
+                    totalMemoryMb *= 1024;
                 }
-            ]);
+
+                metrics.Add(new GpuMetrics
+                {
+                    GpuIndex = index++,
+                    GpuName = name,
+                    TotalMemoryMB = totalMemoryMb,
+                    IsAvailable = true,
+                    ActiveProcesses = new List<GpuProcessInfo>(),
+                    ErrorMessage = "Temperature and utilization not available via system_profiler."
+                });
+            }
+
+            return metrics.ToArray();
+        }
+        catch (Exception ex)
+        {
+            return [new GpuMetrics { GpuIndex = 0, IsAvailable = false, ActiveProcesses = new List<GpuProcessInfo>(), ErrorMessage = $"Failed to parse system_profiler output: {ex.Message}" }];
         }
     }
 }
