@@ -7,6 +7,7 @@
    - Downloading artifacts from GitHub Actions
    - Publishing .nupkg files to NuGet feed
    - Publishing .snupkg symbol files
+   - Making GitHub Packages public (if targeting GitHub)
    - Deleting all workflow artifacts
    - Cleanup
 
@@ -30,8 +31,20 @@
 .PARAMETER SkipCleanup
   Skip cleanup of downloaded artifacts
 
+.PARAMETER MakePublic
+  Make GitHub Packages public after publishing (requires GitHubApiToken)
+
+.PARAMETER GitHubApiToken
+  GitHub API token for setting package visibility
+
+.PARAMETER GitHubOwner
+  GitHub repository owner (default: yanis_1984)
+
 .EXAMPLE
   pwsh .github/scripts/publish-packages.ps1 -NuGetSource $env:NUGET_SOURCE -NuGetApiKey $env:NUGET_API_KEY
+
+.EXAMPLE
+  pwsh .github/scripts/publish-packages.ps1 -NuGetSource $env:NUGET_SOURCE -NuGetApiKey $env:NUGET_API_KEY -MakePublic -GitHubApiToken $env:GITHUB_TOKEN
 #>
 
 param(
@@ -45,7 +58,10 @@ param(
     [string]$SymbolsPath = './dist/symbols',
     [switch]$SkipSymbols,
     [switch]$SkipCleanup,
-    [switch]$ReplaceIfExists
+    [switch]$ReplaceIfExists,
+    [switch]$MakePublic,
+    [string]$GitHubApiToken = '',
+    [string]$GitHubOwner = 'yanis_1984'
 )
 
 Set-StrictMode -Version Latest
@@ -153,6 +169,73 @@ if (-not $SkipSymbols) {
             else {
                 Write-Warning "  ✗ Failed to publish $($sym.Name) (non-fatal)"
             }
+        }
+    }
+}
+
+# Make GitHub Packages public
+if ($MakePublic -and $NuGetSource -match 'nuget.pkg.github.com') {
+    Write-Host "`n--- Setting GitHub Packages Visibility to Public ---" -ForegroundColor Yellow
+    
+    if (-not $GitHubApiToken) {
+        Write-Warning "MakePublic specified but GitHubApiToken not provided. Skipping visibility update."
+    }
+    else {
+        $packages = Get-ChildItem -Path $PackagesPath -Filter '*.nupkg' -ErrorAction SilentlyContinue
+        
+        if ($packages) {
+            $headers = @{
+                'Authorization' = "Bearer $GitHubApiToken"
+                'Accept' = 'application/vnd.github+json'
+                'X-GitHub-Api-Version' = '2022-11-28'
+            }
+            
+            # Package names to make public
+            $packageNames = @('ThunderPropagator.BuildingBlocks', 'ThunderPropagator.BuildingBlocks.Modules')
+            
+            foreach ($pkgName in $packageNames) {
+                Write-Host "`nSetting visibility for package: $pkgName" -ForegroundColor Cyan
+                
+                try {
+                    $uri = "https://api.github.com/user/packages/nuget/$pkgName"
+                    
+                    # First, check if package exists
+                    try {
+                        $response = Invoke-RestMethod -Uri $uri -Method Get -Headers $headers -ErrorAction Stop
+                        Write-Host "  Package found (current visibility: $($response.visibility))" -ForegroundColor Gray
+                    }
+                    catch {
+                        Write-Warning "  Package not found or not accessible: $pkgName"
+                        continue
+                    }
+                    
+                    # Update visibility to public
+                    $body = @{ visibility = 'public' } | ConvertTo-Json
+                    $response = Invoke-RestMethod -Uri $uri -Method Patch -Headers $headers -Body $body -ContentType 'application/json' -ErrorAction Stop
+                    
+                    if ($response.visibility -eq 'public') {
+                        Write-Host "  ✓ Set to PUBLIC successfully" -ForegroundColor Green
+                    }
+                    else {
+                        Write-Warning "  Visibility update returned: $($response.visibility)"
+                    }
+                }
+                catch {
+                    $statusCode = $_.Exception.Response.StatusCode.value__
+                    if ($statusCode -eq 404) {
+                        Write-Host "  Package not found (may not exist yet or wrong name)" -ForegroundColor DarkYellow
+                    }
+                    elseif ($statusCode -eq 403) {
+                        Write-Warning "  Permission denied. Token may lack 'write:packages' scope"
+                    }
+                    else {
+                        Write-Warning "  Failed to update visibility: $($_.Exception.Message)"
+                    }
+                }
+            }
+        }
+        else {
+            Write-Host "No packages found to update visibility" -ForegroundColor Gray
         }
     }
 }
