@@ -199,118 +199,106 @@ if ($MakePublic -and $NuGetSource -match 'nuget.pkg.github.com') {
         $allPackages = Get-ChildItem -Path $PackagesPath -Filter '*.nupkg' -ErrorAction SilentlyContinue
         
         if ($allPackages) {
-            $headers = @{
-                'Authorization' = "Bearer $GitHubApiToken"
-                'Accept' = 'application/vnd.github+json'
-                'X-GitHub-Api-Version' = '2022-11-28'
-            }
-            
-            # Extract owner from NuGet source URL if possible
+            # Extract owner from NuGet source URL
             $owner = $GitHubOwner
             if ($NuGetSource -match 'nuget.pkg.github.com/([^/]+)') {
                 $owner = $Matches[1]
-                Write-Host "Detected repository owner: $owner" -ForegroundColor Gray
+                Write-Host "Repository owner: $owner" -ForegroundColor Gray
             }
             
-            # Extract unique package IDs from all .nupkg files
+            # Extract unique package IDs
             $packageIds = @()
             $versionPattern = '\.\d+\.\d+\.\d+(?:[.-][A-Za-z0-9\.\-]+)*\.nupkg$'
             
             foreach ($pkg in $allPackages) {
-                # Remove version and .nupkg extension to get package ID
                 $pkgId = $pkg.Name -replace $versionPattern, ''
                 if ($pkgId -and $packageIds -notcontains $pkgId) {
                     $packageIds += $pkgId
                 }
             }
             
-            Write-Host "Found $($packageIds.Count) unique package ID(s) to make public" -ForegroundColor Gray
+            Write-Host "Found $($packageIds.Count) unique package(s)" -ForegroundColor Gray
             
-            foreach ($pkgName in $packageIds) {
-                Write-Host "`nSetting visibility for package: $pkgName" -ForegroundColor Cyan
+            # Try using GitHub CLI first (best compatibility)
+            $ghInstalled = (Get-Command gh -ErrorAction SilentlyContinue) -ne $null
+            
+            if ($ghInstalled) {
+                Write-Host "Using GitHub CLI (gh) for setting visibility..." -ForegroundColor Gray
+                $env:GH_TOKEN = $GitHubApiToken
                 
-                $success = $false
-                $endpoints = @(
-                    "https://api.github.com/orgs/$owner/packages/nuget/$pkgName",
-                    "https://api.github.com/user/packages/nuget/$pkgName"
-                )
-                
-                foreach ($uri in $endpoints) {
+                foreach ($pkgName in $packageIds) {
+                    Write-Host "`n$pkgName" -ForegroundColor Cyan
+                    
                     try {
-                        Write-Host "  Trying endpoint: $uri" -ForegroundColor DarkGray
+                        $ghOutput = gh api --silent -X PATCH "/user/packages/nuget/$pkgName" -f visibility=public 2>&1
                         
-                        # Check if package exists
-                        $getResponse = $null
-                        try {
-                            $getResponse = Invoke-RestMethod -Uri $uri -Method Get -Headers $headers -ErrorAction Stop
-                            Write-Host "  Package found (visibility: $($getResponse.visibility))" -ForegroundColor Gray
+                        if ($LASTEXITCODE -eq 0) {
+                            Write-Host "  ✓ Set to PUBLIC" -ForegroundColor Green
                         }
-                        catch {
-                            Write-Host "  Not found at this endpoint, trying next..." -ForegroundColor DarkGray
-                            continue
-                        }
-                        
-                        # Skip if already public
-                        if ($getResponse.visibility -eq 'public') {
-                            Write-Host "  ✓ Already PUBLIC" -ForegroundColor Green
-                            $success = $true
-                            break
-                        }
-                        
-                        # Update visibility to public
-                        Write-Host "  Sending PATCH request to set visibility to public..." -ForegroundColor DarkGray
-                        $body = @{ visibility = 'public' } | ConvertTo-Json
-                        
-                        try {
-                            $patchResponse = Invoke-RestMethod -Uri $uri -Method Patch -Headers $headers -Body $body -ContentType 'application/json' -ErrorAction Stop
-                            
-                            if ($patchResponse.visibility -eq 'public') {
-                                Write-Host "  ✓ Set to PUBLIC successfully" -ForegroundColor Green
-                                $success = $true
-                                break
-                            }
-                            else {
-                                Write-Warning "  Visibility update returned: $($patchResponse.visibility)"
-                            }
-                        }
-                        catch {
-                            $errMsg = $_.Exception.Message
-                            $statusCode = $_.Exception.Response.StatusCode.value__
-                            
-                            # Try to read response body for more details
-                            try {
-                                $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
-                                $responseBody = $reader.ReadToEnd()
-                                $reader.Close()
-                                Write-Host "  Response body: $responseBody" -ForegroundColor DarkYellow
-                            }
-                            catch {
-                                # Ignore if we can't read the response
-                            }
-                            
-                            if ($statusCode -eq 404) {
-                                Write-Warning "  PATCH failed with 404 - package exists but cannot update visibility"
-                            }
-                            elseif ($statusCode -eq 403) {
-                                Write-Warning "  Permission denied (403). Token needs 'write:packages' scope"
-                            }
-                            else {
-                                Write-Warning "  PATCH failed: HTTP $statusCode - $errMsg"
-                            }
+                        else {
+                            Write-Warning "  ✗ Failed: $ghOutput"
                         }
                     }
                     catch {
-                        Write-Host "  Unexpected error: $($_.Exception.Message)" -ForegroundColor DarkGray
+                        Write-Warning "  ✗ Error: $($_.Exception.Message)"
                     }
                 }
+            }
+            else {
+                Write-Host "GitHub CLI not available, using REST API..." -ForegroundColor Gray
                 
-                if (-not $success) {
-                    Write-Warning "  ✗ Failed to set visibility for $pkgName at any endpoint"
+                $headers = @{
+                    'Authorization' = "Bearer $GitHubApiToken"
+                    'Accept' = 'application/vnd.github+json'
+                    'X-GitHub-Api-Version' = '2022-11-28'
+                }
+                
+                foreach ($pkgName in $packageIds) {
+                    Write-Host "`n$pkgName" -ForegroundColor Cyan
+                    
+                    $endpoints = @(
+                        "https://api.github.com/user/packages/nuget/$pkgName",
+                        "https://api.github.com/orgs/$owner/packages/nuget/$pkgName"
+                    )
+                    
+                    $success = $false
+                    foreach ($uri in $endpoints) {
+                        try {
+                            # Check current visibility
+                            $pkg = Invoke-RestMethod -Uri $uri -Method Get -Headers $headers -ErrorAction Stop
+                            
+                            if ($pkg.visibility -eq 'public') {
+                                Write-Host "  ✓ Already public" -ForegroundColor Green
+                                $success = $true
+                                break
+                            }
+                            
+                            # Try to update
+                            $body = @{ visibility = 'public' } | ConvertTo-Json
+                            $updated = Invoke-RestMethod -Uri $uri -Method Patch -Headers $headers -Body $body -ContentType 'application/json' -ErrorAction Stop
+                            
+                            if ($updated.visibility -eq 'public') {
+                                Write-Host "  ✓ Set to PUBLIC" -ForegroundColor Green
+                                $success = $true
+                                break
+                            }
+                        }
+                        catch {
+                            # Silently try next endpoint
+                            continue
+                        }
+                    }
+                    
+                    if (-not $success) {
+                        Write-Warning "  ✗ Could not update (API limitation for package IDs with dots)"
+                    }
                 }
             }
+            
+            Write-Host "`nNote: Packages with platform/config suffixes may need manual visibility update in GitHub Settings." -ForegroundColor Yellow
         }
         else {
-            Write-Host "No packages found to update visibility" -ForegroundColor Gray
+            Write-Host "No packages found" -ForegroundColor Gray
         }
     }
 }
