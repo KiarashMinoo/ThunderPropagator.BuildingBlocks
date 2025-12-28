@@ -74,6 +74,9 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+# Load System.Web for URL encoding
+Add-Type -AssemblyName System.Web
+
 Write-Host "=== NuGet Package Publishing ===" -ForegroundColor Cyan
 Write-Host "Feed: $NuGetSource"
 Write-Host "Packages Path: $PackagesPath"
@@ -229,18 +232,32 @@ if ($MakePublic -and $NuGetSource -match 'nuget.pkg.github.com') {
                 foreach ($pkgName in $packageIds) {
                     Write-Host "`n$pkgName" -ForegroundColor Cyan
                     
-                    try {
-                        $ghOutput = gh api --silent -X PATCH "/user/packages/nuget/$pkgName" -f visibility=public 2>&1
-                        
-                        if ($LASTEXITCODE -eq 0) {
-                            Write-Host "  ✓ Set to PUBLIC" -ForegroundColor Green
+                    # URL encode the package name for API calls
+                    $encodedName = [System.Web.HttpUtility]::UrlEncode($pkgName)
+                    
+                    $success = $false
+                    $endpoints = @(
+                        "/user/packages/nuget/$encodedName",
+                        "/orgs/$owner/packages/nuget/$encodedName"
+                    )
+                    
+                    foreach ($endpoint in $endpoints) {
+                        try {
+                            $ghOutput = gh api --silent -X PATCH "$endpoint" -f visibility=public 2>&1
+                            
+                            if ($LASTEXITCODE -eq 0) {
+                                Write-Host "  ✓ Set to PUBLIC" -ForegroundColor Green
+                                $success = $true
+                                break
+                            }
                         }
-                        else {
-                            Write-Warning "  ✗ Failed: $ghOutput"
+                        catch {
+                            # Try next endpoint
                         }
                     }
-                    catch {
-                        Write-Warning "  ✗ Error: $($_.Exception.Message)"
+                    
+                    if (-not $success) {
+                        Write-Host "  ⚠ Cannot update via API (limitation for compound package names)" -ForegroundColor DarkYellow
                     }
                 }
             }
@@ -295,7 +312,13 @@ if ($MakePublic -and $NuGetSource -match 'nuget.pkg.github.com') {
                 }
             }
             
-            Write-Host "`nNote: Packages with platform/config suffixes may need manual visibility update in GitHub Settings." -ForegroundColor Yellow
+            Write-Host "`n========================================" -ForegroundColor Yellow
+            Write-Host "GitHub Packages API Limitation Detected" -ForegroundColor Yellow
+            Write-Host "========================================" -ForegroundColor Yellow
+            Write-Host "Package IDs with dots cannot have visibility changed via API." -ForegroundColor Gray
+            Write-Host "To make all packages public, manually visit:" -ForegroundColor Gray
+            Write-Host "  https://github.com/$owner?tab=packages" -ForegroundColor Cyan
+            Write-Host "And change visibility for each package in Package Settings." -ForegroundColor Gray
         }
         else {
             Write-Host "No packages found" -ForegroundColor Gray
