@@ -8,7 +8,7 @@ param(
 
     # Package name filter (supports wildcards: *, ?)
     # Use '*' to clean ALL user packages
-    [string]$PackageNameFilter = 'ThunderPropagator.BuildingBlocks*',
+    [string]$PackageNameFilter = 'RapidStreamer*',
     [string[]]$PackageTypes = @('nuget'),
     [int]$PageSize = 1000,
     [switch]$SinglePass,
