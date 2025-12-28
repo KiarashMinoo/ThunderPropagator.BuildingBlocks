@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace RapidStreamer.UnitTests.SystemResourceMonitor.Integration.LoadGenerators;
+namespace ThunderPropagator.UnitTests.SystemResourceMonitor.Integration.LoadGenerators;
 
 /// <summary>
 /// Generates CPU load for testing CPU metrics.

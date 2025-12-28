@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 
-namespace RapidStreamer.UnitTests.SystemResourceMonitor.Integration.LoadGenerators;
+namespace ThunderPropagator.UnitTests.SystemResourceMonitor.Integration.LoadGenerators;
 
 /// <summary>
 /// Generates network I/O load for testing network metrics.

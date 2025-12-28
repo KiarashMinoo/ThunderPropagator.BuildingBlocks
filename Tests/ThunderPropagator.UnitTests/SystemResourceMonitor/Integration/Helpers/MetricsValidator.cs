@@ -1,4 +1,4 @@
-﻿namespace RapidStreamer.UnitTests.SystemResourceMonitor.Integration.Helpers;
+﻿namespace ThunderPropagator.UnitTests.SystemResourceMonitor.Integration.Helpers;
 
 /// <summary>
 /// Validates metric changes between baseline and load samples with configurable tolerances.

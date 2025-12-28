@@ -1,4 +1,4 @@
-﻿namespace RapidStreamer.UnitTests.SystemResourceMonitor.Integration.LoadGenerators;
+﻿namespace ThunderPropagator.UnitTests.SystemResourceMonitor.Integration.LoadGenerators;
 
 /// <summary>
 /// Generates memory load for testing memory metrics.

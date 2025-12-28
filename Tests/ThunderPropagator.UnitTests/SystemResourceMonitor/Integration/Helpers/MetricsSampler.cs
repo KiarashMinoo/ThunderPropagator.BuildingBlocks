@@ -1,6 +1,6 @@
-﻿using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor;
+﻿using ThunderPropagator.BuildingBlocks.Infrastructure.SystemResourceMonitor;
 
-namespace RapidStreamer.UnitTests.SystemResourceMonitor.Integration.Helpers;
+namespace ThunderPropagator.UnitTests.SystemResourceMonitor.Integration.Helpers;
 
 /// <summary>
 /// Utility for sampling system resource metrics over time windows.

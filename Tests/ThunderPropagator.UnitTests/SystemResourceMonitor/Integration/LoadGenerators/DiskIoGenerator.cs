@@ -1,4 +1,4 @@
-﻿namespace RapidStreamer.UnitTests.SystemResourceMonitor.Integration.LoadGenerators;
+﻿namespace ThunderPropagator.UnitTests.SystemResourceMonitor.Integration.LoadGenerators;
 
 /// <summary>
 /// Generates disk I/O load for testing disk metrics.

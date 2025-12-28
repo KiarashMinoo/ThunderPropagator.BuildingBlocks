@@ -1,15 +1,15 @@
 ﻿using Microsoft.Extensions.Options;
-using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor;
-using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Battery;
-using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Cpu;
-using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Disk;
-using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Gpu;
-using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Memory;
-using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.SystemDrives;
-using RapidStreamer.UnitTests.SystemResourceMonitor.Integration.Helpers;
+using ThunderPropagator.BuildingBlocks.Infrastructure.SystemResourceMonitor;
+using ThunderPropagator.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Battery;
+using ThunderPropagator.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Cpu;
+using ThunderPropagator.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Disk;
+using ThunderPropagator.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Gpu;
+using ThunderPropagator.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.Memory;
+using ThunderPropagator.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics.SystemDrives;
+using ThunderPropagator.UnitTests.SystemResourceMonitor.Integration.Helpers;
 using Xunit.Abstractions;
 
-namespace RapidStreamer.UnitTests.SystemResourceMonitor.Integration;
+namespace ThunderPropagator.UnitTests.SystemResourceMonitor.Integration;
 
 /// <summary>
 /// Integration tests for GPU and Battery metrics (platform-dependent).
