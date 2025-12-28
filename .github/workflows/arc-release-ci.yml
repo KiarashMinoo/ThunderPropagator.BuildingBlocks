@@ -181,7 +181,7 @@ jobs:
             -GitHubApiToken $env:GITHUB_TOKEN `
             -SkipCleanup
 
-      - name: Publish packages to NuGet.org
+      - name: Publish packages to NuGet.org (Release AnyCPU only)
         shell: pwsh
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
@@ -190,9 +190,11 @@ jobs:
             Write-Host 'NUGET_API_KEY secret not set; skipping NuGet.org publish.' 
             exit 0 
           }
+          # Only publish Release AnyCPU packages (exclude Debug, ARM64, x86, x64 variants)
           pwsh ./.github/scripts/publish-packages.ps1 `
             -NuGetSource 'https://api.nuget.org/v3/index.json' `
-            -NuGetApiKey $env:NUGET_API_KEY
+            -NuGetApiKey $env:NUGET_API_KEY `
+            -FilterPattern '^(?!.*\.(Debug|ARM64|x86|x64)).*\.nupkg$'
 
   # --- 4) cleanup: delete ALL run artifacts after publish job completes ---
   cleanup:

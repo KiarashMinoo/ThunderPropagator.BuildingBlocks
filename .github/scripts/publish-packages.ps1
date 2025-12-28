@@ -40,11 +40,17 @@
 .PARAMETER GitHubOwner
   GitHub repository owner (default: yanis_1984)
 
+.PARAMETER FilterPattern
+  Regex pattern to filter which packages to publish (e.g., '.*(?<!Debug|ARM64|x86|x64)\.\d+' for Release AnyCPU only)
+
 .EXAMPLE
   pwsh .github/scripts/publish-packages.ps1 -NuGetSource $env:NUGET_SOURCE -NuGetApiKey $env:NUGET_API_KEY
 
 .EXAMPLE
   pwsh .github/scripts/publish-packages.ps1 -NuGetSource $env:NUGET_SOURCE -NuGetApiKey $env:NUGET_API_KEY -MakePublic -GitHubApiToken $env:GITHUB_TOKEN
+
+.EXAMPLE
+  pwsh .github/scripts/publish-packages.ps1 -NuGetSource 'https://api.nuget.org/v3/index.json' -NuGetApiKey $env:NUGET_API_KEY -FilterPattern '.*(?<!Debug|ARM64|x86|x64)\.\d+'
 #>
 
 param(
@@ -61,7 +67,8 @@ param(
     [switch]$ReplaceIfExists,
     [switch]$MakePublic,
     [string]$GitHubApiToken = '',
-    [string]$GitHubOwner = 'yanis_1984'
+    [string]$GitHubOwner = 'yanis_1984',
+    [string]$FilterPattern = ''
 )
 
 Set-StrictMode -Version Latest
@@ -81,8 +88,16 @@ if (-not $NuGetSource -or -not $NuGetApiKey) {
 Write-Host "`n--- Publishing Packages (.nupkg) ---" -ForegroundColor Yellow
 $packages = Get-ChildItem -Path $PackagesPath -Filter '*.nupkg' -ErrorAction SilentlyContinue
 
+# Apply filter if specified
+if ($FilterPattern -and $packages) {
+    $originalCount = $packages.Count
+    $packages = $packages | Where-Object { $_.Name -match $FilterPattern }
+    Write-Host "Filter applied: $FilterPattern" -ForegroundColor Gray
+    Write-Host "  Filtered: $originalCount → $($packages.Count) packages" -ForegroundColor Gray
+}
+
 if (-not $packages) {
-    Write-Warning "No .nupkg files found in $PackagesPath"
+    Write-Warning "No .nupkg files found in $PackagesPath matching criteria"
 }
 else {
     Write-Host "Found $($packages.Count) package(s) to publish"
