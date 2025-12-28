@@ -317,7 +317,7 @@ if ($MakePublic -and $NuGetSource -match 'nuget.pkg.github.com') {
             Write-Host "========================================" -ForegroundColor Yellow
             Write-Host "Package IDs with dots cannot have visibility changed via API." -ForegroundColor Gray
             Write-Host "To make all packages public, manually visit:" -ForegroundColor Gray
-            Write-Host "  https://github.com/$owner?tab=packages" -ForegroundColor Cyan
+            Write-Host "  https://github.com/${owner}?tab=packages" -ForegroundColor Cyan
             Write-Host "And change visibility for each package in Package Settings." -ForegroundColor Gray
         }
         else {
