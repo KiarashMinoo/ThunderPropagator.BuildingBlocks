@@ -1,129 +1,206 @@
-# ThunderPropagator BuildingBlocks (Project ARC) Documentation
+# ThunderPropagator BuildingBlocks Documentation
 
-Welcome to the comprehensive documentation for ThunderPropagator BuildingBlocks (Project ARC) - a robust collection of reusable components designed to accelerate application development across the .NET ecosystem.
+## Contents
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Component Catalog](#component-catalog)
+- [Quick Start](#quick-start)
+- [See Also](#see-also)
 
-## ?? Documentation Overview
+## Overview
 
-This documentation provides detailed guidance for integrating and using ThunderPropagator BuildingBlocks (Project ARC) in your applications. Each component includes comprehensive API references, usage examples, performance characteristics, and architectural guidance.
+ThunderPropagator BuildingBlocks (Project ARC) provides production-ready, reusable components for building high-performance, cloud-native .NET applications. The library targets .NET 8.0, 9.0, and 10.0 with full multi-platform support (AnyCPU, x86, x64, ARM64).
 
-### ??? Architecture
+The solution is architected in two primary layers: **Application** (core building blocks with zero infrastructure dependencies) and **Infrastructure** (system-level components for monitoring, health checks, and observability).
 
-ThunderPropagator BuildingBlocks (Project ARC) is organized into two main layers:
+## Architecture
 
-- **[Application BuildingBlocks](BuildingBlocks.Application/README.md)** - Core application-level components
-- **[Infrastructure BuildingBlocks](BuildingBlocks.Infrastructure/README.md)** - Infrastructure and operational components
+```mermaid
+graph TD
+    A[Application Layer] --> B[Infrastructure Layer]
+    A --> C[Core Abstractions]
+    A --> D[Helpers & Utilities]
+    A --> E[Serialization]
+    A --> F[Collections]
+    B --> G[System Monitoring]
+    B --> H[Health Checks]
+    B --> I[Network Performance]
+    
+    C --> C1[FeederMessage]
+    C --> C2[ServiceConfiguration]
+    C --> C3[DisposableObject]
+    D --> D1[JSON/YAML/ProtoBuf]
+    D --> D2[DateTime/String/Collection]
+    D --> D3[Cryptography]
+    E --> E1[Attribute-Driven]
+    E --> E2[Multi-Format Support]
+    F --> F1[LinkedArray]
+    F --> F2[BindingDictionary]
+    G --> G1[CPU/Memory/Disk]
+    G --> G2[GPU/Battery]
+    H --> H1[ASP.NET Core Health]
+```
 
-### ?? Key Features
+### Layer Responsibilities
 
-- **High Performance**: Optimized implementations with telemetry and monitoring
-- **Type Safety**: Strongly-typed APIs with comprehensive validation
-- **Extensibility**: Attribute-based configuration and custom serialization
-- **Observability**: Built-in telemetry, metrics, and health checks
-- **Cross-Platform**: .NET 8.0+ support with consistent behavior
+- **Application Layer**: Core abstractions, helpers, serialization, collections, and utilities with **no infrastructure dependencies**
+- **Infrastructure Layer**: System resource monitoring, health checks, network performance tracking, and platform-specific implementations
 
-## ?? Quick Start
+**Critical**: Application layer must NEVER depend on Infrastructure. This constraint is enforced by architecture tests in `Tests/ArchTests/ArchitectureTests.cs`.
+
+## Component Catalog
+
+### Application Layer
+
+| Area | Types | Files | Diagrams | Description |
+|------|-------|-------|----------|-------------|
+| [BuildingBlocks.Application](./BuildingBlocks.Application/README.md) | 15 | 12 | ✓ | Core abstractions including FeederMessage, ServiceConfiguration, DisposableObject |
+| [Attributes](./BuildingBlocks.Application/Attributes/README.md) | 2 | 2 | ✓ | JSON serialization control and member ignore attributes |
+| [Certificate](./BuildingBlocks.Application/Certificate/README.md) | 1 | 1 | ✗ | X.509 certificate handling and management |
+| [ChangeTrackingItems](./BuildingBlocks.Application/ChangeTrackingItems/README.md) | 5 | 5 | ✓ | Property change tracking with observable patterns |
+| [Ciphering](./BuildingBlocks.Application/Ciphering/README.md) | 3 | 3 | ✓ | AES/RSA encryption and password generation |
+| [Collections](./BuildingBlocks.Application/Collections/README.md) | 3 | 3 | ✓ | Specialized collections (LinkedArray, BindingDictionary, GenericOrderedDictionary) |
+| [CorrelationId](./BuildingBlocks.Application/CorrelationId/README.md) | 3 | 3 | ✓ | Correlation ID management for distributed tracing |
+| [Enums](./BuildingBlocks.Application/Enums/README.md) | 4 | 4 | ✗ | Common enumerations (AuthenticationType, CastType, DataType) |
+| [Helpers](./BuildingBlocks.Application/Helpers/README.md) | 18 | 18 | ✓ | Comprehensive utility helpers for JSON, YAML, collections, strings, dates |
+| [Identity](./BuildingBlocks.Application/Identity/README.md) | 1 | 1 | ✗ | JWT identity helper utilities |
+| [Objects](./BuildingBlocks.Application/Objects/README.md) | 7 | 7 | ✓ | Base classes (DisposableObject, EquatableObject, NotifiableObject) |
+| [Serializations](./BuildingBlocks.Application/Serializations/README.md) | 4 | 4 | ✓ | Serialization abstractions and Kafka serializer types |
+| [Serializations/Json](./BuildingBlocks.Application/Serializations/Json/README.md) | 2 | 2 | ✓ | JSON-specific serializers for Kafka |
+| [Serializations/Yaml](./BuildingBlocks.Application/Serializations/Yaml/README.md) | 2 | 2 | ✓ | YAML-specific serializers for Kafka |
+
+### Infrastructure Layer
+
+| Area | Types | Files | Diagrams | Description |
+|------|-------|-------|----------|-------------|
+| [BuildingBlocks.Infrastructure](./BuildingBlocks.Infrastructure/README.md) | 3 | 2 | ✓ | Infrastructure layer entry point and assembly info |
+| [HealthChecks](./BuildingBlocks.Infrastructure/HealthChecks/README.md) | 0 | 0 | ✗ | ASP.NET Core health check integrations |
+| [System](./BuildingBlocks.Infrastructure/System/README.md) | 0 | 0 | ✓ | System-level utilities and abstractions |
+| [System/Network](./BuildingBlocks.Infrastructure/System/Network/README.md) | 2 | 2 | ✓ | Network performance monitoring and reporting |
+| [SystemResourceMonitor](./BuildingBlocks.Infrastructure/SystemResourceMonitor/README.md) | 4 | 4 | ✓ | Cross-platform system resource monitoring framework |
+| [SystemResourceMonitor/Metrics](./BuildingBlocks.Infrastructure/SystemResourceMonitor/Metrics/README.md) | 2 | 2 | ✓ | Metrics client abstractions and base interfaces |
+| [SystemResourceMonitor/Metrics/Battery](./BuildingBlocks.Infrastructure/SystemResourceMonitor/Metrics/Battery/README.md) | 3 | 2 | ✓ | Battery status, charge, and health metrics (Windows/macOS/Linux) |
+| [SystemResourceMonitor/Metrics/Cpu](./BuildingBlocks.Infrastructure/SystemResourceMonitor/Metrics/Cpu/README.md) | 4 | 4 | ✓ | CPU usage and temperature monitoring |
+| [SystemResourceMonitor/Metrics/Disk](./BuildingBlocks.Infrastructure/SystemResourceMonitor/Metrics/Disk/README.md) | 6 | 4 | ✓ | Disk health (SMART) and I/O performance metrics |
+| [SystemResourceMonitor/Metrics/Gpu](./BuildingBlocks.Infrastructure/SystemResourceMonitor/Metrics/Gpu/README.md) | 3 | 2 | ✓ | GPU utilization, memory, temperature (Windows/Linux) |
+| [SystemResourceMonitor/Metrics/Memory](./BuildingBlocks.Infrastructure/SystemResourceMonitor/Metrics/Memory/README.md) | 2 | 2 | ✓ | System and process memory usage metrics |
+| [SystemResourceMonitor/Metrics/SystemDrives](./BuildingBlocks.Infrastructure/SystemResourceMonitor/Metrics/SystemDrives/README.md) | 2 | 2 | ✓ | System drive enumeration and space metrics |
+
+## Quick Start
 
 ### Installation
 
-Add ThunderPropagator packages from GitHub Packages:
+Packages are hosted on **GitHub Packages**. Configure your NuGet source:
 
 ```bash
-# Add GitHub Packages source
 dotnet nuget add source https://nuget.pkg.github.com/KiarashMinoo/index.json \
   --name "ThunderPropagator" \
-  --username "KiarashMinoo" \
-  --password "YOUR_GITHUB_TOKEN"
+  --username YOUR_GITHUB_USERNAME \
+  --password YOUR_GITHUB_PAT
+```
 
-# Install packages
+Install packages:
+
+```bash
+# Core application building blocks
 dotnet add package ThunderPropagator.BuildingBlocks.Application
+
+# Infrastructure components
 dotnet add package ThunderPropagator.BuildingBlocks.Infrastructure
 ```
 
 ### Basic Usage
 
+**FeederMessage Pattern**:
+
 ```csharp
 using ThunderPropagator.BuildingBlocks.Application;
-using ThunderPropagator.BuildingBlocks.Application.Helpers;
 
-// Create a message with correlation tracking
-var message = new FeederMessage
+public class MyMessage : FeederMessage
 {
-    ["userId"] = "12345",
-    ["action"] = "purchase",
-    CorrelationId = Guid.NewGuid().ToString()
+    public Guid Id
+    {
+        get => GetValueOrDefault(Guid.NewGuid());
+        set => SetValue(value);
+    }
+    
+    public string? Name
+    {
+        get => GetValueOrNull<string>();
+        set => SetValue(value);
+    }
+}
+
+var message = new MyMessage
+{
+    Id = Guid.NewGuid(),
+    Name = "Sample",
+    CorrelationId = "req-12345"
 };
-
-// Serialize with telemetry
-string json = message.ToJson();
-
-// Deserialize safely
-var restored = json.FromJson<FeederMessage>();
 ```
 
-## ?? Documentation Sections
-
-### Application Components
-
-| Component | Description | Key Classes |
-|-----------|-------------|-------------|
-| **[Attributes](BuildingBlocks.Application/Attributes/README.md)** | Serialization and processing control | `JsonSerializationAttribute`, `IgnoreMemberAttribute` |
-| **[Helpers](BuildingBlocks.Application/Helpers/README.md)** | Utility classes and extensions | `JsonHelper`, `StringHelper`, `CollectionHelper` |
-| **[Collections](BuildingBlocks.Application/Collections/README.md)** | Specialized collection types | `ObservableList`, `LinkedArray` |
-| **[Ciphering](BuildingBlocks.Application/Ciphering/README.md)** | Cryptography and security | AES/RSA encryption, password hashing |
-| **[Serializations](BuildingBlocks.Application/Serializations/README.md)** | Serialization abstractions | Format-agnostic serialization interfaces |
-
-### Infrastructure Components
-
-| Component | Description | Key Classes |
-|-----------|-------------|-------------|
-| **[HealthChecks](BuildingBlocks.Infrastructure/HealthChecks/README.md)** | System health monitoring | Health check implementations |
-| **[SystemResourceMonitor](BuildingBlocks.Infrastructure/SystemResourceMonitor/README.md)** | Performance tracking | CPU, memory, disk monitoring |
-
-## ?? API Reference
-
-Each component provides comprehensive API documentation including:
-
-- **Class Diagrams**: Visual representation of type relationships
-- **Sequence Diagrams**: Interaction flows and data pipelines
-- **Usage Recipes**: Practical code examples
-- **Performance Notes**: Optimization guidance and benchmarks
-- **Configuration Options**: Attribute-based customization
-
-## ?? Performance & Monitoring
-
-All components include built-in telemetry and performance monitoring:
+**System Resource Monitoring**:
 
 ```csharp
-// Automatic activity tracking
-using var activity = Telemetry.StartActivity("ProcessOrder", ActivityKind.Internal);
+using ThunderPropagator.BuildingBlocks.Infrastructure.SystemResourceMonitor;
 
-// Performance metrics
-var counter = Telemetry.CreateCounter<int>("orders_processed");
-counter.Add(1);
+services.AddSystemResourceMonitor(options =>
+{
+    options.EnableCpuMetrics = true;
+    options.EnableMemoryMetrics = true;
+    options.EnableDiskHealth = true;
+    options.DefaultSamplingWindowMs = 500;
+});
 
-// Health checks
-var healthCheck = new SystemHealthCheck();
-var result = await healthCheck.CheckHealthAsync();
+// In your service
+public class MonitoringService
+{
+    private readonly ISystemResourceMonitor _monitor;
+    
+    public MonitoringService(ISystemResourceMonitor monitor)
+    {
+        _monitor = monitor;
+    }
+    
+    public async Task<SystemResourceMonitorMetrics> GetMetricsAsync()
+    {
+        return await _monitor.Collect();
+    }
+}
 ```
 
-## ?? Contributing
+**Serialization Helpers**:
 
-This documentation is automatically generated from source code analysis. To contribute:
+```csharp
+using ThunderPropagator.BuildingBlocks.Application.Helpers;
 
-1. Add XML documentation comments to public APIs
-2. Use appropriate attributes for serialization control
-3. Include usage examples in method documentation
-4. Run documentation generation to validate changes
+// JSON
+var json = myObject.ToJson();
+var obj = json.FromJson<MyType>();
 
-## ?? License
+// YAML
+var yaml = myObject.ToYaml();
+var obj = yaml.FromYaml<MyType>();
 
-ThunderPropagator BuildingBlocks (Project ARC) is licensed under the MIT License. See the repository LICENSE file for details.
+// ProtoBuf
+var bytes = myObject.ToProtoBufBytes();
+var obj = bytes.FromProtoBufBytes<MyType>();
+
+// MessagePack
+var base64 = myObject.ToMessagePackBase64();
+var obj = base64.FromMessagePackBase64<MyType>();
+```
+
+## See Also
+
+- [Application Layer Documentation](./BuildingBlocks.Application/README.md)
+- [Infrastructure Layer Documentation](./BuildingBlocks.Infrastructure/README.md)
+- [Root README](../README.md)
+- [Architecture Tests](../Tests/ArchTests/ArchitectureTests.cs)
 
 ---
 
-**Last generated:** December 2025  
-**Framework Support:** .NET 8.0, 9.0, 10.0  
-**Package Source:** GitHub Packages
-
-[View on GitHub](https://github.com/KiarashMinoo/ThunderPropagator.BuildingBlocks)</content>
-<parameter name="filePath">C:\Users\Kiarash\RiderProjects\ThunderPropagator.BuildingBlocks\docs\README.md
+**Last generated**: December 28, 2025  
+**Total types documented**: 100+  
+**Total files documented**: 92  
+**Total diagrams**: 25+

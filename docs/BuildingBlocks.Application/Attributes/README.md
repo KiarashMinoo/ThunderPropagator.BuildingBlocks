@@ -1,9 +1,6 @@
 # Attributes
 
-Custom attributes for controlling serialization behavior and metadata in ThunderPropagator applications.
-
 ## Contents
-
 - [Overview](#overview)
 - [Files](#files)
 - [Types & Members](#types--members)
@@ -13,168 +10,267 @@ Custom attributes for controlling serialization behavior and metadata in Thunder
 
 ## Overview
 
-The Attributes namespace provides custom attributes that control how objects are serialized and processed within the ThunderPropagator framework. These attributes allow developers to customize JSON serialization behavior and exclude specific members from processing.
-
-Key attributes include:
-- `JsonSerializationAttribute` - Controls JSON property naming conventions
-- `IgnoreMemberAttribute` - Excludes properties or fields from serialization/processing
+The Attributes namespace provides custom attributes for controlling serialization behavior. The primary attribute is `JsonSerializationAttribute`, which controls JSON naming policies (camelCase vs PascalCase) at the type level, and `IgnoreMemberAttribute` for excluding properties from serialization.
 
 ## Files
 
-| File | Primary type(s) | LOC (approx) | Responsibility |
-|------|-----------------|--------------|----------------|
-| `JsonSerializationAttribute.cs` | `JsonSerializationAttribute` | 15 | Controls JSON serialization options for classes |
-| `IgnoreMemberAttribute.cs` | `IgnoreMemberAttribute` | 10 | Marks members to be ignored during processing |
+| File | Primary Type(s) | LOC | Responsibility |
+|------|-----------------|-----|----------------|
+| [JsonSerializationAttribute.cs](../../../src/ThunderPropagator.BuildingBlocks.Application/Attributes/JsonSerializationAttribute.cs) | `JsonSerializationAttribute` | 15 | Controls JSON naming policy (camelCase toggle) |
+| [IgnoreMemberAttribute.cs](../../../src/ThunderPropagator.BuildingBlocks.Application/Attributes/IgnoreMemberAttribute.cs) | `IgnoreMemberAttribute` | 12 | Marks properties to exclude from serialization |
 
 ## Types & Members
 
+### Types Summary
+
 | Type | Kind | Summary | Inherits/Implements | Key Members |
-|------|------|---------|-------------------|-------------|
-| `JsonSerializationAttribute` | Class | Controls JSON serialization behavior | `Attribute` | `CamelCase` |
-| `IgnoreMemberAttribute` | Class | Marks members for exclusion | `Attribute` | - |
+|------|------|---------|---------------------|-------------|
+| `JsonSerializationAttribute` | Sealed Class (Debug: Non-Sealed) | Controls JSON naming policy for a type | `Attribute` | `CamelCase` property |
+| `IgnoreMemberAttribute` | Sealed Class (Debug: Non-Sealed) | Marks members to exclude from serialization | `Attribute` | - |
+
+[↑ Back to top](#contents)
 
 ### JsonSerializationAttribute
 
-**Kind:** Class  
-**Namespace:** ThunderPropagator.BuildingBlocks.Application.Attributes  
-**Inherits:** Attribute  
-**AttributeUsage:** AttributeTargets.Class
+**Kind**: Sealed Class (Non-Sealed in DEBUG builds)  
+**Namespace**: `ThunderPropagator.BuildingBlocks.Application.Attributes`
 
-Controls JSON serialization options for classes, particularly property naming conventions.
+Controls JSON naming policy for a type. When applied to a class, it determines whether property names should be serialized in camelCase (default) or PascalCase.
 
-**Key Properties:**
-- `CamelCase: bool` - Whether to use camelCase for property names (default: true)
+**Attribute Targets**: `AttributeTargets.Class`
 
-**Constructors:**
-- `JsonSerializationAttribute()` - Default constructor with CamelCase = true
+**Key Properties**:
+- `bool CamelCase { get; set; } = true` — When true (default), uses camelCase; when false, uses PascalCase
 
-**Usage Recipe:**
+**Usage with JsonHelper**:
+- `JsonHelper.JsonSerializerOptions<T>()` inspects this attribute via reflection
+- Cached in `ConcurrentDictionary<Type, JsonSerializationAttribute?>` for performance
+- If `CamelCase = false`, sets `JsonSerializerOptions.PropertyNamingPolicy = null`
+
+**Usage Recipe**:
+
 ```csharp
-[JsonSerialization(CamelCase = false)]
-public class MyClass
+using ThunderPropagator.BuildingBlocks.Application.Attributes;
+using ThunderPropagator.BuildingBlocks.Application.Helpers;
+
+// Default: camelCase
+public class UserProfile
 {
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public int UserId { get; set; }
 }
 
-// Without attribute: {"firstName": "John", "lastName": "Doe"}
-// With CamelCase = false: {"FirstName": "John", "LastName": "Doe"}
+var profile1 = new UserProfile
+{
+    FirstName = "John",
+    LastName = "Doe",
+    UserId = 123
+};
+
+var json1 = profile1.ToJson();
+// Output: {"firstName":"John","lastName":"Doe","userId":123}
+
+// Opt-out of camelCase
+[JsonSerialization(CamelCase = false)]
+public class DatabaseConfig
+{
+    public string ConnectionString { get; set; } = string.Empty;
+    public int MaxPoolSize { get; set; }
+    public bool EnableRetry { get; set; }
+}
+
+var config = new DatabaseConfig
+{
+    ConnectionString = "Server=localhost",
+    MaxPoolSize = 100,
+    EnableRetry = true
+};
+
+var json2 = config.ToJson();
+// Output: {"ConnectionString":"Server=localhost","MaxPoolSize":100,"EnableRetry":true}
 ```
+
+[↑ Back to top](#contents)
 
 ### IgnoreMemberAttribute
 
-**Kind:** Class  
-**Namespace:** ThunderPropagator.BuildingBlocks.Application.Attributes  
-**Inherits:** Attribute  
-**AttributeUsage:** AttributeTargets.Property | AttributeTargets.Field
+**Kind**: Sealed Class (Non-Sealed in DEBUG builds)  
+**Namespace**: `ThunderPropagator.BuildingBlocks.Application.Attributes`
 
-Marks properties or fields to be ignored during serialization, processing, or other operations.
+Marks properties or fields to exclude from serialization. Used internally by `FeederMessage` and other types to prevent exposing internal state.
 
-**Usage Recipe:**
+**Attribute Targets**: All (commonly used on properties and fields)
+
+**Usage in FeederMessage**:
+
 ```csharp
-public class UserProfile : FeederMessage
-{
-    public string Username { get; set; }
-
-    [IgnoreMember]
-    public string PasswordHash { get; set; } // Won't be serialized
-
-    [IgnoreMember]
-    private int _accessCount; // Won't be processed
-}
+[IgnoreMember] 
+private readonly ConcurrentDictionary<string, object?> _dictionary = [];
 ```
+
+**Usage Recipe**:
+
+```csharp
+using ThunderPropagator.BuildingBlocks.Application.Attributes;
+
+public class SecureData
+{
+    public string PublicId { get; set; } = string.Empty;
+    public string Data { get; set; } = string.Empty;
+    
+    [IgnoreMember]
+    public string InternalToken { get; set; } = string.Empty;
+    
+    [IgnoreMember]
+    private string _encryptionKey = string.Empty;
+}
+
+// When serialized, InternalToken and _encryptionKey are excluded
+```
+
+[↑ Back to top](#contents)
 
 ## Diagrams
 
-### Attribute Usage Flow
+### Attribute-Driven Serialization Flow
 
 ```mermaid
-graph TD
-    A[Class Definition] --> B{JsonSerializationAttribute?}
-    B -->|Yes| C[Apply CamelCase Setting]
-    B -->|No| D[Use Default camelCase]
-
-    E[Property/Field] --> F{IgnoreMemberAttribute?}
-    F -->|Yes| G[Exclude from Processing]
-    F -->|No| H[Include in Processing]
-
-    C --> I[JSON Serialization]
-    D --> I
-    H --> J[Message Processing]
-    G -.-> J
+sequenceDiagram
+    participant C as Client
+    participant JH as JsonHelper
+    participant Cache as AttributeCache
+    participant R as Reflection
+    participant JSO as JsonSerializerOptions
+    
+    C->>JH: ToJson<Config>()
+    JH->>Cache: GetOrAdd(typeof(Config))
+    Cache->>R: GetCustomAttributes(JsonSerializationAttribute)
+    R-->>Cache: JsonSerializationAttribute or null
+    Cache-->>JH: Cached attribute
+    
+    JH->>JSO: BuildDefaultSerializerOptions()
+    JSO-->>JH: Options (camelCase = true)
+    
+    alt CamelCase = false
+        JH->>JSO: PropertyNamingPolicy = null
+    end
+    
+    JH->>JH: JsonSerializer.Serialize(instance, options)
+    JH-->>C: JSON string
 ```
 
-### Attribute Relationships
+### Attribute Hierarchy
 
 ```mermaid
 classDiagram
+    class Attribute {
+        <<abstract>>
+    }
+    
     class JsonSerializationAttribute {
         +CamelCase: bool
     }
-
+    
     class IgnoreMemberAttribute {
+        (no properties)
     }
-
-    class Attribute {
+    
+    Attribute <|-- JsonSerializationAttribute
+    Attribute <|-- IgnoreMemberAttribute
+    
+    class FeederMessage {
+        [JsonSerialization(CamelCase=false)]
+        [IgnoreMember] _dictionary
     }
-
-    JsonSerializationAttribute --> Attribute
-    IgnoreMemberAttribute --> Attribute
-
-    note for JsonSerializationAttribute "Applied to classes\nControls JSON naming"
-    note for IgnoreMemberAttribute "Applied to members\nExcludes from processing"
+    
+    JsonSerializationAttribute --> FeederMessage : applied to
+    IgnoreMemberAttribute --> FeederMessage : applied to
 ```
 
 ## Examples
 
-### Combined Attribute Usage
+### Mixing Attributes
+
 ```csharp
+using ThunderPropagator.BuildingBlocks.Application.Attributes;
+using ThunderPropagator.BuildingBlocks.Application.Helpers;
+
+[JsonSerialization(CamelCase = false)]
+public class ApiResponse
+{
+    public int StatusCode { get; set; }
+    public string Message { get; set; } = string.Empty;
+    public object? Data { get; set; }
+    
+    [IgnoreMember]
+    public DateTime ProcessedAt { get; set; } = DateTime.UtcNow;
+    
+    [IgnoreMember]
+    internal string InternalTraceId { get; set; } = Guid.NewGuid().ToString();
+}
+
+var response = new ApiResponse
+{
+    StatusCode = 200,
+    Message = "Success",
+    Data = new { Id = 1, Name = "Test" },
+    ProcessedAt = DateTime.UtcNow,
+    InternalTraceId = "trace-123"
+};
+
+var json = response.ToJson();
+// Output: {"StatusCode":200,"Message":"Success","Data":{"id":1,"name":"Test"}}
+// Note: PascalCase for ApiResponse properties, but Data is camelCase (nested)
+// ProcessedAt and InternalTraceId are excluded
+```
+
+### Custom Type with Attribute
+
+```csharp
+using ThunderPropagator.BuildingBlocks.Application;
 using ThunderPropagator.BuildingBlocks.Application.Attributes;
 
 [JsonSerialization(CamelCase = false)]
-public class Product : FeederMessage
+public class OrderCommand : FeederMessage
 {
-    public string ProductId { get; set; }
-    public string Name { get; set; }
-    public decimal Price { get; set; }
-
+    public Guid OrderId
+    {
+        get => GetValueOrDefault(Guid.NewGuid());
+        set => SetValue(value);
+    }
+    
+    public decimal Amount
+    {
+        get => GetValueOrDefault(0m);
+        set => SetValue(value);
+    }
+    
     [IgnoreMember]
-    public DateTime CreatedAt { get; set; } // Internal timestamp
-
-    [IgnoreMember]
-    private List<string> _tags; // Internal data
+    public DateTime CreatedAt
+    {
+        get => GetValueOrDefault(DateTime.UtcNow);
+        set => SetValue(value);
+    }
 }
 
-public class Order : FeederMessage
+var order = new OrderCommand
 {
-    public string OrderId { get; set; }
-    public List<Product> Products { get; set; }
-
-    [IgnoreMember]
-    public string InternalNotes { get; set; } // Not for external consumption
-}
-```
-
-### Serialization Behavior
-```csharp
-var product = new Product
-{
-    ProductId = "P001",
-    Name = "Widget",
-    Price = 29.99m,
-    CreatedAt = DateTime.Now
+    OrderId = Guid.NewGuid(),
+    Amount = 99.99m,
+    CorrelationId = "req-abc"
 };
 
-// JSON output (PascalCase due to CamelCase = false):
-// {"ProductId": "P001", "Name": "Widget", "Price": 29.99}
-// Note: CreatedAt is excluded due to IgnoreMember
+var json = order.ToJson();
+// Output uses PascalCase: {"OrderId":"...","Amount":99.99,"CorrelationId":"req-abc"}
+// CreatedAt is excluded due to [IgnoreMember]
 ```
 
 ## See Also
 
-- [FeederMessage](../README.md#feedermessage) - Base class that uses these attributes
-- [Helpers](../Helpers/README.md) - Serialization helpers that respect these attributes
-- [Serializations](../Serializations/README.md) - Serialization implementations
+- [Application Layer](../README.md)
+- [Helpers](../Helpers/README.md) — JsonHelper uses these attributes
+- [FeederMessage](../README.md#feedermessage) — Uses JsonSerializationAttribute
+- [Documentation Home](../../README.md)
 
-[? Back to top](#contents)</content>
-<parameter name="filePath">C:\Users\Kiarash\RiderProjects\ThunderPropagator.BuildingBlocks\docs\BuildingBlocks.Application\Attributes\README.md
+[↑ Back to top](#contents)

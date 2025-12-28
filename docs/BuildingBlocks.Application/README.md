@@ -1,303 +1,517 @@
 # BuildingBlocks.Application
 
-Core application-level components providing essential functionality for building robust applications.
-
 ## Contents
-
 - [Overview](#overview)
 - [Files](#files)
 - [Types & Members](#types--members)
 - [Diagrams](#diagrams)
+- [ThunderPropagator Dependencies](#thunderpropagator-dependencies)
 - [Examples](#examples)
 - [See Also](#see-also)
 
 ## Overview
 
-The BuildingBlocks.Application namespace contains the foundational components for ThunderPropagator applications. This includes core abstractions like `FeederMessage`, configuration management with `ServiceConfiguration`, telemetry support, and essential utilities for application development.
+The Application layer provides core building blocks and abstractions for building distributed, cloud-native applications. This layer has **zero infrastructure dependencies** and includes essential patterns like FeederMessage (dictionary-based messages), ServiceConfiguration (strongly-typed configuration with change notifications), and DisposableObject (consistent resource cleanup). It also provides comprehensive serialization helpers, telemetry integration via OpenTelemetry, and specialized collections.
 
-Key features include:
-- Message-based communication with `FeederMessage` abstract class
-- Configuration management with observable properties
-- Telemetry and metrics collection
-- Exception information serialization
-- Correlation ID support for distributed tracing
+This layer targets .NET 8.0, 9.0, and 10.0 with multi-platform support (AnyCPU, x86, x64, ARM64).
 
 ## Files
 
-| File | Primary type(s) | LOC (approx) | Responsibility |
-|------|-----------------|--------------|----------------|
-| `ExceptionInfo.cs` | `ExceptionInfo` | 45 | Exception serialization and information capture |
-| `FeederMessage.cs` | `FeederMessage` | 120 | Abstract message class with dictionary-like behavior |
-| `ServiceConfiguration.cs` | `IServiceConfiguration`, `ServiceConfiguration` | 200 | Configuration management with change notifications |
-| `Telemetry.cs` | `Telemetry` | 60 | Telemetry and metrics collection utilities |
-| `AssemblyInfo.cs` | Assembly attributes | 15 | Assembly metadata |
-| `GlobalUsings.cs` | Global using directives | 20 | Common namespace imports |
-| `ConcurrentStringBuilder.cs` | `ConcurrentStringBuilder` | 80 | Thread-safe string building |
-| `DispatcherTimer.cs` | `DispatcherTimer` | 40 | Timer implementation for UI threading |
-| `ICloneable.cs` | `ICloneable<T>` | 15 | Generic cloning interface |
-| `IConvertible.cs` | `IConvertible<T>` | 15 | Generic conversion interface |
-| `InconvertibleException.cs` | `InconvertibleException` | 20 | Exception for conversion failures |
+| File | Primary Type(s) | LOC | Responsibility |
+|------|-----------------|-----|----------------|
+| [FeederMessage.cs](../../src/ThunderPropagator.BuildingBlocks.Application/FeederMessage.cs) | `FeederMessage` | 150 | Dictionary-based abstract message class with correlation ID support |
+| [ServiceConfiguration.cs](../../src/ThunderPropagator.BuildingBlocks.Application/ServiceConfiguration.cs) | `ServiceConfiguration`, `IServiceConfiguration` | 173 | Strongly-typed configuration base with property change notifications |
+| [Telemetry.cs](../../src/ThunderPropagator.BuildingBlocks.Application/Telemetry.cs) | `Telemetry` | 60 | OpenTelemetry integration for activities, counters, histograms |
+| [DisposableObject.cs](../../src/ThunderPropagator.BuildingBlocks.Application/Objects/DisposableObject.cs) | `DisposableObject` | 200 | Base class for consistent resource disposal (sync/async) |
+| [ExceptionInfo.cs](../../src/ThunderPropagator.BuildingBlocks.Application/ExceptionInfo.cs) | `ExceptionInfo` | 80 | Exception serialization wrapper |
+| [ConcurrentStringBuilder.cs](../../src/ThunderPropagator.BuildingBlocks.Application/ConcurrentStringBuilder.cs) | `ConcurrentStringBuilder` | 100 | Thread-safe StringBuilder wrapper |
+| [DispatcherTimer.cs](../../src/ThunderPropagator.BuildingBlocks.Application/DispatcherTimer.cs) | `DispatcherTimer` | 120 | Timer with dispatcher integration |
+| [ICloneable.cs](../../src/ThunderPropagator.BuildingBlocks.Application/ICloneable.cs) | `ICloneable<T>` | 10 | Generic cloneable interface |
+| [IConvertible.cs](../../src/ThunderPropagator.BuildingBlocks.Application/IConvertible.cs) | `IConvertible<T>` | 10 | Generic convertible interface |
+| [InconvertibleException.cs](../../src/ThunderPropagator.BuildingBlocks.Application/InconvertibleException.cs) | `InconvertibleException` | 20 | Exception for conversion failures |
+| [GlobalUsings.cs](../../src/ThunderPropagator.BuildingBlocks.Application/GlobalUsings.cs) | - | 15 | Global using directives |
+| [AssemblyInfo.cs](../../src/ThunderPropagator.BuildingBlocks.Application/AssemblyInfo.cs) | - | 10 | Assembly metadata |
 
 ## Types & Members
 
+### Types Summary
+
 | Type | Kind | Summary | Inherits/Implements | Key Members |
-|------|------|---------|-------------------|-------------|
-| `ExceptionInfo` | Class | Serializable exception information | - | `Type`, `Message`, `Source`, `InnerException` |
-| `FeederMessage` | Abstract Class | Message with dictionary behavior | `DisposableObject`, `IDictionary<string, object?>`, `ICorrelationIdSupport` | `this[string]`, `CastType`, `CorrelationId` |
-| `IServiceConfiguration` | Interface | Configuration contract | `IEnumerable<KeyValuePair<string, string>>` | - |
-| `ServiceConfiguration` | Abstract Class | Observable configuration | `IServiceConfiguration`, `INotifyPropertyChanged` | Properties via indexer, events |
-| `Telemetry` | Static Class | Telemetry utilities | - | `StartActivity()`, `CreateCounter()`, metrics |
+|------|------|---------|---------------------|-------------|
+| `FeederMessage` | Abstract Class | Dictionary-based message with correlation ID tracking | `DisposableObject`, `IDictionary<string, object?>`, `ICorrelationIdSupport`, `ICloneable` | `CastType`, `IsDeleted`, `CorrelationId`, `GetValue<T>()`, `SetValue()` |
+| `ServiceConfiguration` | Abstract Class | Strongly-typed configuration with property change tracking | `IServiceConfiguration`, `INotifyPropertyChanged`, `INotifyPropertyChanging` | `Set<T>()`, `Get<T>()`, `Bind()` |
+| `Telemetry` | Static Class | OpenTelemetry integration for activities and metrics | - | `StartActivity()`, `CreateCounter<T>()`, `CreateHistogram<T>()` |
+| `ExceptionInfo` | Class | Exception serialization wrapper | - | `Message`, `StackTrace`, `InnerException`, Constructor(Exception) |
+| `ConcurrentStringBuilder` | Class | Thread-safe StringBuilder | - | `Append()`, `AppendLine()`, `ToString()`, `Clear()` |
+| `DispatcherTimer` | Class | Timer with dispatcher integration | - | `Start()`, `Stop()`, `Tick` event |
+| `ICloneable<T>` | Interface | Generic cloneable contract | - | `T Clone()` |
+| `IConvertible<T>` | Interface | Generic convertible contract | - | `T Convert()` |
+| `InconvertibleException` | Class | Conversion failure exception | `Exception` | Constructor(string message) |
 
-### ExceptionInfo
-
-**Kind:** Class  
-**Namespace:** ThunderPropagator.BuildingBlocks.Application
-
-Serializable representation of exception information for logging and transmission.
-
-**Key Properties:**
-- `Type: string` - Full type name of the exception
-- `Message: string` - Exception message
-- `Source: string?` - Source of the exception
-- `InnerException: ExceptionInfo?` - Nested exception information
-
-**Constructors:**
-- `ExceptionInfo(Exception exception)` - Creates from exception instance
-
-**Usage Recipe:**
-```csharp
-try
-{
-    // Some operation
-}
-catch (Exception ex)
-{
-    var info = new ExceptionInfo(ex);
-    // Serialize or log the info
-}
-```
+[↑ Back to top](#contents)
 
 ### FeederMessage
 
-**Kind:** Abstract Class  
-**Namespace:** ThunderPropagator.BuildingBlocks.Application  
-**Inherits:** DisposableObject  
-**Implements:** IDictionary<string, object?>, ICorrelationIdSupport, ICloneable
+**Kind**: Abstract Class  
+**Namespace**: `ThunderPropagator.BuildingBlocks.Application`
 
-Abstract base class for messages that behave like dictionaries with additional messaging features.
+A dictionary-based message abstraction that stores properties in an internal `ConcurrentDictionary<string, object?>`. Ideal for building flexible message types where properties are dynamically accessed.
 
-**Key Properties:**
-- `this[string]: object?` - Dictionary-like access
-- `CastType: CastType` - Message casting mode
-- `CorrelationId: string?` - Request correlation identifier
+**Inherits/Implements**: `DisposableObject`, `IDictionary<string, object?>`, `IReadOnlyDictionary<string, object?>`, `ICorrelationIdSupport`, `ICloneable`, `ICloneable<IDictionary<string, object?>>`
 
-**Key Methods:**
-- `GetValueOrNull<T>(string key)` - Type-safe value retrieval
-- `SetValue(object value, string key)` - Type-safe value setting
-- `Clone()` - Create a copy of the message
+**Attributes**: `[JsonSerialization(CamelCase = false)]`
 
-**Usage Recipe:**
+**Key Properties**:
+- `object? this[string key]` — Dictionary indexer for dynamic property access
+- `CastType CastType` — Multicast or unicast message type (default: Multicast)
+- `bool IsDeleted` — Soft-delete flag
+- `string CorrelationId` — Correlation ID for distributed tracing
+- `int? HashKey` — Internal hash key (nullable)
+
+**Key Methods**:
+- `void SetValue(object? value, [CallerMemberName] string? key = null)` — Sets a property value using caller member name
+- `T GetValue<T>([CallerMemberName] string? key = null)` — Gets a property value or throws
+- `T? GetValueOrNull<T>([CallerMemberName] string? key = null)` — Gets a property value or returns null
+- `T GetValueOrDefault<T>(T @default, [CallerMemberName] string? key = null)` — Gets a property value or returns default
+- `object Clone()` — Shallow clone (MemberwiseClone)
+- `IDictionary<string, object?> Clone()` — Returns underlying dictionary
+
+**Thread-safety**: Uses `ConcurrentDictionary` internally for thread-safe property storage.
+
+**Usage Recipe**:
+
 ```csharp
-public class MyMessage : FeederMessage
+using ThunderPropagator.BuildingBlocks.Application;
+
+public class OrderMessage : FeederMessage
 {
-    public string Title
+    public Guid OrderId
     {
-        get => GetValueOrDefault<string>("Title");
-        set => SetValue(value, "Title");
+        get => GetValueOrDefault(Guid.NewGuid());
+        set => SetValue(value);
+    }
+    
+    public decimal Amount
+    {
+        get => GetValueOrDefault(0m);
+        set => SetValue(value);
+    }
+    
+    public string? CustomerName
+    {
+        get => GetValueOrNull<string>();
+        set => SetValue(value);
     }
 }
 
-var message = new MyMessage { Title = "Hello", CorrelationId = "123" };
+// Usage
+var order = new OrderMessage
+{
+    OrderId = Guid.NewGuid(),
+    Amount = 99.99m,
+    CustomerName = "John Doe",
+    CorrelationId = "req-abc-123"
+};
+
+// Dynamic access
+order["CustomField"] = "custom value";
+var customValue = order.GetValueOrNull<string>("CustomField");
 ```
+
+[↑ Back to top](#contents)
 
 ### ServiceConfiguration
 
-**Kind:** Abstract Class  
-**Namespace:** ThunderPropagator.BuildingBlocks.Application  
-**Implements:** IServiceConfiguration, INotifyPropertyChanged, INotifyPropertyChanging, IEquatable<ServiceConfiguration>
+**Kind**: Abstract Class  
+**Namespace**: `ThunderPropagator.BuildingBlocks.Application`
 
-Observable configuration class with JSON serialization support.
+Abstract base class for strongly-typed configuration with property change notifications. Properties are stored in a `ConcurrentDictionary<string, string>` and automatically tracked for changes.
 
-**Key Properties:**
-- Properties accessed via indexer and reflection
+**Inherits/Implements**: `IServiceConfiguration`, `INotifyPropertyChanged`, `INotifyPropertyChanging`, `IEquatable<ServiceConfiguration>`
 
-**Key Methods:**
-- `GetValue<T>(string key)` - Retrieve configuration value
-- `SetValue(string key, object? value)` - Set configuration value
+**Attributes**: `[JsonConverter(typeof(ServiceConfigurationJsonConverter))]`
 
-**Events:**
-- `PropertyChanged` - Fired when properties change
-- `PropertyChanging` - Fired before properties change
+**Key Properties**:
+- `event PropertyChangingEventHandler? PropertyChanging` — Raised before property value changes
+- `event PropertyChangedEventHandler? PropertyChanged` — Raised after property value changes
 
-**Usage Recipe:**
+**Key Methods**:
+- `void Set<T>(T? value, [CallerMemberName] string? key = null)` — Sets a property value with change notification
+- `T? Get<T>([CallerMemberName] string? key = null)` — Gets a property value or default
+- `T Get<T>(T defaultValue, [CallerMemberName] string? key = null)` — Gets a property value or specified default
+- `void Bind(IEnumerable<KeyValuePair<string, string>> properties)` — Binds from key-value pairs
+- `void Bind(ServiceConfiguration serviceConfiguration)` — Binds from another configuration
+
+**Constructors**:
+- `protected ServiceConfiguration()` — Default constructor
+- `protected ServiceConfiguration(IEnumerable<KeyValuePair<string, string>> properties)` — Initialize with properties
+- `protected ServiceConfiguration(ServiceConfiguration serviceConfiguration)` — Copy constructor
+
+**Serialization**: Custom JSON converter with `CaseConverter` for camelCase serialization.
+
+**Usage Recipe**:
+
 ```csharp
-public class AppConfig : ServiceConfiguration
-{
-    public string DatabaseUrl
-    {
-        get => GetValue<string>("DatabaseUrl");
-        set => SetValue("DatabaseUrl", value);
-    }
-}
+using ThunderPropagator.BuildingBlocks.Application;
 
-var config = new AppConfig();
-config.PropertyChanged += (s, e) => Console.WriteLine($"Changed: {e.PropertyName}");
-config.DatabaseUrl = "postgresql://...";
-```
-
-### Telemetry
-
-**Kind:** Static Class  
-**Namespace:** ThunderPropagator.BuildingBlocks.Application
-
-Centralized telemetry and metrics collection utilities.
-
-**Key Methods:**
-- `StartActivity(string name, ActivityKind kind)` - Start a tracing activity
-- `CreateCounter<T>(string name, string? unit, string? description)` - Create a counter metric
-- `CreateHistogram<T>(string name, string? unit, string? description)` - Create a histogram metric
-
-**Usage Recipe:**
-```csharp
-using var activity = Telemetry.StartActivity("ProcessOrder", ActivityKind.Internal);
-var counter = Telemetry.CreateCounter<int>("orders_processed", "orders", "Number of orders processed");
-// ... processing logic ...
-counter.Add(1);
-```
-
-## Diagrams
-
-### Message Flow Architecture
-
-```mermaid
-graph TD
-    A[Client] --> B{FeederMessage}
-    B --> C[Processing Pipeline]
-    C --> D[CorrelationId Tracking]
-    C --> E[Telemetry Recording]
-
-    F[ServiceConfiguration] --> G[Property Change Events]
-    G --> H[Configuration Updates]
-
-    I[Exception] --> J[ExceptionInfo]
-    J --> K[Serialization/Logging]
-```
-
-### Component Relationships
-
-```mermaid
-classDiagram
-    class FeederMessage {
-        +CastType
-        +CorrelationId
-        +GetValueOrNull~T~(key)
-        +SetValue(value, key)
-    }
-
-    class ServiceConfiguration {
-        +PropertyChanged
-        +PropertyChanging
-        +GetValue~T~(key)
-        +SetValue(key, value)
-    }
-
-    class ExceptionInfo {
-        +Type
-        +Message
-        +Source
-        +InnerException
-    }
-
-    class Telemetry {
-        +StartActivity(name, kind)
-        +CreateCounter~T~(name)
-        +CreateHistogram~T~(name)
-    }
-
-    FeederMessage --> ICorrelationIdSupport
-    ServiceConfiguration --> INotifyPropertyChanged
-    ExceptionInfo --> IConvertible
-```
-
-## Examples
-
-### Basic Message Creation
-```csharp
-public class OrderMessage : FeederMessage
-{
-    public string OrderId
-    {
-        get => GetValueOrDefault<string>("OrderId");
-        set => SetValue(value, "OrderId");
-    }
-
-    public decimal Amount
-    {
-        get => GetValueOrDefault<decimal>("Amount");
-        set => SetValue(value, "Amount");
-    }
-}
-
-var message = new OrderMessage
-{
-    OrderId = "ORD-001",
-    Amount = 99.99m,
-    CorrelationId = Guid.NewGuid().ToString()
-};
-```
-
-### Configuration with Change Tracking
-```csharp
-public class DatabaseConfig : ServiceConfiguration
+public class DatabaseConfiguration : ServiceConfiguration
 {
     public string ConnectionString
     {
-        get => GetValue<string>("ConnectionString");
-        set => SetValue("ConnectionString", value);
+        get => Get<string>() ?? string.Empty;
+        set => Set(value);
     }
-
+    
     public int MaxPoolSize
     {
-        get => GetValue<int>("MaxPoolSize");
-        set => SetValue("MaxPoolSize", value);
+        get => Get(100); // default: 100
+        set => Set(value);
+    }
+    
+    public TimeSpan CommandTimeout
+    {
+        get => Get(TimeSpan.FromSeconds(30));
+        set => Set(value);
     }
 }
 
-var config = new DatabaseConfig();
-config.PropertyChanged += (s, e) =>
+// Usage
+var config = new DatabaseConfiguration();
+config.PropertyChanged += (sender, e) =>
 {
-    Console.WriteLine($"Config changed: {e.PropertyName}");
-    // Trigger configuration reload
+    Console.WriteLine($"Property {e.PropertyName} changed");
 };
 
 config.ConnectionString = "Server=localhost;Database=mydb";
-config.MaxPoolSize = 100;
+config.MaxPoolSize = 200;
+
+// Serialize to JSON (camelCase)
+var json = config.ToNJson(); // uses Newtonsoft.Json
 ```
 
-### Exception Handling with Telemetry
+[↑ Back to top](#contents)
+
+### Telemetry
+
+**Kind**: Static Class  
+**Namespace**: `ThunderPropagator.BuildingBlocks.Application`
+
+Provides OpenTelemetry integration for distributed tracing (activities) and metrics (counters, histograms, gauges). Controlled by environment variables `OTEL_EXPORTER_OTLP_ENDPOINT` (activities) and `METER_ENABLED` (metrics).
+
+**Constants**:
+- `string MeterName = "thunderPropagator.meter"` — Default meter name
+- `string ActivityName = "thunderPropagator.activity"` — Default activity source name
+- `string Version = "1.0.0"` — Telemetry version
+- `KeyValuePair<string, object?> SuccessfulTag` — Success status tag
+- `KeyValuePair<string, object?> UnsuccessfulTag` — Failed status tag
+
+**Key Methods**:
+- `Activity? StartActivity(string name, ActivityKind kind)` — Starts a new activity span
+- `Activity? StartActivity(string name, ActivityKind kind, ActivityContext parentContext)` — Starts activity with parent context
+- `Counter<T>? CreateCounter<T>(string name, string? unit, string? description)` — Creates a counter metric
+- `UpDownCounter<T>? CreateUpDownCounter<T>(string name, string? unit, string? description)` — Creates an up/down counter
+- `Histogram<T>? CreateHistogram<T>(string name, string? unit, string? description)` — Creates a histogram metric
+- `ObservableGauge<T>? CreateObservableGauge<T>(string name, Func<T> observeValue, string? unit, string? description)` — Creates an observable gauge
+
+**Environment Variables**:
+- `OTEL_EXPORTER_OTLP_ENDPOINT` — OTLP exporter endpoint (enables activities)
+- `ACTIVITY_NAME` — Custom activity source name
+- `VERSION` — Custom version
+- `METER_ENABLED` — Enable/disable meters (default: true)
+- `METER_NAME` — Custom meter name
+
+**Usage Recipe**:
+
 ```csharp
-try
+using ThunderPropagator.BuildingBlocks.Application;
+
+public class OrderService
 {
-    using var activity = Telemetry.StartActivity("ProcessPayment", ActivityKind.Internal);
-    // ... payment processing ...
-    activity?.AddTag("payment.amount", 99.99);
-    activity?.AddTag(Telemetry.SuccessfulTag.Key, Telemetry.SuccessfulTag.Value);
+    public async Task ProcessOrderAsync(Order order)
+    {
+        const string activityName = $"{nameof(OrderService)}_{nameof(ProcessOrderAsync)}";
+        using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+        
+        activity?.SetTag("order.id", order.Id);
+        activity?.SetTag("order.amount", order.Amount);
+        
+        try
+        {
+            // Process order logic
+            await SaveOrderAsync(order);
+            
+            activity?.SetTag("status", "success");
+            activity?.AddTag(Telemetry.SuccessfulTag);
+        }
+        catch (Exception ex)
+        {
+            activity?.SetTag("error", ex.Message);
+            activity?.AddTag(Telemetry.UnsuccessfulTag);
+            throw;
+        }
+    }
 }
-catch (Exception ex)
+
+// Metrics
+var orderCounter = Telemetry.CreateCounter<long>("orders.processed", "orders", "Number of orders processed");
+orderCounter?.Add(1, new KeyValuePair<string, object?>("status", "success"));
+
+var orderHistogram = Telemetry.CreateHistogram<double>("order.amount", "USD", "Order amount distribution");
+orderHistogram?.Record(99.99, new KeyValuePair<string, object?>("currency", "USD"));
+```
+
+[↑ Back to top](#contents)
+
+## Diagrams
+
+### Application Layer Architecture
+
+```mermaid
+graph TD
+    A[FeederMessage] --> B[DisposableObject]
+    C[ServiceConfiguration] --> D[INotifyPropertyChanged]
+    C --> E[INotifyPropertyChanging]
+    F[Telemetry] --> G[OpenTelemetry]
+    F --> H[ActivitySource]
+    F --> I[Meter]
+    
+    J[Client Code] --> A
+    J --> C
+    J --> F
+    
+    A --> K[IDictionary]
+    A --> L[ICorrelationIdSupport]
+    
+    style A fill:#4a90e2
+    style C fill:#4a90e2
+    style F fill:#50c878
+```
+
+### FeederMessage Class Hierarchy
+
+```mermaid
+classDiagram
+    class DisposableObject {
+        <<abstract>>
+        +IsDisposed: bool
+        +Dispose()
+        +DisposeAsync()
+    }
+    
+    class FeederMessage {
+        <<abstract>>
+        +CastType: CastType
+        +IsDeleted: bool
+        +CorrelationId: string
+        #SetValue(value, key)
+        #GetValue~T~(key)
+        #GetValueOrNull~T~(key)
+        #GetValueOrDefault~T~(default, key)
+    }
+    
+    class IDictionary~string, object~ {
+        <<interface>>
+        +this[key]: object
+        +Keys: ICollection~string~
+        +Values: ICollection~object~
+        +Add(key, value)
+        +Remove(key)
+    }
+    
+    class ICorrelationIdSupport {
+        <<interface>>
+        +CorrelationId: string
+    }
+    
+    DisposableObject <|-- FeederMessage
+    IDictionary~string, object~ <|.. FeederMessage
+    ICorrelationIdSupport <|.. FeederMessage
+    ICloneable <|.. FeederMessage
+```
+
+### ServiceConfiguration Sequence
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant SC as ServiceConfiguration
+    participant D as ConcurrentDictionary
+    participant E as PropertyChanging Event
+    participant F as PropertyChanged Event
+    
+    C->>SC: Set("value", "PropertyName")
+    SC->>E: PropertyChanging("PropertyName")
+    SC->>D: AddOrUpdate("PropertyName", "value")
+    D-->>SC: previousValue
+    SC->>SC: Compare: value != previousValue
+    SC->>F: PropertyChanged("PropertyName")
+    SC-->>C: void
+    
+    C->>SC: Get<string>("PropertyName")
+    SC->>D: GetValueOrDefault("PropertyName")
+    D-->>SC: "value"
+    SC-->>C: "value"
+```
+
+### Telemetry Activity Flow
+
+```mermaid
+sequenceDiagram
+    participant S as Service
+    participant T as Telemetry
+    participant A as ActivitySource
+    participant O as OTLP Exporter
+    
+    S->>T: StartActivity("Operation", Internal)
+    T->>A: StartActivity()
+    A-->>T: Activity instance
+    T-->>S: Activity instance
+    
+    S->>S: Execute operation
+    S->>T: activity.SetTag("key", value)
+    T->>A: SetTag()
+    
+    S->>T: activity.Dispose()
+    T->>A: Stop activity
+    A->>O: Export span data
+    O-->>A: Acknowledged
+```
+
+[↑ Back to top](#contents)
+
+## ThunderPropagator Dependencies
+
+| Package | Version | Description | Links |
+|---------|---------|-------------|-------|
+| Ardalis.GuardClauses | 5.0.0 | Guard clause extensions for parameter validation | [NuGet](https://nuget.pkg.github.com/KiarashMinoo/index.json) |
+| JetBrains.Annotations | 2025.2.4 | JetBrains code analysis annotations | [NuGet](https://nuget.pkg.github.com/KiarashMinoo/index.json) |
+| CaseConverter | 2.0.1 | Case conversion utilities (camelCase, PascalCase) | [NuGet](https://nuget.pkg.github.com/KiarashMinoo/index.json) |
+| Newtonsoft.Json | 13.0.4 | JSON serialization (ServiceConfiguration) | [NuGet](https://nuget.pkg.github.com/KiarashMinoo/index.json) |
+| System.Diagnostics.DiagnosticSource | Built-in | OpenTelemetry integration | [Microsoft](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/) |
+
+## Examples
+
+### Creating Custom FeederMessage
+
+```csharp
+using ThunderPropagator.BuildingBlocks.Application;
+using ThunderPropagator.BuildingBlocks.Application.Enums;
+
+public class EventMessage : FeederMessage
 {
-    var exceptionInfo = new ExceptionInfo(ex);
-    // Log or transmit exception info
-    throw;
+    public Guid EventId
+    {
+        get => GetValueOrDefault(Guid.NewGuid());
+        set => SetValue(value);
+    }
+    
+    public DateTime Timestamp
+    {
+        get => GetValueOrDefault(DateTime.UtcNow);
+        set => SetValue(value);
+    }
+    
+    public string EventType
+    {
+        get => GetValueOrNull<string>() ?? "Unknown";
+        set => SetValue(value);
+    }
+    
+    public Dictionary<string, object>? Metadata
+    {
+        get => GetValueOrNull<Dictionary<string, object>>();
+        set => SetValue(value);
+    }
 }
+
+// Usage
+var evt = new EventMessage
+{
+    EventId = Guid.NewGuid(),
+    EventType = "UserRegistered",
+    Timestamp = DateTime.UtcNow,
+    CorrelationId = "trace-xyz-789",
+    CastType = CastType.Unicast,
+    Metadata = new Dictionary<string, object>
+    {
+        ["UserId"] = 12345,
+        ["Source"] = "WebAPI"
+    }
+};
+
+// Serialize to JSON
+var json = evt.ToJson();
+Console.WriteLine(json);
+```
+
+### Custom ServiceConfiguration with Validation
+
+```csharp
+using ThunderPropagator.BuildingBlocks.Application;
+using Ardalis.GuardClauses;
+
+public class ApiConfiguration : ServiceConfiguration
+{
+    public string BaseUrl
+    {
+        get => Get<string>() ?? "https://localhost";
+        set
+        {
+            Guard.Against.NullOrWhiteSpace(value, nameof(BaseUrl));
+            Guard.Against.InvalidFormat(value, nameof(BaseUrl), @"^https?://", 
+                "BaseUrl must start with http:// or https://");
+            Set(value);
+        }
+    }
+    
+    public int Timeout
+    {
+        get => Get(30);
+        set
+        {
+            Guard.Against.NegativeOrZero(value, nameof(Timeout));
+            Set(value);
+        }
+    }
+    
+    public string? ApiKey
+    {
+        get => Get<string>();
+        set => Set(value);
+    }
+}
+
+// Usage
+var config = new ApiConfiguration
+{
+    BaseUrl = "https://api.example.com",
+    Timeout = 60,
+    ApiKey = "secret-key-123"
+};
+
+// Track changes
+config.PropertyChanged += (sender, args) =>
+{
+    Console.WriteLine($"Configuration changed: {args.PropertyName}");
+};
+
+config.Timeout = 120; // Triggers PropertyChanged event
 ```
 
 ## See Also
 
-- [Attributes](./Attributes/README.md) - Custom attributes for serialization and metadata
-- [Helpers](./Helpers/README.md) - Utility classes for common operations
-- [Collections](./Collections/README.md) - Specialized collection types
-- [Ciphering](./Ciphering/README.md) - Cryptographic operations
-- [BuildingBlocks.Infrastructure](../BuildingBlocks.Infrastructure/README.md) - Infrastructure components
+- [Attributes](./Attributes/README.md) — JSON serialization control attributes
+- [Certificate](./Certificate/README.md) — X.509 certificate utilities
+- [ChangeTrackingItems](./ChangeTrackingItems/README.md) — Property change tracking
+- [Ciphering](./Ciphering/README.md) — Encryption services
+- [Collections](./Collections/README.md) — Specialized collections
+- [CorrelationId](./CorrelationId/README.md) — Correlation ID management
+- [Enums](./Enums/README.md) — Common enumerations
+- [Helpers](./Helpers/README.md) — Utility helpers
+- [Identity](./Identity/README.md) — JWT identity helpers
+- [Objects](./Objects/README.md) — Base object classes
+- [Serializations](./Serializations/README.md) — Serialization abstractions
+- [Infrastructure Layer](../BuildingBlocks.Infrastructure/README.md)
+- [Documentation Home](../README.md)
 
-[? Back to top](#contents)</content>
-<parameter name="filePath">C:\Users\Kiarash\RiderProjects\ThunderPropagator.BuildingBlocks\docs\BuildingBlocks.Application\README.md
+[↑ Back to top](#contents)

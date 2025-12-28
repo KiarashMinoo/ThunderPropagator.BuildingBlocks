@@ -1,0 +1,102 @@
+﻿[
+    {
+        "Path":  "BuildingBlocks.Application/Certificate",
+        "Types":  1,
+        "Files":  1
+    },
+    {
+        "Path":  "BuildingBlocks.Application/ChangeTrackingItems",
+        "Types":  5,
+        "Files":  5
+    },
+    {
+        "Path":  "BuildingBlocks.Application/Ciphering",
+        "Types":  3,
+        "Files":  3
+    },
+    {
+        "Path":  "BuildingBlocks.Application/CorrelationId",
+        "Types":  3,
+        "Files":  3
+    },
+    {
+        "Path":  "BuildingBlocks.Application/Enums",
+        "Types":  4,
+        "Files":  4
+    },
+    {
+        "Path":  "BuildingBlocks.Application/Identity",
+        "Types":  2,
+        "Files":  2
+    },
+    {
+        "Path":  "BuildingBlocks.Application/Objects",
+        "Types":  5,
+        "Files":  5
+    },
+    {
+        "Path":  "BuildingBlocks.Application/Serializations",
+        "Types":  2,
+        "Files":  2
+    },
+    {
+        "Path":  "BuildingBlocks.Application/Serializations/Json",
+        "Types":  2,
+        "Files":  2
+    },
+    {
+        "Path":  "BuildingBlocks.Application/Serializations/Yaml",
+        "Types":  2,
+        "Files":  2
+    },
+    {
+        "Path":  "BuildingBlocks.Infrastructure/HealthChecks",
+        "Types":  0,
+        "Files":  0
+    },
+    {
+        "Path":  "BuildingBlocks.Infrastructure/System",
+        "Types":  0,
+        "Files":  0
+    },
+    {
+        "Path":  "BuildingBlocks.Infrastructure/System/Network",
+        "Types":  2,
+        "Files":  2
+    },
+    {
+        "Path":  "BuildingBlocks.Infrastructure/SystemResourceMonitor/Metrics",
+        "Types":  2,
+        "Files":  2
+    },
+    {
+        "Path":  "BuildingBlocks.Infrastructure/SystemResourceMonitor/Metrics/Battery",
+        "Types":  3,
+        "Files":  2
+    },
+    {
+        "Path":  "BuildingBlocks.Infrastructure/SystemResourceMonitor/Metrics/Cpu",
+        "Types":  4,
+        "Files":  4
+    },
+    {
+        "Path":  "BuildingBlocks.Infrastructure/SystemResourceMonitor/Metrics/Disk",
+        "Types":  6,
+        "Files":  4
+    },
+    {
+        "Path":  "BuildingBlocks.Infrastructure/SystemResourceMonitor/Metrics/Gpu",
+        "Types":  3,
+        "Files":  2
+    },
+    {
+        "Path":  "BuildingBlocks.Infrastructure/SystemResourceMonitor/Metrics/Memory",
+        "Types":  2,
+        "Files":  2
+    },
+    {
+        "Path":  "BuildingBlocks.Infrastructure/SystemResourceMonitor/Metrics/SystemDrives",
+        "Types":  2,
+        "Files":  2
+    }
+]
