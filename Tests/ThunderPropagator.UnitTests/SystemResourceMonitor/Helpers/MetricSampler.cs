@@ -31,13 +31,23 @@ public sealed class MetricSampler
         var endTime = DateTime.UtcNow.AddMilliseconds(windowMs);
         var sampleCount = 0;
 
+        // Collect first sample immediately
+        var metrics = await _monitor.GetMetricsAsync(window: intervalMs, cancellationToken: cancellationToken);
+        _samples.Add(metrics);
+        sampleCount++;
+
+        // Continue collecting samples at intervals until window expires
         while (DateTime.UtcNow < endTime && !cancellationToken.IsCancellationRequested)
         {
-            var metrics = await _monitor.GetMetricsAsync(window: intervalMs, cancellationToken: cancellationToken);
-            _samples.Add(metrics);
-            sampleCount++;
-
             await Task.Delay(intervalMs, cancellationToken);
+            
+            // Only collect if we're still within the window
+            if (DateTime.UtcNow < endTime)
+            {
+                metrics = await _monitor.GetMetricsAsync(window: intervalMs, cancellationToken: cancellationToken);
+                _samples.Add(metrics);
+                sampleCount++;
+            }
         }
 
         return new MetricSample(_samples.ToArray(), windowMs, intervalMs);
