@@ -30,15 +30,24 @@ public class MetricsSampler
         var startTime = DateTime.UtcNow;
         var endTime = startTime.AddMilliseconds(durationMs);
 
+        // Collect first sample immediately
+        var metrics = await _monitor.GetMetricsAsync(windowMs, null, cancellationToken);
+        _samples.Add(metrics);
+
+        // Continue collecting samples at intervals until duration expires
         while (DateTime.UtcNow < endTime && !cancellationToken.IsCancellationRequested)
         {
-            var metrics = await _monitor.GetMetricsAsync(windowMs, null, cancellationToken);
-            _samples.Add(metrics);
-
             await Task.Delay(windowMs, cancellationToken);
+            
+            // Only collect if we're still within the duration
+            if (DateTime.UtcNow < endTime)
+            {
+                metrics = await _monitor.GetMetricsAsync(windowMs, null, cancellationToken);
+                _samples.Add(metrics);
+            }
         }
 
-        return new MetricsSample(_samples);
+        return new MetricsSample(new List<SystemResourceMonitorMetrics>(_samples));
     }
 
     /// <summary>
