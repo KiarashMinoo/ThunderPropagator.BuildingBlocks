@@ -50,7 +50,7 @@ jobs:
           name: v${{ steps.ver.outputs.version }}
           body_path: release-notes.txt
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
   # --- 1b) propagate finalized version into 'develop' and push ---
   sync-develop-version:
@@ -172,13 +172,13 @@ jobs:
       - name: Publish packages to GitHub Packages (public)
         shell: pwsh
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           pwsh ./.github/scripts/publish-packages.ps1 `
             -NuGetSource 'https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json' `
-            -NuGetApiKey $env:GITHUB_TOKEN `
+            -NuGetApiKey $env:GH_TOKEN `
             -MakePublic `
-            -GitHubApiToken $env:GITHUB_TOKEN `
+            -GitHubApiToken $env:GH_TOKEN `
             -SkipCleanup
 
       - name: Publish packages to NuGet.org (Release AnyCPU only)
@@ -204,7 +204,7 @@ jobs:
     steps:
       - name: Delete ALL run artifacts
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts \
             --paginate --jq '.artifacts[].id' | while read -r id; do
