@@ -205,6 +205,13 @@ if ($MakePublic -and $NuGetSource -match 'nuget.pkg.github.com') {
                 'X-GitHub-Api-Version' = '2022-11-28'
             }
             
+            # Extract owner from NuGet source URL if possible
+            $owner = $GitHubOwner
+            if ($NuGetSource -match 'nuget.pkg.github.com/([^/]+)') {
+                $owner = $Matches[1]
+                Write-Host "Detected repository owner: $owner" -ForegroundColor Gray
+            }
+            
             # Extract unique package IDs from all .nupkg files
             $packageIds = @()
             $versionPattern = '\.\d+\.\d+\.\d+(?:[.-][A-Za-z0-9\.\-]+)*\.nupkg$'
@@ -222,41 +229,83 @@ if ($MakePublic -and $NuGetSource -match 'nuget.pkg.github.com') {
             foreach ($pkgName in $packageIds) {
                 Write-Host "`nSetting visibility for package: $pkgName" -ForegroundColor Cyan
                 
-                try {
-                    $uri = "https://api.github.com/user/packages/nuget/$pkgName"
-                    
-                    # First, check if package exists
+                $success = $false
+                $endpoints = @(
+                    "https://api.github.com/orgs/$owner/packages/nuget/$pkgName",
+                    "https://api.github.com/user/packages/nuget/$pkgName"
+                )
+                
+                foreach ($uri in $endpoints) {
                     try {
-                        $response = Invoke-RestMethod -Uri $uri -Method Get -Headers $headers -ErrorAction Stop
-                        Write-Host "  Package found (current visibility: $($response.visibility))" -ForegroundColor Gray
+                        Write-Host "  Trying endpoint: $uri" -ForegroundColor DarkGray
+                        
+                        # Check if package exists
+                        $getResponse = $null
+                        try {
+                            $getResponse = Invoke-RestMethod -Uri $uri -Method Get -Headers $headers -ErrorAction Stop
+                            Write-Host "  Package found (visibility: $($getResponse.visibility))" -ForegroundColor Gray
+                        }
+                        catch {
+                            Write-Host "  Not found at this endpoint, trying next..." -ForegroundColor DarkGray
+                            continue
+                        }
+                        
+                        # Skip if already public
+                        if ($getResponse.visibility -eq 'public') {
+                            Write-Host "  ✓ Already PUBLIC" -ForegroundColor Green
+                            $success = $true
+                            break
+                        }
+                        
+                        # Update visibility to public
+                        Write-Host "  Sending PATCH request to set visibility to public..." -ForegroundColor DarkGray
+                        $body = @{ visibility = 'public' } | ConvertTo-Json
+                        
+                        try {
+                            $patchResponse = Invoke-RestMethod -Uri $uri -Method Patch -Headers $headers -Body $body -ContentType 'application/json' -ErrorAction Stop
+                            
+                            if ($patchResponse.visibility -eq 'public') {
+                                Write-Host "  ✓ Set to PUBLIC successfully" -ForegroundColor Green
+                                $success = $true
+                                break
+                            }
+                            else {
+                                Write-Warning "  Visibility update returned: $($patchResponse.visibility)"
+                            }
+                        }
+                        catch {
+                            $errMsg = $_.Exception.Message
+                            $statusCode = $_.Exception.Response.StatusCode.value__
+                            
+                            # Try to read response body for more details
+                            try {
+                                $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+                                $responseBody = $reader.ReadToEnd()
+                                $reader.Close()
+                                Write-Host "  Response body: $responseBody" -ForegroundColor DarkYellow
+                            }
+                            catch {
+                                # Ignore if we can't read the response
+                            }
+                            
+                            if ($statusCode -eq 404) {
+                                Write-Warning "  PATCH failed with 404 - package exists but cannot update visibility"
+                            }
+                            elseif ($statusCode -eq 403) {
+                                Write-Warning "  Permission denied (403). Token needs 'write:packages' scope"
+                            }
+                            else {
+                                Write-Warning "  PATCH failed: HTTP $statusCode - $errMsg"
+                            }
+                        }
                     }
                     catch {
-                        Write-Warning "  Package not found or not accessible: $pkgName"
-                        continue
-                    }
-                    
-                    # Update visibility to public
-                    $body = @{ visibility = 'public' } | ConvertTo-Json
-                    $response = Invoke-RestMethod -Uri $uri -Method Patch -Headers $headers -Body $body -ContentType 'application/json' -ErrorAction Stop
-                    
-                    if ($response.visibility -eq 'public') {
-                        Write-Host "  ✓ Set to PUBLIC successfully" -ForegroundColor Green
-                    }
-                    else {
-                        Write-Warning "  Visibility update returned: $($response.visibility)"
+                        Write-Host "  Unexpected error: $($_.Exception.Message)" -ForegroundColor DarkGray
                     }
                 }
-                catch {
-                    $statusCode = $_.Exception.Response.StatusCode.value__
-                    if ($statusCode -eq 404) {
-                        Write-Host "  Package not found (may not exist yet or wrong name)" -ForegroundColor DarkYellow
-                    }
-                    elseif ($statusCode -eq 403) {
-                        Write-Warning "  Permission denied. Token may lack 'write:packages' scope"
-                    }
-                    else {
-                        Write-Warning "  Failed to update visibility: $($_.Exception.Message)"
-                    }
+                
+                if (-not $success) {
+                    Write-Warning "  ✗ Failed to set visibility for $pkgName at any endpoint"
                 }
             }
         }
