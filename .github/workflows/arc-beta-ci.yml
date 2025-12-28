@@ -87,6 +87,8 @@ jobs:
       - name: Build and Pack
         id: pack
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           $releaseNotes = if ($env:REL_NOTES) { $env:REL_NOTES } else { "" }
           $params = @{

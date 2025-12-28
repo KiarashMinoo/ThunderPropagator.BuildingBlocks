@@ -121,6 +121,8 @@ jobs:
       - name: Build and Pack
         id: pack
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           pwsh ./.github/scripts/pack-solution.ps1 `
             -Configuration "${{ matrix.configuration }}" `
