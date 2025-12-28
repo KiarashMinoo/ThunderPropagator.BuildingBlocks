@@ -1,7 +1,7 @@
 using NetArchTest.Rules;
 using Xunit;
 
-namespace ThunderPropagator.ArchTests
+namespace ArchTests
 {
     public class ArchitectureTests
     {
