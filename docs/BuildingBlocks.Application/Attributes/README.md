@@ -1,6 +1,6 @@
-﻿# Attributes
+# Attributes
 
-Custom attributes for controlling serialization behavior and metadata in RapidStreamer applications.
+Custom attributes for controlling serialization behavior and metadata in ThunderPropagator applications.
 
 ## Contents
 
@@ -13,7 +13,7 @@ Custom attributes for controlling serialization behavior and metadata in RapidSt
 
 ## Overview
 
-The Attributes namespace provides custom attributes that control how objects are serialized and processed within the RapidStreamer framework. These attributes allow developers to customize JSON serialization behavior and exclude specific members from processing.
+The Attributes namespace provides custom attributes that control how objects are serialized and processed within the ThunderPropagator framework. These attributes allow developers to customize JSON serialization behavior and exclude specific members from processing.
 
 Key attributes include:
 - `JsonSerializationAttribute` - Controls JSON property naming conventions
@@ -36,7 +36,7 @@ Key attributes include:
 ### JsonSerializationAttribute
 
 **Kind:** Class  
-**Namespace:** RapidStreamer.BuildingBlocks.Application.Attributes  
+**Namespace:** ThunderPropagator.BuildingBlocks.Application.Attributes  
 **Inherits:** Attribute  
 **AttributeUsage:** AttributeTargets.Class
 
@@ -64,7 +64,7 @@ public class MyClass
 ### IgnoreMemberAttribute
 
 **Kind:** Class  
-**Namespace:** RapidStreamer.BuildingBlocks.Application.Attributes  
+**Namespace:** ThunderPropagator.BuildingBlocks.Application.Attributes  
 **Inherits:** Attribute  
 **AttributeUsage:** AttributeTargets.Property | AttributeTargets.Field
 
@@ -129,7 +129,7 @@ classDiagram
 
 ### Combined Attribute Usage
 ```csharp
-using RapidStreamer.BuildingBlocks.Application.Attributes;
+using ThunderPropagator.BuildingBlocks.Application.Attributes;
 
 [JsonSerialization(CamelCase = false)]
 public class Product : FeederMessage
@@ -176,5 +176,5 @@ var product = new Product
 - [Helpers](../Helpers/README.md) - Serialization helpers that respect these attributes
 - [Serializations](../Serializations/README.md) - Serialization implementations
 
-[↑ Back to top](#contents)</content>
-<parameter name="filePath">C:\Users\Kiarash\RiderProjects\RapidStreamer.BuildingBlocks\docs\BuildingBlocks.Application\Attributes\README.md
+[? Back to top](#contents)</content>
+<parameter name="filePath">C:\Users\Kiarash\RiderProjects\ThunderPropagator.BuildingBlocks\docs\BuildingBlocks.Application\Attributes\README.md

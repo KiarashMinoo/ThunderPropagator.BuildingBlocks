@@ -1,4 +1,4 @@
-﻿<!-- BEGIN AUTO-RELEASE-NOTES -->
+<!-- BEGIN AUTO-RELEASE-NOTES -->
 # Changelog
 
 All notable changes to this project will be documented in this file.
@@ -23,7 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - update readme files ($(@{Sha='10a20e378297d34344715f823d92447ea3ba78aa; Short=10a20e3; Date=2025-09-30; Subject=update readme files; Author=Ahmad(Kia) Minoo'}.Short))
 - updating documentations ($(@{Sha='0e73a07858a07df41a382f4fc334f19eee3f82f1; Short=0e73a07; Date=2025-09-30; Subject=updating documentations; Author=Ahmad(Kia) Minoo'}.Short))
 - upgrade nuget packages ($(@{Sha='21c5a2847013b6fa7ad636a53f809bf418a10a9d; Short=21c5a28; Date=2025-09-29; Subject=upgrade nuget packages; Author=Ahmad(Kia) Minoo'}.Short))
-- Merge branch 'develop' of https://github.com/KiarashMinoo/RapidStreamer.BuildingBlocks into develop ($(@{Sha='100b2ce58aabfb4bf362c6572e4e5e9a92930937; Short=100b2ce; Date=2025-09-29; Subject=Merge branch 'develop' of https://github.com/KiarashMinoo/RapidStreamer.BuildingBlocks into develop; Author=Ahmad(Kia) Minoo'}.Short))
+- Merge branch 'develop' of https://github.com/KiarashMinoo/ThunderPropagator.BuildingBlocks into develop ($(@{Sha='100b2ce58aabfb4bf362c6572e4e5e9a92930937; Short=100b2ce; Date=2025-09-29; Subject=Merge branch 'develop' of https://github.com/KiarashMinoo/ThunderPropagator.BuildingBlocks into develop; Author=Ahmad(Kia) Minoo'}.Short))
 - add documentations ($(@{Sha='76a76cf86e45e7539a56feacdc7ad92abc558a9d; Short=76a76cf; Date=2025-09-29; Subject=add documentations; Author=Ahmad(Kia) Minoo'}.Short))
 - update github actions ($(@{Sha='38cfe45279c7248b6abdbae324944e4cfefacd83; Short=38cfe45; Date=2025-09-09; Subject=update github actions; Author=Ahmad(Kia) Minoo'}.Short))
 - _...and 5 more commits_

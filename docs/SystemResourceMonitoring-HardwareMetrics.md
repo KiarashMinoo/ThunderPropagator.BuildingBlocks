@@ -1,8 +1,8 @@
-﻿# System Resource Monitoring - Hardware Health & Performance Metrics
+# System Resource Monitoring - Hardware Health & Performance Metrics
 
 ## Overview
 
-The RapidStreamer Building Blocks System Resource Monitoring module provides comprehensive hardware health and performance metrics collection across multiple platforms (Windows, Linux, macOS). The module supports real-time monitoring of CPU, memory, disk, GPU, and battery metrics with configurable sampling intervals and platform-specific providers.
+The ThunderPropagator Building Blocks System Resource Monitoring module provides comprehensive hardware health and performance metrics collection across multiple platforms (Windows, Linux, macOS). The module supports real-time monitoring of CPU, memory, disk, GPU, and battery metrics with configurable sampling intervals and platform-specific providers.
 
 ## Features
 
@@ -71,38 +71,38 @@ The RapidStreamer Building Blocks System Resource Monitoring module provides com
 ## Platform Support
 
 ### Windows
-- ✅ CPU Usage, Threads, Processes
-- ⚠️ CPU Temperature (requires WMI or hardware monitoring library)
-- ✅ Memory Metrics
-- ✅ Disk Space
-- ⚠️ Disk Health (requires WMI SMART implementation)
-- ⚠️ Disk Speed (requires System.Diagnostics.PerformanceCounter package)
-- ⚠️ GPU Metrics (requires NVML/AMD Display Library)
-- ✅ Battery Metrics (via WMIC)
+- ? CPU Usage, Threads, Processes
+- ?? CPU Temperature (requires WMI or hardware monitoring library)
+- ? Memory Metrics
+- ? Disk Space
+- ?? Disk Health (requires WMI SMART implementation)
+- ?? Disk Speed (requires System.Diagnostics.PerformanceCounter package)
+- ?? GPU Metrics (requires NVML/AMD Display Library)
+- ? Battery Metrics (via WMIC)
 
 ### Linux
-- ✅ CPU Usage, Threads, Processes
-- ✅ CPU Temperature (via `/sys/class/thermal`)
-- ✅ Memory Metrics (via `free` command)
-- ✅ Disk Space
-- ⚠️ Disk Health (requires `smartctl`)
-- ⚠️ Disk Speed (requires `/proc/diskstats` parsing)
-- ⚠️ GPU Metrics (requires `nvidia-smi` or `rocm-smi`)
-- ✅ Battery Metrics (via `/sys/class/power_supply`)
+- ? CPU Usage, Threads, Processes
+- ? CPU Temperature (via `/sys/class/thermal`)
+- ? Memory Metrics (via `free` command)
+- ? Disk Space
+- ?? Disk Health (requires `smartctl`)
+- ?? Disk Speed (requires `/proc/diskstats` parsing)
+- ?? GPU Metrics (requires `nvidia-smi` or `rocm-smi`)
+- ? Battery Metrics (via `/sys/class/power_supply`)
 
 ### macOS
-- ✅ CPU Usage, Threads, Processes
-- ⚠️ CPU Temperature (requires IOKit or `smc` tool)
-- ✅ Memory Metrics
-- ✅ Disk Space
-- ⚠️ Disk Health (requires `diskutil smartdata`)
-- ⚠️ Disk Speed (requires `iostat` parsing)
-- ⚠️ GPU Metrics (requires Metal framework)
-- ⚠️ Battery Metrics (requires IOKit or enhanced `pmset` parsing)
+- ? CPU Usage, Threads, Processes
+- ?? CPU Temperature (requires IOKit or `smc` tool)
+- ? Memory Metrics
+- ? Disk Space
+- ?? Disk Health (requires `diskutil smartdata`)
+- ?? Disk Speed (requires `iostat` parsing)
+- ?? GPU Metrics (requires Metal framework)
+- ?? Battery Metrics (requires IOKit or enhanced `pmset` parsing)
 
 **Legend:**
-- ✅ Fully implemented
-- ⚠️ Placeholder/partial implementation - requires additional platform-specific implementation
+- ? Fully implemented
+- ?? Placeholder/partial implementation - requires additional platform-specific implementation
 
 ## Installation
 
@@ -110,7 +110,7 @@ Add the package reference to your project:
 
 ```xml
 <ItemGroup>
-    <PackageReference Include="RapidStreamer.BuildingBlocks.Modules" Version="1.0.x" />
+    <PackageReference Include="ThunderPropagator.BuildingBlocks.Modules" Version="1.0.x" />
 </ItemGroup>
 ```
 
@@ -119,7 +119,7 @@ Add the package reference to your project:
 ### Basic Setup
 
 ```csharp
-using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor;
+using ThunderPropagator.BuildingBlocks.Infrastructure.SystemResourceMonitor;
 
 // In your Startup.cs or Program.cs
 services.AddSystemResourceMonitor();
@@ -157,7 +157,7 @@ services.AddSystemResourceMonitor(options =>
 ### Collecting Metrics
 
 ```csharp
-using RapidStreamer.BuildingBlocks.Infrastructure.SystemResourceMonitor;
+using ThunderPropagator.BuildingBlocks.Infrastructure.SystemResourceMonitor;
 
 public class MonitoringService
 {
@@ -183,7 +183,7 @@ public class MonitoringService
         // CPU Temperature (may be null if not supported)
         if (metrics.CpuTemperature?.TemperatureSensorsAvailable == true)
         {
-            Console.WriteLine($"CPU Temp: {metrics.CpuTemperature.PackageTemperatureCelsius}°C");
+            Console.WriteLine($"CPU Temp: {metrics.CpuTemperature.PackageTemperatureCelsius}�C");
         }
 
         // Disk metrics
@@ -199,7 +199,7 @@ public class MonitoringService
             {
                 Console.WriteLine($"Disk {diskHealth.DriveId} Health: {diskHealth.Status}");
                 if (diskHealth.TemperatureCelsius.HasValue)
-                    Console.WriteLine($"  Temperature: {diskHealth.TemperatureCelsius}°C");
+                    Console.WriteLine($"  Temperature: {diskHealth.TemperatureCelsius}�C");
             }
         }
 
@@ -221,7 +221,7 @@ public class MonitoringService
             {
                 Console.WriteLine($"GPU {gpu.GpuIndex} ({gpu.GpuName}):");
                 Console.WriteLine($"  Utilization: {gpu.UtilizationPercent}%");
-                Console.WriteLine($"  Temperature: {gpu.TemperatureCelsius}°C");
+                Console.WriteLine($"  Temperature: {gpu.TemperatureCelsius}�C");
                 Console.WriteLine($"  Active Processes: {gpu.ActiveProcesses.Count}");
             }
         }
@@ -382,5 +382,5 @@ To contribute platform-specific implementations:
 
 ## License
 
-This module is part of the RapidStreamer Building Blocks and follows the same license as the parent project.
+This module is part of the ThunderPropagator Building Blocks and follows the same license as the parent project.
 

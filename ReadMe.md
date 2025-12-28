@@ -1,10 +1,10 @@
-﻿# RapidStreamer BuildingBlocks
+# ThunderPropagator BuildingBlocks (Project ARC)
 
-RapidStreamer BuildingBlocks is a comprehensive library of production-ready components for .NET application development. It provides robust, reusable building blocks for scalable, high-performance, and cloud-native solutions.
+ThunderPropagator BuildingBlocks (Project ARC) is a comprehensive library of production-ready components for .NET application development. It provides robust, reusable building blocks for scalable, high-performance, and cloud-native solutions.
 
 ---
 
-## 📚 Documentation
+## ?? Documentation
 
 **Main Documentation Hub:**
 - [Full Documentation Catalog](docs/README.md)
@@ -13,9 +13,9 @@ Explore all Application and Infrastructure components, API references, integrati
 
 ---
 
-## 🚀 NuGet Installation (GitHub Packages)
+## ?? NuGet Installation (GitHub Packages)
 
-RapidStreamer packages are hosted at GitHub Packages:
+ThunderPropagator packages are hosted at GitHub Packages:
 `https://nuget.pkg.github.com/KiarashMinoo/index.json`
 
 **Add the GitHub Packages feed to your NuGet config:**
@@ -29,7 +29,7 @@ RapidStreamer packages are hosted at GitHub Packages:
   </packageSources>
   <packageSourceMapping>
     <packageSource key="github">
-      <package pattern="RapidStreamer.*" />
+      <package pattern="ThunderPropagator.*" />
     </packageSource>
     <packageSource key="nuget.org">
       <package pattern="*" />
@@ -45,16 +45,16 @@ dotnet nuget add source --name github --source https://nuget.pkg.github.com/Kiar
 
 ---
 
-## 📦 RapidStreamer Packages
+## ?? ThunderPropagator packages
 
 | Package | Description | Docs Usage |
 |---------|-------------|------------|
-| RapidStreamer.BuildingBlocks.Application | Core application building blocks | [docs/BuildingBlocks.Application/README.md](docs/BuildingBlocks.Application/README.md) |
-| RapidStreamer.BuildingBlocks.Infrastructure | Infrastructure and monitoring | [docs/BuildingBlocks.Infrastructure/README.md](docs/BuildingBlocks.Infrastructure/README.md) |
+| ThunderPropagator.BuildingBlocks.Application | Core application building blocks | [docs/BuildingBlocks.Application/README.md](docs/BuildingBlocks.Application/README.md) |
+| ThunderPropagator.BuildingBlocks.Infrastructure | Infrastructure and monitoring | [docs/BuildingBlocks.Infrastructure/README.md](docs/BuildingBlocks.Infrastructure/README.md) |
 
 ---
 
-## 🛠️ Build & Restore
+## ??? Build & Restore
 
 ```bash
 dotnet restore
@@ -63,7 +63,7 @@ dotnet build -c Release
 
 ---
 
-## 📊 Coverage Audit
+## ?? Coverage Audit
 
 See [docs/README.md](docs/README.md#coverage-audit) for a full audit of documentation coverage, folder READMEs, and API details.
 

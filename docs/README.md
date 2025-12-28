@@ -1,19 +1,19 @@
-﻿# RapidStreamer BuildingBlocks Documentation
+# ThunderPropagator BuildingBlocks (Project ARC) Documentation
 
-Welcome to the comprehensive documentation for RapidStreamer BuildingBlocks - a robust collection of reusable components designed to accelerate application development across the .NET ecosystem.
+Welcome to the comprehensive documentation for ThunderPropagator BuildingBlocks (Project ARC) - a robust collection of reusable components designed to accelerate application development across the .NET ecosystem.
 
-## 📚 Documentation Overview
+## ?? Documentation Overview
 
-This documentation provides detailed guidance for integrating and using RapidStreamer BuildingBlocks in your applications. Each component includes comprehensive API references, usage examples, performance characteristics, and architectural guidance.
+This documentation provides detailed guidance for integrating and using ThunderPropagator BuildingBlocks (Project ARC) in your applications. Each component includes comprehensive API references, usage examples, performance characteristics, and architectural guidance.
 
-### 🏗️ Architecture
+### ??? Architecture
 
-RapidStreamer BuildingBlocks is organized into two main layers:
+ThunderPropagator BuildingBlocks (Project ARC) is organized into two main layers:
 
 - **[Application BuildingBlocks](BuildingBlocks.Application/README.md)** - Core application-level components
 - **[Infrastructure BuildingBlocks](BuildingBlocks.Infrastructure/README.md)** - Infrastructure and operational components
 
-### 🔧 Key Features
+### ?? Key Features
 
 - **High Performance**: Optimized implementations with telemetry and monitoring
 - **Type Safety**: Strongly-typed APIs with comprehensive validation
@@ -21,29 +21,29 @@ RapidStreamer BuildingBlocks is organized into two main layers:
 - **Observability**: Built-in telemetry, metrics, and health checks
 - **Cross-Platform**: .NET 8.0+ support with consistent behavior
 
-## 🚀 Quick Start
+## ?? Quick Start
 
 ### Installation
 
-Add RapidStreamer packages from GitHub Packages:
+Add ThunderPropagator packages from GitHub Packages:
 
 ```bash
 # Add GitHub Packages source
 dotnet nuget add source https://nuget.pkg.github.com/KiarashMinoo/index.json \
-  --name "RapidStreamer" \
+  --name "ThunderPropagator" \
   --username "KiarashMinoo" \
   --password "YOUR_GITHUB_TOKEN"
 
 # Install packages
-dotnet add package RapidStreamer.BuildingBlocks.Application
-dotnet add package RapidStreamer.BuildingBlocks.Infrastructure
+dotnet add package ThunderPropagator.BuildingBlocks.Application
+dotnet add package ThunderPropagator.BuildingBlocks.Infrastructure
 ```
 
 ### Basic Usage
 
 ```csharp
-using RapidStreamer.BuildingBlocks.Application;
-using RapidStreamer.BuildingBlocks.Application.Helpers;
+using ThunderPropagator.BuildingBlocks.Application;
+using ThunderPropagator.BuildingBlocks.Application.Helpers;
 
 // Create a message with correlation tracking
 var message = new FeederMessage
@@ -60,7 +60,7 @@ string json = message.ToJson();
 var restored = json.FromJson<FeederMessage>();
 ```
 
-## 📖 Documentation Sections
+## ?? Documentation Sections
 
 ### Application Components
 
@@ -79,7 +79,7 @@ var restored = json.FromJson<FeederMessage>();
 | **[HealthChecks](BuildingBlocks.Infrastructure/HealthChecks/README.md)** | System health monitoring | Health check implementations |
 | **[SystemResourceMonitor](BuildingBlocks.Infrastructure/SystemResourceMonitor/README.md)** | Performance tracking | CPU, memory, disk monitoring |
 
-## 🔍 API Reference
+## ?? API Reference
 
 Each component provides comprehensive API documentation including:
 
@@ -89,7 +89,7 @@ Each component provides comprehensive API documentation including:
 - **Performance Notes**: Optimization guidance and benchmarks
 - **Configuration Options**: Attribute-based customization
 
-## 📊 Performance & Monitoring
+## ?? Performance & Monitoring
 
 All components include built-in telemetry and performance monitoring:
 
@@ -106,7 +106,7 @@ var healthCheck = new SystemHealthCheck();
 var result = await healthCheck.CheckHealthAsync();
 ```
 
-## 🤝 Contributing
+## ?? Contributing
 
 This documentation is automatically generated from source code analysis. To contribute:
 
@@ -115,9 +115,9 @@ This documentation is automatically generated from source code analysis. To cont
 3. Include usage examples in method documentation
 4. Run documentation generation to validate changes
 
-## 📄 License
+## ?? License
 
-RapidStreamer BuildingBlocks is licensed under the MIT License. See the repository LICENSE file for details.
+ThunderPropagator BuildingBlocks (Project ARC) is licensed under the MIT License. See the repository LICENSE file for details.
 
 ---
 
@@ -125,5 +125,5 @@ RapidStreamer BuildingBlocks is licensed under the MIT License. See the reposito
 **Framework Support:** .NET 8.0, 9.0, 10.0  
 **Package Source:** GitHub Packages
 
-[View on GitHub](https://github.com/KiarashMinoo/RapidStreamer.BuildingBlocks)</content>
-<parameter name="filePath">C:\Users\Kiarash\RiderProjects\RapidStreamer.BuildingBlocks\docs\README.md
+[View on GitHub](https://github.com/KiarashMinoo/ThunderPropagator.BuildingBlocks)</content>
+<parameter name="filePath">C:\Users\Kiarash\RiderProjects\ThunderPropagator.BuildingBlocks\docs\README.md

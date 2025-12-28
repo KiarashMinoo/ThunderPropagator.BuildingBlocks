@@ -1,0 +1,3 @@
+namespace ThunderPropagator.BuildingBlocks.Infrastructure.SystemResourceMonitor.Metrics;
+
+public interface IMetrics;

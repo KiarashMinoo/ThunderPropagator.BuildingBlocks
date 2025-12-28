@@ -1,6 +1,6 @@
-﻿# Helpers
+# Helpers
 
-Comprehensive utility classes providing common operations for RapidStreamer applications, including serialization, string manipulation, collections, and cryptography.
+Comprehensive utility classes providing common operations for ThunderPropagator applications, including serialization, string manipulation, collections, and cryptography.
 
 ## Contents
 
@@ -13,7 +13,7 @@ Comprehensive utility classes providing common operations for RapidStreamer appl
 
 ## Overview
 
-The Helpers namespace contains essential utility classes that provide common functionality used throughout RapidStreamer applications. These helpers offer efficient implementations for serialization, string operations, collection processing, cryptography, and more.
+The Helpers namespace contains essential utility classes that provide common functionality used throughout ThunderPropagator applications. These helpers offer efficient implementations for serialization, string operations, collection processing, cryptography, and more.
 
 Key categories include:
 - **Serialization**: JSON, MessagePack, Protobuf, YAML, ToonNet format support
@@ -65,7 +65,7 @@ Key categories include:
 ### JsonHelper
 
 **Kind:** Static Class  
-**Namespace:** RapidStreamer.BuildingBlocks.Application.Helpers
+**Namespace:** ThunderPropagator.BuildingBlocks.Application.Helpers
 
 JSON serialization utilities with support for custom attributes and options.
 
@@ -97,7 +97,7 @@ Product? restored = json.FromJson<Product>();
 ### StringHelper
 
 **Kind:** Static Class  
-**Namespace:** RapidStreamer.BuildingBlocks.Application.Helpers
+**Namespace:** ThunderPropagator.BuildingBlocks.Application.Helpers
 
 String manipulation utilities including encoding, compression, and base64 conversion.
 
@@ -120,7 +120,7 @@ string back = bytes.FromByteArray(); // "Hello, World!"
 ### CollectionHelper
 
 **Kind:** Static Class  
-**Namespace:** RapidStreamer.BuildingBlocks.Application.Helpers
+**Namespace:** ThunderPropagator.BuildingBlocks.Application.Helpers
 
 High-performance collection processing utilities with telemetry support.
 
@@ -293,5 +293,5 @@ string userId = claims.FindFirst("sub")?.Value;
 - [Ciphering](../Ciphering/README.md) - Cryptographic helpers
 - [Serializations](../Serializations/README.md) - Serialization abstractions
 
-[↑ Back to top](#contents)</content>
-<parameter name="filePath">C:\Users\Kiarash\RiderProjects\RapidStreamer.BuildingBlocks\docs\BuildingBlocks.Application\Helpers\README.md
+[? Back to top](#contents)</content>
+<parameter name="filePath">C:\Users\Kiarash\RiderProjects\ThunderPropagator.BuildingBlocks\docs\BuildingBlocks.Application\Helpers\README.md

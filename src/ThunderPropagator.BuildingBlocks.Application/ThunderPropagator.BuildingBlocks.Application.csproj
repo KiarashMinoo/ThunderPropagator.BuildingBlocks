@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup Label="PackageId">
+        <PackageIdBase>ThunderPropagator.BuildingBlocks</PackageIdBase>
+        <PackageId>$(PackageIdBase)$(PackageIdConfigurationSuffix)$(PackageIdPlatformSuffix)</PackageId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="CaseConverter"/>
+        <PackageReference Include="JetBrains.Annotations"/>
+        <PackageReference Include="MessagePack"/>
+        <PackageReference Include="MessagePackAnalyzer"/>
+        <PackageReference Include="NetJSON"/>
+        <PackageReference Include="Newtonsoft.Json"/>
+        <PackageReference Include="protobuf-net"/>
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt"/>
+        <PackageReference Include="YamlDotNet"/>
+        <PackageReference Include="Ardalis.GuardClauses"/>
+        <PackageReference Include="SharpZipLib"/>
+        <PackageReference Include="ToonNet"/>
+    </ItemGroup>
+
+</Project>

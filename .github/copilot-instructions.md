@@ -1,13 +1,13 @@
-# RapidStreamer BuildingBlocks - AI Agent Instructions
+# ThunderPropagator BuildingBlocks (Project ARC) - AI Agent Instructions
 
 ## Project Overview
-RapidStreamer BuildingBlocks is a .NET library of production-ready, reusable components for building high-performance, cloud-native applications. The solution targets .NET 8.0, 9.0, and 10.0 with multi-platform support (AnyCPU, x86, x64, ARM64).
+ThunderPropagator BuildingBlocks (Project ARC) is a .NET library of production-ready, reusable components for building high-performance, cloud-native applications. The solution targets .NET 8.0, 9.0, and 10.0 with multi-platform support (AnyCPU, x86, x64, ARM64).
 
 ## Architecture
 
 ### Layer Structure
-- **Application Layer** (`src/RapidStreamer.BuildingBlocks.Application/`): Core building blocks with NO dependencies on Infrastructure
-- **Infrastructure Layer** (`src/RapidStreamer.BuildingBlocks.Infrastructure/`): System-level components (monitoring, health checks)
+- **Application Layer** (`src/ThunderPropagator.BuildingBlocks.Application/`): Core building blocks with NO dependencies on Infrastructure
+- **Infrastructure Layer** (`src/ThunderPropagator.BuildingBlocks.Infrastructure/`): System-level components (monitoring, health checks)
 - **CRITICAL**: Application must NEVER depend on Infrastructure. Verified by `ArchTests/ArchitectureTests.cs`
 
 ### Key Design Patterns
@@ -84,14 +84,14 @@ dotnet pack -c Release -o artifacts/pkg
 - `EnablePreviewFeatures=true` in test projects only
 
 ### Package Publishing
-- All packages include `RapidStreamer.png` and `README.md`
+- All packages include `ThunderPropagator.png` and `README.md`
 - Auto-generated on build when `IsPackable=true` and `GeneratePackageOnBuild=true`
 - Output to `artifacts/pkg/` directory
 
 ## Testing Strategy
 
 ### Test Organization
-- **Unit Tests**: `Tests/RapidStreamer.UnitTests/` - xUnit with NSubstitute for mocking
+- **Unit Tests**: `Tests/ThunderPropagator.UnitTests/` - xUnit with NSubstitute for mocking
 - **Arch Tests**: `Tests/ArchTests/` - NetArchTest.Rules for architecture validation
 - **Benchmarks**: BenchmarkDotNet tests in unit test project (see `CollectionHelperBenchmark.cs`)
 
@@ -189,11 +189,11 @@ See `SystemResourceMonitorExtensions.cs` for the pattern.
 6. Document in `docs/SystemResourceMonitoring-*.md`
 
 ### Adding New Helper
-1. Create in `src/RapidStreamer.BuildingBlocks.Application/Helpers/`
+1. Create in `src/ThunderPropagator.BuildingBlocks.Application/Helpers/`
 2. Make static class with extension methods
 3. Use `[CallerArgumentExpression]` for parameter validation
 4. Add XML documentation (required for build)
-5. Add tests in `Tests/RapidStreamer.UnitTests/`
+5. Add tests in `Tests/ThunderPropagator.UnitTests/`
 6. Document in `docs/BuildingBlocks.Application/Helpers/README.md`
 
 ### Adding Serialization Support

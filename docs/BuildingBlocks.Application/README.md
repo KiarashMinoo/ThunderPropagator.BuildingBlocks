@@ -1,4 +1,4 @@
-﻿# BuildingBlocks.Application
+# BuildingBlocks.Application
 
 Core application-level components providing essential functionality for building robust applications.
 
@@ -13,7 +13,7 @@ Core application-level components providing essential functionality for building
 
 ## Overview
 
-The BuildingBlocks.Application namespace contains the foundational components for RapidStreamer applications. This includes core abstractions like `FeederMessage`, configuration management with `ServiceConfiguration`, telemetry support, and essential utilities for application development.
+The BuildingBlocks.Application namespace contains the foundational components for ThunderPropagator applications. This includes core abstractions like `FeederMessage`, configuration management with `ServiceConfiguration`, telemetry support, and essential utilities for application development.
 
 Key features include:
 - Message-based communication with `FeederMessage` abstract class
@@ -51,7 +51,7 @@ Key features include:
 ### ExceptionInfo
 
 **Kind:** Class  
-**Namespace:** RapidStreamer.BuildingBlocks.Application
+**Namespace:** ThunderPropagator.BuildingBlocks.Application
 
 Serializable representation of exception information for logging and transmission.
 
@@ -80,7 +80,7 @@ catch (Exception ex)
 ### FeederMessage
 
 **Kind:** Abstract Class  
-**Namespace:** RapidStreamer.BuildingBlocks.Application  
+**Namespace:** ThunderPropagator.BuildingBlocks.Application  
 **Inherits:** DisposableObject  
 **Implements:** IDictionary<string, object?>, ICorrelationIdSupport, ICloneable
 
@@ -113,7 +113,7 @@ var message = new MyMessage { Title = "Hello", CorrelationId = "123" };
 ### ServiceConfiguration
 
 **Kind:** Abstract Class  
-**Namespace:** RapidStreamer.BuildingBlocks.Application  
+**Namespace:** ThunderPropagator.BuildingBlocks.Application  
 **Implements:** IServiceConfiguration, INotifyPropertyChanged, INotifyPropertyChanging, IEquatable<ServiceConfiguration>
 
 Observable configuration class with JSON serialization support.
@@ -148,7 +148,7 @@ config.DatabaseUrl = "postgresql://...";
 ### Telemetry
 
 **Kind:** Static Class  
-**Namespace:** RapidStreamer.BuildingBlocks.Application
+**Namespace:** ThunderPropagator.BuildingBlocks.Application
 
 Centralized telemetry and metrics collection utilities.
 
@@ -299,5 +299,5 @@ catch (Exception ex)
 - [Ciphering](./Ciphering/README.md) - Cryptographic operations
 - [BuildingBlocks.Infrastructure](../BuildingBlocks.Infrastructure/README.md) - Infrastructure components
 
-[↑ Back to top](#contents)</content>
-<parameter name="filePath">C:\Users\Kiarash\RiderProjects\RapidStreamer.BuildingBlocks\docs\BuildingBlocks.Application\README.md
+[? Back to top](#contents)</content>
+<parameter name="filePath">C:\Users\Kiarash\RiderProjects\ThunderPropagator.BuildingBlocks\docs\BuildingBlocks.Application\README.md

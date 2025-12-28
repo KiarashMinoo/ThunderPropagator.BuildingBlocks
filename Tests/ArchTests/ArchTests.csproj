@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\RapidStreamer.BuildingBlocks.Application\RapidStreamer.BuildingBlocks.Application.csproj" />
+    <ProjectReference Include="..\..\src\ThunderPropagator.BuildingBlocks.Application\ThunderPropagator.BuildingBlocks.Application.csproj" />
   </ItemGroup>
 
 </Project>
