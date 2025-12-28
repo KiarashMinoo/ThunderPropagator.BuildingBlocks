@@ -196,19 +196,30 @@ if ($MakePublic -and $NuGetSource -match 'nuget.pkg.github.com') {
         Write-Warning "MakePublic specified but GitHubApiToken not provided. Skipping visibility update."
     }
     else {
-        $packages = Get-ChildItem -Path $PackagesPath -Filter '*.nupkg' -ErrorAction SilentlyContinue
+        $allPackages = Get-ChildItem -Path $PackagesPath -Filter '*.nupkg' -ErrorAction SilentlyContinue
         
-        if ($packages) {
+        if ($allPackages) {
             $headers = @{
                 'Authorization' = "Bearer $GitHubApiToken"
                 'Accept' = 'application/vnd.github+json'
                 'X-GitHub-Api-Version' = '2022-11-28'
             }
             
-            # Package names to make public
-            $packageNames = @('ThunderPropagator.BuildingBlocks', 'ThunderPropagator.BuildingBlocks.Modules')
+            # Extract unique package IDs from all .nupkg files
+            $packageIds = @()
+            $versionPattern = '\.\d+\.\d+\.\d+(?:[.-][A-Za-z0-9\.\-]+)*\.nupkg$'
             
-            foreach ($pkgName in $packageNames) {
+            foreach ($pkg in $allPackages) {
+                # Remove version and .nupkg extension to get package ID
+                $pkgId = $pkg.Name -replace $versionPattern, ''
+                if ($pkgId -and $packageIds -notcontains $pkgId) {
+                    $packageIds += $pkgId
+                }
+            }
+            
+            Write-Host "Found $($packageIds.Count) unique package ID(s) to make public" -ForegroundColor Gray
+            
+            foreach ($pkgName in $packageIds) {
                 Write-Host "`nSetting visibility for package: $pkgName" -ForegroundColor Cyan
                 
                 try {
