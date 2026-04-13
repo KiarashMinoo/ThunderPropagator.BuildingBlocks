@@ -11,6 +11,9 @@ on:
 jobs:
   cleanup:
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
 
     steps:
       - name: Checkout repository
@@ -19,8 +22,8 @@ jobs:
       - name: Run package cleanup script
         shell: pwsh
         env:
-          # Make the PAT available as GH_PAT so your script can pick it up
-          GH_PAT: ${{ secrets.GH_TOKEN }}
+          # Use GitHub's auto-generated token with package permissions
+          GH_PAT: ${{ secrets.GITHUB_TOKEN }}
         run: |
           $ErrorActionPreference = "Stop"
 
