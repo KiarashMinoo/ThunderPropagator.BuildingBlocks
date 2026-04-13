@@ -26,5 +26,5 @@ jobs:
 
           # We only pass the filter; username is inferred from git remote,
           # token is picked up from GH_PAT env by your script.
-          ./Delete-GitHubPackages.ps1 `
+          ./.github/scripts/Delete-GitHubPackages.ps1 `
             -PackageNameFilter '${{ github.event.inputs.package_name_filter }}'
