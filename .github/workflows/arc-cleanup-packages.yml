@@ -11,9 +11,6 @@ on:
 jobs:
   cleanup:
     runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
 
     steps:
       - name: Checkout repository
@@ -22,8 +19,10 @@ jobs:
       - name: Run package cleanup script
         shell: pwsh
         env:
-          # Use GitHub's auto-generated token with package permissions
-          GH_PAT: ${{ secrets.GITHUB_TOKEN }}
+          # Personal Access Token with 'read:packages' and 'delete:packages' permissions
+          # Create at: https://github.com/settings/tokens?type=beta
+          # Add to repo secrets: https://github.com/KiarashMinoo/ThunderPropagator.BuildingBlocks/settings/secrets/actions
+          GH_PAT: ${{ secrets.PACKAGE_CLEANUP_TOKEN }}
         run: |
           $ErrorActionPreference = "Stop"
 
