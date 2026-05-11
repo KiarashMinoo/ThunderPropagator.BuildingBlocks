@@ -20,7 +20,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.CorrelationId
             {
                 FeederMessage feederMessage => feederMessage.HashKey switch
                 {
-                    not null or 0 => feederMessage.HashKey.Value,
+                    > 0 => feederMessage.HashKey.Value,
                     _ => input.GetHashCode()
                 },
                 _ => input.GetHashCode()
