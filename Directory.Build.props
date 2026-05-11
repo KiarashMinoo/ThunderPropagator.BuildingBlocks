@@ -5,45 +5,28 @@
     <SharedBuildProps>Shared.Build.props</SharedBuildProps>
     <SharedNugetProps>Shared.Nuget.props</SharedNugetProps>
   </PropertyGroup>
-
   <!-- Import shared props when available. -->
-  <Import Project="$(SharedPropsDirectory)$(SharedBuildProps)"
-          Condition="Exists('$(SharedPropsDirectory)$(SharedBuildProps)')"/>
-  <Import Project="$(SharedPropsDirectory)$(SharedNugetProps)"
-          Condition="Exists('$(SharedPropsDirectory)$(SharedNugetProps)')"/>
-
+  <Import Project="$(SharedPropsDirectory)$(SharedBuildProps)" Condition="Exists('$(SharedPropsDirectory)$(SharedBuildProps)')" />
+  <Import Project="$(SharedPropsDirectory)$(SharedNugetProps)" Condition="Exists('$(SharedPropsDirectory)$(SharedNugetProps)')" />
   <!--
     Download shared props on first build; subsequent builds skip due to Condition checks.
   -->
-
   <Target Name="DownloadSharedProps" BeforeTargets="PrepareForBuild;Restore">
-    <MakeDir Directories="$(SharedPropsDirectory)" Condition="!Exists('$(SharedPropsDirectory)')"/>
-    <DownloadFile SourceUrl="$(SharedBuildBaseUrl)/$(SharedBuildProps)"
-                  DestinationFolder="$(SharedPropsDirectory)"
-                  DestinationFileName="$(SharedBuildProps)"
-                  Condition="!Exists('$(SharedPropsDirectory)$(SharedBuildProps)')"
-                  ContinueOnError="WarnAndContinue"/>
-    <DownloadFile SourceUrl="$(SharedBuildBaseUrl)/$(SharedNugetProps)"
-                  DestinationFolder="$(SharedPropsDirectory)"
-                  DestinationFileName="$(SharedNugetProps)"
-                  Condition="!Exists('$(SharedPropsDirectory)$(SharedNugetProps)')"
-                  ContinueOnError="WarnAndContinue"/>
+    <MakeDir Directories="$(SharedPropsDirectory)" Condition="!Exists('$(SharedPropsDirectory)')" />
+    <DownloadFile SourceUrl="$(SharedBuildBaseUrl)/$(SharedBuildProps)" DestinationFolder="$(SharedPropsDirectory)" DestinationFileName="$(SharedBuildProps)" Condition="!Exists('$(SharedPropsDirectory)$(SharedBuildProps)')" ContinueOnError="WarnAndContinue" />
+    <DownloadFile SourceUrl="$(SharedBuildBaseUrl)/$(SharedNugetProps)" DestinationFolder="$(SharedPropsDirectory)" DestinationFileName="$(SharedNugetProps)" Condition="!Exists('$(SharedPropsDirectory)$(SharedNugetProps)')" ContinueOnError="WarnAndContinue" />
   </Target>
-
   <Target Name="CleanSharedProps" BeforeTargets="Clean">
-    <RemoveDir Directories="$(SharedPropsDirectory)" Condition="Exists('$(SharedPropsDirectory)')"/>
+    <RemoveDir Directories="$(SharedPropsDirectory)" Condition="Exists('$(SharedPropsDirectory)')" />
   </Target>
-
   <PropertyGroup Label="Versioning">
-    <Version>1.0.1-beta.19</Version>
+    <Version>1.0.1-beta.20</Version>
   </PropertyGroup>
-
   <!-- Multi-targeting frameworks. -->
   <PropertyGroup>
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
   </PropertyGroup>
-
   <ItemGroup Label="PackageAssets">
-    <None Include="$(MSBuildThisFileDirectory)ReadMe.md" Pack="true" Link="README.md" PackagePath=""/>
+    <None Include="$(MSBuildThisFileDirectory)ReadMe.md" Pack="true" Link="README.md" PackagePath="" />
   </ItemGroup>
 </Project>
