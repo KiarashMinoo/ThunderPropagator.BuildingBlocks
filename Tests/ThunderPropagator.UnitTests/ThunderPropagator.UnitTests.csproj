@@ -3,6 +3,8 @@
     <PropertyGroup>
         <IsPackable>false</IsPackable>
         <EnablePreviewFeatures>true</EnablePreviewFeatures>
+        <TargetFramework>net10.0</TargetFramework>
+        <TargetFrameworks />
     </PropertyGroup>
 
     <ItemGroup>
