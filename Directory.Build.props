@@ -36,7 +36,8 @@
     <RepositoryUrl>https://github.com/KiarashMinoo/ThunderPropagator.BuildingBlocks</RepositoryUrl>
   </PropertyGroup>
   <ItemGroup Label="PackageAssets">
-    <None Include="$(MSBuildThisFileDirectory)ReadMe.md" Pack="true" Link="README.md" PackagePath="" />
+    <!-- PackagePath="README.md" ensures consistent naming inside the package on case-sensitive Linux -->
+    <None Include="$(MSBuildThisFileDirectory)ReadMe.md" Pack="true" PackagePath="README.md" />
   </ItemGroup>
   <!-- ── Targets ───────────────────────────────────────────────────────────── -->
   <!--
