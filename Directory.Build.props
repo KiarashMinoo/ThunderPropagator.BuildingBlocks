@@ -15,10 +15,15 @@
   -->
 
   <PropertyGroup Label="SharedProps">
-    <SharedPropsDirectory>$(MSBuildThisFileDirectory).shared-props\</SharedPropsDirectory>
+    <!-- Forward slash works on both Windows and Linux; backslash is a literal char on Linux -->
+    <SharedPropsDirectory>$(MSBuildThisFileDirectory).shared-props/</SharedPropsDirectory>
     <SharedBuildBaseUrl>https://raw.githubusercontent.com/KiarashMinoo/ThunderPropagator.SharedBuild/main</SharedBuildBaseUrl>
     <SharedBuildPropsFile>$(SharedPropsDirectory)Shared.Build.props</SharedBuildPropsFile>
     <SharedNugetPropsFile>$(SharedPropsDirectory)Shared.Nuget.props</SharedNugetPropsFile>
+    <!-- Cross-platform wait command: 'sleep 3' on Unix, 'timeout /t 3 /nobreak >nul' on Windows.
+         System.Threading.Thread.Sleep is blocked on GitHub Actions (MSB4185). -->
+    <_WaitCommand Condition="'$(OS)' != 'Windows_NT'">sleep 3</_WaitCommand>
+    <_WaitCommand Condition="'$(OS)' == 'Windows_NT'">timeout /t 3 /nobreak &gt;nul</_WaitCommand>
   </PropertyGroup>
 
   <!-- Import shared props when present on disk. Downloaded automatically on restore/build. -->
@@ -92,9 +97,9 @@
 
     <!-- ── Attempt 2 (wait 3 s if any file still missing) ───────────────── -->
     <!-- PropertyGroup Condition uses named properties — metadata not allowed here -->
-    <PropertyGroup Condition="!Exists('$(SharedBuildPropsFile)') Or !Exists('$(SharedNugetPropsFile)')">
-      <_Wait>$([System.Threading.Thread]::Sleep(3000))</_Wait>
-    </PropertyGroup>
+    <Exec Command="$(_WaitCommand)"
+          Condition="!Exists('$(SharedBuildPropsFile)') Or !Exists('$(SharedNugetPropsFile)')"
+          StandardOutputImportance="low" />
 
     <Message Importance="normal"
              Text="[SharedProps] Attempt 1 failed for %(_SharedFile.Identity) — retrying (attempt 2) …"
@@ -107,9 +112,9 @@
                   ContinueOnError="WarnAndContinue" />
 
     <!-- ── Attempt 3 (wait 3 s if any file still missing) ───────────────── -->
-    <PropertyGroup Condition="!Exists('$(SharedBuildPropsFile)') Or !Exists('$(SharedNugetPropsFile)')">
-      <_Wait>$([System.Threading.Thread]::Sleep(3000))</_Wait>
-    </PropertyGroup>
+    <Exec Command="$(_WaitCommand)"
+          Condition="!Exists('$(SharedBuildPropsFile)') Or !Exists('$(SharedNugetPropsFile)')"
+          StandardOutputImportance="low" />
 
     <Message Importance="normal"
              Text="[SharedProps] Attempt 2 failed for %(_SharedFile.Identity) — retrying (attempt 3, final) …"
