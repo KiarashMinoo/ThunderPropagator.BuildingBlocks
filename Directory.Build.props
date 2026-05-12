@@ -34,7 +34,6 @@
   <PropertyGroup Label="RepoIdentity">
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <RepositoryUrl>https://github.com/KiarashMinoo/ThunderPropagator.BuildingBlocks</RepositoryUrl>
-    <PackageTags>Real-Time Data Propagation, Blazingly Fast, Cloud-Native, Data Streaming, Effortless Performance, High Impact, Real-Time Processing, Fast Data Pipelines, Cloud Solutions, ThunderPropagator, Project ARC</PackageTags>
   </PropertyGroup>
   <ItemGroup Label="PackageAssets">
     <None Include="$(MSBuildThisFileDirectory)ReadMe.md" Pack="true" Link="README.md" PackagePath="" />
