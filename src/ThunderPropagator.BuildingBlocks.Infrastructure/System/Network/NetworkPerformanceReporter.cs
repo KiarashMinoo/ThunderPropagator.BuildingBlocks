@@ -1,6 +1,7 @@
 using Microsoft.Diagnostics.Tracing.Parsers;
 using Microsoft.Diagnostics.Tracing.Parsers.Kernel;
 using Microsoft.Diagnostics.Tracing.Session;
+using Microsoft.Extensions.Logging;
 using ThunderPropagator.BuildingBlocks.Application.Objects;
 
 namespace ThunderPropagator.BuildingBlocks.Infrastructure.System.Network
@@ -11,62 +12,51 @@ namespace ThunderPropagator.BuildingBlocks.Infrastructure.System.Network
 #endif
         class NetworkPerformanceReporter : DisposableObject
     {
-#if NET9_0_OR_GREATER
-        private readonly Lock _lock = new();
-#else
-        private readonly object _lock = new();
-#endif
-
-        private class Counters
-        {
-            public long TcpReceived;
-            public long TcpSent;
-            public long UdpReceived;
-            public long UdpSent;
-        }
+        private long _tcpReceived;
+        private long _tcpSent;
+        private long _udpReceived;
+        private long _udpSent;
 
         private readonly int _processId;
         private readonly string _sessionName;
         private readonly bool _enableUdp;
+        private readonly ILogger<NetworkPerformanceReporter>? _logger;
         private DateTime _etwStartTime;
         private TraceEventSession? _etwSession;
-        private readonly Counters _counters = new();
 
-        private NetworkPerformanceReporter(int processId, string sessionName, bool enableUdp)
+        private NetworkPerformanceReporter(int processId, string sessionName, bool enableUdp, ILogger<NetworkPerformanceReporter>? logger = null)
         {
             _processId = processId;
             _sessionName = sessionName;
             _enableUdp = enableUdp;
+            _logger = logger;
+        }
+
+        public static async Task<NetworkPerformanceReporter> CreateAsync(int processId, string sessionName, bool enableUdp = false, ILogger<NetworkPerformanceReporter>? logger = null, CancellationToken cancellationToken = default)
+        {
+            var networkPerformanceReporter = new NetworkPerformanceReporter(processId, sessionName, enableUdp, logger);
+            await networkPerformanceReporter.InitialiseAsync(cancellationToken);
+            return networkPerformanceReporter;
         }
 
         public static NetworkPerformanceReporter Create(int processId, string sessionName, bool enableUdp = false, CancellationToken cancellationToken = default)
         {
-            var networkPerformancePresenter = new NetworkPerformanceReporter(processId, sessionName, enableUdp);
-            networkPerformancePresenter.Initialise(cancellationToken);
-            return networkPerformancePresenter;
+            var networkPerformanceReporter = new NetworkPerformanceReporter(processId, sessionName, enableUdp);
+            networkPerformanceReporter.Initialise(cancellationToken);
+            return networkPerformanceReporter;
         }
 
         public NetworkPerformanceData GetNetworkPerformanceData()
         {
             var timeDifferenceInSeconds = (DateTime.UtcNow - _etwStartTime).TotalSeconds;
 
-            NetworkPerformanceData networkData;
-
-#if NET9_0_OR_GREATER
-            lock (_lock)
-#else
-            lock (_lock)
-#endif
+            var networkData = new NetworkPerformanceData
             {
-                networkData = new NetworkPerformanceData
-                {
-                    TcpBytesReceived = Convert.ToInt64(_counters.TcpReceived / timeDifferenceInSeconds),
-                    TcpBytesSent = Convert.ToInt64(_counters.TcpSent / timeDifferenceInSeconds),
-
-                    UdpBytesReceived = Convert.ToInt64(_counters.UdpReceived / timeDifferenceInSeconds),
-                    UdpBytesSent = Convert.ToInt64(_counters.UdpSent / timeDifferenceInSeconds)
-                };
-            }
+                TcpBytesReceived = Convert.ToInt64(Interlocked.Read(ref _tcpReceived) / timeDifferenceInSeconds),
+                TcpBytesSent = Convert.ToInt64(Interlocked.Read(ref _tcpSent) / timeDifferenceInSeconds),
+                UdpBytesReceived = Convert.ToInt64(Interlocked.Read(ref _udpReceived) / timeDifferenceInSeconds),
+                UdpBytesSent = Convert.ToInt64(Interlocked.Read(ref _udpSent) / timeDifferenceInSeconds)
+            };
 
             // Reset the counters to get a fresh reading for next time this is called.
             ResetCounters();
@@ -76,7 +66,24 @@ namespace ThunderPropagator.BuildingBlocks.Infrastructure.System.Network
 
         private void Initialise(CancellationToken cancellationToken = default)
         {
-            new Thread(Start).Start(cancellationToken);
+            var thread = new Thread(Start)
+            {
+                IsBackground = true,
+                Name = $"ETW_{_sessionName}"
+            };
+            thread.Start(cancellationToken);
+        }
+
+        private async Task InitialiseAsync(CancellationToken cancellationToken = default)
+        {
+            var readyTcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            var thread = new Thread(Start)
+            {
+                IsBackground = true,
+                Name = $"ETW_{_sessionName}"
+            };
+            thread.Start((readyTcs, cancellationToken));
+            await readyTcs.Task.ConfigureAwait(false);
         }
 
         private void Start(object? state)
@@ -84,8 +91,18 @@ namespace ThunderPropagator.BuildingBlocks.Infrastructure.System.Network
             if (!(TraceEventSession.IsElevated() ?? false))
                 throw new InvalidOperationException("To turn on ETW events you need to be Administrator, please run from an Admin process.");
 
-            if (state is not CancellationToken cancellationToken)
-                throw new InvalidOperationException();
+            CancellationToken cancellationToken = default;
+            TaskCompletionSource? readyTcs = null;
+
+            if (state is (TaskCompletionSource tcs, CancellationToken token))
+            {
+                readyTcs = tcs;
+                cancellationToken = token;
+            }
+            else if (state is CancellationToken ct)
+            {
+                cancellationToken = ct;
+            }
 
             try
             {
@@ -118,13 +135,17 @@ namespace ThunderPropagator.BuildingBlocks.Infrastructure.System.Network
                         _etwSession.Source.StopProcessing();
                     });
 
+                    // Signal that the ETW session is ready before processing events
+                    readyTcs?.TrySetResult();
+
                     _etwSession.Source.Process();
                 }
             }
             catch (Exception exception)
             {
                 ResetCounters(); // Stop reporting figures
-                Console.Error.WriteLine(exception);
+                _logger?.LogError(exception, "ETW session {Session} failed.", _sessionName);
+                readyTcs?.TrySetException(exception);
             }
 
             return;
@@ -133,14 +154,7 @@ namespace ThunderPropagator.BuildingBlocks.Infrastructure.System.Network
             {
                 if (data.ProcessID == _processId)
                 {
-#if NET9_0_OR_GREATER
-                    lock (_lock)
-#else
-                    lock (_lock)
-#endif
-                    {
-                        _counters.TcpReceived += data.size;
-                    }
+                    Interlocked.Add(ref _tcpReceived, data.size);
                 }
             }
 
@@ -148,14 +162,7 @@ namespace ThunderPropagator.BuildingBlocks.Infrastructure.System.Network
             {
                 if (data.ProcessID == _processId)
                 {
-#if NET9_0_OR_GREATER
-                    lock (_lock)
-#else
-                    lock (_lock)
-#endif
-                    {
-                        _counters.TcpSent += data.size;
-                    }
+                    Interlocked.Add(ref _tcpSent, data.size);
                 }
             }
 
@@ -163,14 +170,7 @@ namespace ThunderPropagator.BuildingBlocks.Infrastructure.System.Network
             {
                 if (data.ProcessID == _processId)
                 {
-#if NET9_0_OR_GREATER
-                    lock (_lock)
-#else
-                    lock (_lock)
-#endif
-                    {
-                        _counters.UdpReceived += data.size;
-                    }
+                    Interlocked.Add(ref _udpReceived, data.size);
                 }
             }
 
@@ -178,29 +178,17 @@ namespace ThunderPropagator.BuildingBlocks.Infrastructure.System.Network
             {
                 if (data.ProcessID == _processId)
                 {
-#if NET9_0_OR_GREATER
-                    lock (_lock)
-#else
-                    lock (_lock)
-#endif
-                    {
-                        _counters.UdpSent += data.size;
-                    }
+                    Interlocked.Add(ref _udpSent, data.size);
                 }
             }
         }
 
         private void ResetCounters()
         {
-#if NET9_0_OR_GREATER
-            lock (_lock)
-#else
-            lock (_lock)
-#endif
-            {
-                _counters.TcpSent = 0;
-                _counters.TcpReceived = 0;
-            }
+            Interlocked.Exchange(ref _tcpReceived, 0);
+            Interlocked.Exchange(ref _tcpSent, 0);
+            Interlocked.Exchange(ref _udpReceived, 0);
+            Interlocked.Exchange(ref _udpSent, 0);
 
             _etwStartTime = DateTime.UtcNow;
         }
