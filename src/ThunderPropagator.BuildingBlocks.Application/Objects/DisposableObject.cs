@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace ThunderPropagator.BuildingBlocks.Application.Objects
 {
     public abstract class DisposableObject : EquatableObject,
@@ -124,7 +122,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Objects
         /// </summary>
         protected virtual ValueTask DisposeManagedResourcesAsync()
         {
-            // TODO: dispose managed state(managed objects)
+            DisposeManagedResources();
             return ValueTask.CompletedTask;
         }
 
@@ -133,7 +131,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Objects
         /// </summary>
         protected virtual ValueTask ReleaseUnmanagedResourcesAsync()
         {
-            // TODO: free unmanaged resources(unmanaged objects)
+            ReleaseUnmanagedResources();
             return ValueTask.CompletedTask;
         }
 
@@ -142,11 +140,10 @@ namespace ThunderPropagator.BuildingBlocks.Application.Objects
         /// </summary>
         protected virtual ValueTask SetLargeFieldsAsNullAsync()
         {
-            // TODO: set large fields to null
+            SetLargeFieldsAsNull();
             return ValueTask.CompletedTask;
         }
 
-        [SuppressMessage("ReSharper", "MethodHasAsyncOverload")]
         private async ValueTask DisposeAsync(bool disposing)
         {
             IsDisposing = disposing;
@@ -156,14 +153,10 @@ namespace ThunderPropagator.BuildingBlocks.Application.Objects
                 if (IsDisposing)
                 {
                     OnDisposing();
-                    DisposeManagedResources();
                     await DisposeManagedResourcesAsync();
                 }
 
-                ReleaseUnmanagedResources();
                 await ReleaseUnmanagedResourcesAsync();
-
-                SetLargeFieldsAsNull();
                 await SetLargeFieldsAsNullAsync();
 
                 IsDisposed = true;
