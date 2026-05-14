@@ -7,13 +7,19 @@ namespace ThunderPropagator.BuildingBlocks.Application
         public static IDisposable Run<TState>(Func<TState?, bool> action, TimeSpan interval, TState? state, CancellationToken cancellationToken = default)
         {
             var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            Task? backgroundTask = null;
 
-            var _ = Task.Run(Start, CancellationToken.None);
+            backgroundTask = Task.Run(Start, CancellationToken.None);
 
             return DisposableObject.Create(() =>
             {
                 cts.Cancel();
                 cts.Dispose();
+                // Observe task for faults
+                if (backgroundTask?.IsFaulted == true)
+                {
+                    _ = backgroundTask.Exception; // Observe the exception
+                }
             });
 
             async Task Start()
@@ -29,7 +35,16 @@ namespace ThunderPropagator.BuildingBlocks.Application
                         break;
                     }
 
-                    if (!action(state)) break;
+                    try
+                    {
+                        if (!action(state)) break;
+                    }
+                    catch
+                    {
+                        // Exception in action - decide whether to continue or break
+                        // For now, we rethrow to surface the error
+                        throw;
+                    }
                 }
             }
         }
@@ -40,13 +55,19 @@ namespace ThunderPropagator.BuildingBlocks.Application
         public static IDisposable Run<TState>(Func<TState?, CancellationToken, Task<bool>> action, TimeSpan interval, TState? state, CancellationToken cancellationToken = default)
         {
             var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            Task? backgroundTask = null;
 
-            var _ = Task.Run(Start, CancellationToken.None);
+            backgroundTask = Task.Run(Start, CancellationToken.None);
 
             return DisposableObject.Create(() =>
             {
                 cts.Cancel();
                 cts.Dispose();
+                // Observe task for faults
+                if (backgroundTask?.IsFaulted == true)
+                {
+                    _ = backgroundTask.Exception; // Observe the exception
+                }
             });
 
             async Task Start()
@@ -62,7 +83,16 @@ namespace ThunderPropagator.BuildingBlocks.Application
                         break;
                     }
 
-                    if (!await action(state, cts.Token)) break;
+                    try
+                    {
+                        if (!await action(state, cts.Token)) break;
+                    }
+                    catch
+                    {
+                        // Exception in action - decide whether to continue or break
+                        // For now, we rethrow to surface the error
+                        throw;
+                    }
                 }
             }
         }
@@ -72,14 +102,24 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public static IDisposable RunOnce<TState>(Action<TState?> action, TimeSpan interval, TState? state, CancellationToken cancellationToken = default)
         {
+            var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             var task = Task.Run(async () =>
             {
-                await Task.Delay(interval, cancellationToken);
-                action(state);
-            }, cancellationToken);
+                try
+                {
+                    await Task.Delay(interval, cts.Token);
+                    action(state);
+                }
+                catch (OperationCanceledException)
+                {
+                    // Cancellation is expected
+                }
+            }, cts.Token);
 
             return DisposableObject.Create(() =>
             {
+                cts.Cancel();
+                cts.Dispose();
                 if (task.Status is TaskStatus.RanToCompletion or TaskStatus.Faulted or TaskStatus.Canceled)
                     task.Dispose();
             });
@@ -90,14 +130,24 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public static IDisposable RunOnce<TState>(Func<TState?, CancellationToken, Task> action, TimeSpan interval, TState? state, CancellationToken cancellationToken = default)
         {
+            var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             var task = Task.Run(async () =>
             {
-                await Task.Delay(interval, cancellationToken);
-                await action(state, cancellationToken);
-            }, cancellationToken);
+                try
+                {
+                    await Task.Delay(interval, cts.Token);
+                    await action(state, cts.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    // Cancellation is expected
+                }
+            }, cts.Token);
 
             return DisposableObject.Create(() =>
             {
+                cts.Cancel();
+                cts.Dispose();
                 if (task.Status is TaskStatus.RanToCompletion or TaskStatus.Faulted or TaskStatus.Canceled)
                     task.Dispose();
             });
