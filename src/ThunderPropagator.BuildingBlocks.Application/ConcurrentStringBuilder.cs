@@ -56,22 +56,14 @@ namespace ThunderPropagator.BuildingBlocks.Application
         {
             get
             {
-#if NET9_0_OR_GREATER
-            lock (_lock)
-#else
                 lock (_lock)
-#endif
                 {
                     return _stringBuilder.Capacity;
                 }
             }
             set
             {
-#if NET9_0_OR_GREATER
-            lock (_lock)
-#else
                 lock (_lock)
-#endif
                 {
                     _stringBuilder.Capacity = value;
                 }
@@ -82,11 +74,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
         {
             get
             {
-#if NET9_0_OR_GREATER
-            lock (_lock)
-#else
                 lock (_lock)
-#endif
                 {
                     return _stringBuilder.MaxCapacity;
                 }
@@ -97,11 +85,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
         {
             get
             {
-#if NET9_0_OR_GREATER
-            lock (_lock)
-#else
                 lock (_lock)
-#endif
                 {
                     return _stringBuilder.Length;
                 }
@@ -113,41 +97,25 @@ namespace ThunderPropagator.BuildingBlocks.Application
         {
             get
             {
-#if NET9_0_OR_GREATER
-            lock (_lock)
-#else
                 lock (_lock)
-#endif
                     return _stringBuilder[index];
             }
             set
             {
-#if NET9_0_OR_GREATER
-            lock (_lock)
-#else
                 lock (_lock)
-#endif
                     _stringBuilder[index] = value;
             }
         }
 
         public int EnsureCapacity(int capacity)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
                 return _stringBuilder.EnsureCapacity(capacity);
         }
 
         public ConcurrentStringBuilder Append(char value, int repeatCount)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Append(value, repeatCount);
                 return this;
@@ -156,11 +124,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Append(char[]? value, int startIndex, int charCount)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Append(value, startIndex, charCount);
                 return this;
@@ -169,11 +133,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Append(string? value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Append(value);
                 return this;
@@ -182,11 +142,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Append(string? value, int startIndex, int count)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Append(value, startIndex, count);
                 return this;
@@ -195,11 +151,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Append(ConcurrentStringBuilder? value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Append(value?._stringBuilder);
                 return this;
@@ -208,11 +160,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Append(ConcurrentStringBuilder? value, int startIndex, int count)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Append(value?._stringBuilder, startIndex, count);
                 return this;
@@ -221,11 +169,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Append(StringBuilder? value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Append(value);
                 return this;
@@ -234,11 +178,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Append(StringBuilder? value, int startIndex, int count)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Append(value, startIndex, count);
                 return this;
@@ -247,11 +187,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Append(bool value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Append(value);
                 return this;
@@ -260,11 +196,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Append(char value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Append(value);
                 return this;
@@ -273,11 +205,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Append(sbyte value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Append(value);
                 return this;
@@ -286,11 +214,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Append(byte value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Append(value);
                 return this;
@@ -299,11 +223,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Append(short value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Append(value);
                 return this;
@@ -312,11 +232,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Append(int value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Append(value);
                 return this;
@@ -325,11 +241,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Append(long value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Append(value);
                 return this;
@@ -338,11 +250,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Append(float value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Append(value);
                 return this;
@@ -351,11 +259,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Append(double value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Append(value);
                 return this;
@@ -364,11 +268,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Append(decimal value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Append(value);
                 return this;
@@ -377,11 +277,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Append(ushort value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Append(value);
                 return this;
@@ -390,11 +286,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Append(uint value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Append(value);
                 return this;
@@ -403,11 +295,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Append(ulong value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Append(value);
                 return this;
@@ -416,11 +304,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Append(object? value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Append(value);
                 return this;
@@ -429,11 +313,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Append(char[]? value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Append(value);
                 return this;
@@ -442,11 +322,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Append(ReadOnlySpan<char> value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Append(value);
                 return this;
@@ -455,11 +331,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Append(ReadOnlyMemory<char> value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Append(value);
                 return this;
@@ -468,11 +340,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public unsafe ConcurrentStringBuilder Append(char* value, int valueCount)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Append(value, valueCount);
                 return this;
@@ -481,11 +349,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder AppendLine()
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.AppendLine();
                 return this;
@@ -494,11 +358,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder AppendLine(string? value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.AppendLine(value);
                 return this;
@@ -507,11 +367,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder AppendJoin(string? separator, params object?[] values)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.AppendJoin(separator, values);
                 return this;
@@ -520,11 +376,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder AppendJoin<T>(string? separator, IEnumerable<T> values)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.AppendJoin(separator, values);
                 return this;
@@ -533,11 +385,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder AppendJoin(string? separator, params string?[] values)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.AppendJoin(separator, values);
                 return this;
@@ -546,11 +394,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder AppendJoin(char separator, params object?[] values)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.AppendJoin(separator, values);
                 return this;
@@ -559,11 +403,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder AppendJoin<T>(char separator, IEnumerable<T> values)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.AppendJoin(separator, values);
                 return this;
@@ -572,11 +412,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder AppendJoin(char separator, params string?[] values)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.AppendJoin(separator, values);
                 return this;
@@ -585,11 +421,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder AppendFormat([StringSyntax(StringSyntaxAttribute.CompositeFormat)] string format, object? arg0)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.AppendFormat(format, arg0);
                 return this;
@@ -598,11 +430,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder AppendFormat([StringSyntax(StringSyntaxAttribute.CompositeFormat)] string format, object? arg0, object? arg1)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.AppendFormat(format, arg0, arg1);
                 return this;
@@ -611,11 +439,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder AppendFormat([StringSyntax(StringSyntaxAttribute.CompositeFormat)] string format, object? arg0, object? arg1, object? arg2)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.AppendFormat(format, arg0, arg1, arg2);
                 return this;
@@ -624,11 +448,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder AppendFormat([StringSyntax(StringSyntaxAttribute.CompositeFormat)] string format, params object?[] args)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.AppendFormat(format, args);
                 return this;
@@ -637,11 +457,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder AppendFormat(IFormatProvider? provider, [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string format, object? arg0)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.AppendFormat(provider, format, arg0);
                 return this;
@@ -650,11 +466,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder AppendFormat(IFormatProvider? provider, [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string format, object? arg0, object? arg1)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.AppendFormat(provider, format, arg0, arg1);
                 return this;
@@ -664,11 +476,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
         public ConcurrentStringBuilder AppendFormat(IFormatProvider? provider, [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string format, object? arg0, object? arg1,
             object? arg2)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.AppendFormat(provider, format, arg0, arg1, arg2);
                 return this;
@@ -677,11 +485,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder AppendFormat(IFormatProvider? provider, [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string format, params object?[] args)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.AppendFormat(provider, format, args);
                 return this;
@@ -690,11 +494,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Insert(int index, string? value, int count)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Insert(index, value, count);
                 return this;
@@ -703,11 +503,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Insert(int index, string? value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Insert(index, value);
                 return this;
@@ -716,11 +512,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Insert(int index, bool value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Insert(index, value);
                 return this;
@@ -729,11 +521,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Insert(int index, sbyte value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Insert(index, value);
                 return this;
@@ -742,11 +530,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Insert(int index, byte value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Insert(index, value);
                 return this;
@@ -755,11 +539,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Insert(int index, short value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Insert(index, value);
                 return this;
@@ -768,11 +548,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Insert(int index, char value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Insert(index, value);
                 return this;
@@ -781,11 +557,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Insert(int index, char[]? value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Insert(index, value);
                 return this;
@@ -794,11 +566,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Insert(int index, char[]? value, int startIndex, int charCount)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Insert(index, value, startIndex, charCount);
                 return this;
@@ -807,11 +575,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Insert(int index, int value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Insert(index, value);
                 return this;
@@ -820,11 +584,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Insert(int index, long value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Insert(index, value);
                 return this;
@@ -833,11 +593,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Insert(int index, float value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Insert(index, value);
                 return this;
@@ -846,11 +602,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Insert(int index, double value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Insert(index, value);
                 return this;
@@ -859,11 +611,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Insert(int index, decimal value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Insert(index, value);
                 return this;
@@ -872,11 +620,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Insert(int index, ushort value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Insert(index, value);
                 return this;
@@ -885,11 +629,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Insert(int index, uint value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Insert(index, value);
                 return this;
@@ -898,11 +638,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Insert(int index, ulong value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Insert(index, value);
                 return this;
@@ -911,11 +647,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Insert(int index, object? value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Insert(index, value);
                 return this;
@@ -924,11 +656,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Insert(int index, ReadOnlySpan<char> value)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Insert(index, value);
                 return this;
@@ -937,11 +665,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Replace(string oldValue, string? newValue)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Replace(oldValue, newValue);
                 return this;
@@ -950,11 +674,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Replace(string oldValue, string? newValue, int startIndex, int count)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Replace(oldValue, newValue, startIndex, count);
                 return this;
@@ -963,11 +683,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Replace(char oldChar, char newChar)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Replace(oldChar, newChar);
                 return this;
@@ -976,11 +692,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Replace(char oldChar, char newChar, int startIndex, int count)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Replace(oldChar, newChar, startIndex, count);
                 return this;
@@ -989,11 +701,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Remove(int startIndex, int length)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Remove(startIndex, length);
                 return this;
@@ -1002,11 +710,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public ConcurrentStringBuilder Clear()
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.Clear();
                 return this;
@@ -1015,11 +719,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.CopyTo(sourceIndex, destination, destinationIndex, count);
             }
@@ -1027,11 +727,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public void CopyTo(int sourceIndex, Span<char> destination, int count)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 _stringBuilder.CopyTo(sourceIndex, destination, count);
             }
@@ -1039,11 +735,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public bool Equals([NotNullWhen(true)] ConcurrentStringBuilder? sb)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 return _stringBuilder.Equals(sb?._stringBuilder);
             }
@@ -1051,11 +743,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public bool Equals([NotNullWhen(true)] StringBuilder? sb)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 return _stringBuilder.Equals(sb);
             }
@@ -1063,11 +751,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public bool Equals(ReadOnlySpan<char> span)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 return _stringBuilder.Equals(span);
             }
@@ -1075,11 +759,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public override string ToString()
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 return _stringBuilder.ToString();
             }
@@ -1091,11 +771,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public string ToString(int startIndex, int length)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 return _stringBuilder.ToString(startIndex, length);
             }
@@ -1103,11 +779,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public string ToString(bool removeLast)
         {
-#if NET9_0_OR_GREATER
             lock (_lock)
-#else
-            lock (_lock)
-#endif
             {
                 var rtn = ToString();
                 return removeLast ? rtn[..^1] : rtn;
