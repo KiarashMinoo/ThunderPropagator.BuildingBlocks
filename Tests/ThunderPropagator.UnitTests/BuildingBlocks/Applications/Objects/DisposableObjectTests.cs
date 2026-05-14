@@ -83,6 +83,24 @@ namespace ThunderPropagator.UnitTests.BuildingBlocks.Applications.Objects
             // Assert
             Assert.True(isDisposed);
         }
+
+        [Fact]
+        public async Task DisposeAsync_ShouldNotInvokeSyncDispose_WhenSubclassOverridesAsyncDispose()
+        {
+            // Arrange
+            var syncInvokeCount = 0;
+            var asyncInvokeCount = 0;
+            var disposable = (IAsyncDisposable)new TestDisposableWithBothOverrides(
+                () => syncInvokeCount++,
+                () => asyncInvokeCount++);
+
+            // Act
+            await disposable.DisposeAsync();
+
+            // Assert — async override called once; sync override not called from async path
+            Assert.Equal(1, asyncInvokeCount);
+            Assert.Equal(0, syncInvokeCount);
+        }
     }
 
     internal class TestDisposable : DisposableObject
@@ -95,6 +113,29 @@ namespace ThunderPropagator.UnitTests.BuildingBlocks.Applications.Objects
         {
             base.DisposeManagedResources();
             _disposeAction?.Invoke();
+        }
+    }
+
+    internal class TestDisposableWithBothOverrides : DisposableObject
+    {
+        private readonly Action _syncAction;
+        private readonly Action _asyncAction;
+
+        public TestDisposableWithBothOverrides(Action syncAction, Action asyncAction)
+        {
+            _syncAction = syncAction;
+            _asyncAction = asyncAction;
+        }
+
+        protected override void DisposeManagedResources()
+        {
+            _syncAction();
+        }
+
+        protected override ValueTask DisposeManagedResourcesAsync()
+        {
+            _asyncAction();
+            return ValueTask.CompletedTask;
         }
     }
 }
