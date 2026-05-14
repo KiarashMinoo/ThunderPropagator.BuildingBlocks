@@ -643,7 +643,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
             lock (_lock)
 #endif
             {
-                _stringBuilder.AppendFormat(format, arg0);
+                _stringBuilder.AppendFormat(provider, format, arg0);
                 return this;
             }
         }
@@ -656,7 +656,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
             lock (_lock)
 #endif
             {
-                _stringBuilder.AppendFormat(format, arg0, arg1);
+                _stringBuilder.AppendFormat(provider, format, arg0, arg1);
                 return this;
             }
         }
@@ -670,7 +670,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
             lock (_lock)
 #endif
             {
-                _stringBuilder.AppendFormat(format, arg0, arg1, arg2);
+                _stringBuilder.AppendFormat(provider, format, arg0, arg1, arg2);
                 return this;
             }
         }
@@ -683,7 +683,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
             lock (_lock)
 #endif
             {
-                _stringBuilder.AppendFormat(format, args);
+                _stringBuilder.AppendFormat(provider, format, args);
                 return this;
             }
         }
