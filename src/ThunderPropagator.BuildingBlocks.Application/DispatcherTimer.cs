@@ -8,7 +8,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
         {
             var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
-            new Thread(Start).Start();
+            var _ = Task.Run(Start, CancellationToken.None);
 
             return DisposableObject.Create(() =>
             {
@@ -16,11 +16,19 @@ namespace ThunderPropagator.BuildingBlocks.Application
                 cts.Dispose();
             });
 
-            async void Start()
+            async Task Start()
             {
                 while (!cts.IsCancellationRequested)
                 {
-                    await Task.Delay(interval, cts.Token);
+                    try
+                    {
+                        await Task.Delay(interval, cts.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+
                     if (!action(state)) break;
                 }
             }
@@ -33,7 +41,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
         {
             var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
-            new Thread(Start).Start();
+            var _ = Task.Run(Start, CancellationToken.None);
 
             return DisposableObject.Create(() =>
             {
@@ -41,11 +49,19 @@ namespace ThunderPropagator.BuildingBlocks.Application
                 cts.Dispose();
             });
 
-            async void Start()
+            async Task Start()
             {
                 while (!cts.IsCancellationRequested)
                 {
-                    await Task.Delay(interval, cts.Token);
+                    try
+                    {
+                        await Task.Delay(interval, cts.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+
                     if (!await action(state, cts.Token)) break;
                 }
             }
