@@ -12,19 +12,10 @@ namespace ThunderPropagator.BuildingBlocks.Infrastructure.System.Network
 #endif
         class NetworkPerformanceReporter : DisposableObject
     {
-#if NET9_0_OR_GREATER
-        private readonly Lock _lock = new();
-#else
-        private readonly object _lock = new();
-#endif
-
-        private class Counters
-        {
-            public long TcpReceived;
-            public long TcpSent;
-            public long UdpReceived;
-            public long UdpSent;
-        }
+        private long _tcpReceived;
+        private long _tcpSent;
+        private long _udpReceived;
+        private long _udpSent;
 
         private readonly int _processId;
         private readonly string _sessionName;
@@ -32,7 +23,6 @@ namespace ThunderPropagator.BuildingBlocks.Infrastructure.System.Network
         private readonly ILogger<NetworkPerformanceReporter>? _logger;
         private DateTime _etwStartTime;
         private TraceEventSession? _etwSession;
-        private readonly Counters _counters = new();
 
         private NetworkPerformanceReporter(int processId, string sessionName, bool enableUdp, ILogger<NetworkPerformanceReporter>? logger = null)
         {
@@ -60,19 +50,13 @@ namespace ThunderPropagator.BuildingBlocks.Infrastructure.System.Network
         {
             var timeDifferenceInSeconds = (DateTime.UtcNow - _etwStartTime).TotalSeconds;
 
-            NetworkPerformanceData networkData;
-
-            lock (_lock)
+            var networkData = new NetworkPerformanceData
             {
-                networkData = new NetworkPerformanceData
-                {
-                    TcpBytesReceived = Convert.ToInt64(_counters.TcpReceived / timeDifferenceInSeconds),
-                    TcpBytesSent = Convert.ToInt64(_counters.TcpSent / timeDifferenceInSeconds),
-
-                    UdpBytesReceived = Convert.ToInt64(_counters.UdpReceived / timeDifferenceInSeconds),
-                    UdpBytesSent = Convert.ToInt64(_counters.UdpSent / timeDifferenceInSeconds)
-                };
-            }
+                TcpBytesReceived = Convert.ToInt64(Interlocked.Read(ref _tcpReceived) / timeDifferenceInSeconds),
+                TcpBytesSent = Convert.ToInt64(Interlocked.Read(ref _tcpSent) / timeDifferenceInSeconds),
+                UdpBytesReceived = Convert.ToInt64(Interlocked.Read(ref _udpReceived) / timeDifferenceInSeconds),
+                UdpBytesSent = Convert.ToInt64(Interlocked.Read(ref _udpSent) / timeDifferenceInSeconds)
+            };
 
             // Reset the counters to get a fresh reading for next time this is called.
             ResetCounters();
@@ -170,10 +154,7 @@ namespace ThunderPropagator.BuildingBlocks.Infrastructure.System.Network
             {
                 if (data.ProcessID == _processId)
                 {
-                    lock (_lock)
-                    {
-                        _counters.TcpReceived += data.size;
-                    }
+                    Interlocked.Add(ref _tcpReceived, data.size);
                 }
             }
 
@@ -181,10 +162,7 @@ namespace ThunderPropagator.BuildingBlocks.Infrastructure.System.Network
             {
                 if (data.ProcessID == _processId)
                 {
-                    lock (_lock)
-                    {
-                        _counters.TcpSent += data.size;
-                    }
+                    Interlocked.Add(ref _tcpSent, data.size);
                 }
             }
 
@@ -192,10 +170,7 @@ namespace ThunderPropagator.BuildingBlocks.Infrastructure.System.Network
             {
                 if (data.ProcessID == _processId)
                 {
-                    lock (_lock)
-                    {
-                        _counters.UdpReceived += data.size;
-                    }
+                    Interlocked.Add(ref _udpReceived, data.size);
                 }
             }
 
@@ -203,21 +178,17 @@ namespace ThunderPropagator.BuildingBlocks.Infrastructure.System.Network
             {
                 if (data.ProcessID == _processId)
                 {
-                    lock (_lock)
-                    {
-                        _counters.UdpSent += data.size;
-                    }
+                    Interlocked.Add(ref _udpSent, data.size);
                 }
             }
         }
 
         private void ResetCounters()
         {
-            lock (_lock)
-            {
-                _counters.TcpSent = 0;
-                _counters.TcpReceived = 0;
-            }
+            Interlocked.Exchange(ref _tcpReceived, 0);
+            Interlocked.Exchange(ref _tcpSent, 0);
+            Interlocked.Exchange(ref _udpReceived, 0);
+            Interlocked.Exchange(ref _udpSent, 0);
 
             _etwStartTime = DateTime.UtcNow;
         }
