@@ -192,7 +192,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Collections
             }
             else if (raiseException)
                 throw new InvalidOperationException(
-                    $"There’s already an entry with the key '{key}' in the dictionary. Each key must be unique, so please check and use a different key");
+                    $"Thereï¿½s already an entry with the key '{key}' in the dictionary. Each key must be unique, so please check and use a different key");
 
             return isAdded;
         }
@@ -258,7 +258,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Collections
 
         public TValue GetValue(TKey key)
             => !TryGetValue(key, out var value)
-                ? throw new KeyNotFoundException("The key you’re looking for does not exist in the dictionary. Please check the key and try again.")
+                ? throw new KeyNotFoundException("The key youï¿½re looking for does not exist in the dictionary. Please check the key and try again.")
                 : value;
 
         public TValue? GetValueOrNull(TKey key) => TryGetValue(key, out var value) ? value : default;
@@ -300,8 +300,8 @@ namespace ThunderPropagator.BuildingBlocks.Application.Collections
             {
                 null => false,
                 _ => Count == other.Count &&
-                     Keys.Any(left => other.Keys.Any(right => right.Equals(left))) &&
-                     Values.Any(left => other.Values.Any(right => right?.Equals(left) == true))
+                     other.All(kvp => TryGetValue(kvp.Key, out var value) &&
+                                      EqualityComparer<TValue>.Default.Equals(value, kvp.Value))
             };
 
         public override bool Equals(object? obj) => Equals(obj as IDictionary<TKey, TValue>);

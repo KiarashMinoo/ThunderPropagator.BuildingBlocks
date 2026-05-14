@@ -156,5 +156,70 @@ namespace ThunderPropagator.UnitTests.BuildingBlocks.Applications.Collections
             // Assert
             Assert.True(isTriggered);
         }
+
+        [Fact]
+        public void Equals_ShouldReturnTrue_WhenSameKeysAndValues()
+        {
+            // Arrange
+            var dict = new BindingDictionary<string, int> { { "a", 1 }, { "b", 2 } };
+            IDictionary<string, int> other = new Dictionary<string, int> { { "a", 1 }, { "b", 2 } };
+
+            // Act & Assert
+            Assert.True(dict.Equals(other));
+        }
+
+        [Fact]
+        public void Equals_ShouldReturnFalse_WhenValueDiffers()
+        {
+            // Arrange
+            var dict = new BindingDictionary<string, int> { { "a", 1 }, { "b", 2 } };
+            IDictionary<string, int> other = new Dictionary<string, int> { { "a", 1 }, { "b", 99 } };
+
+            // Act & Assert
+            Assert.False(dict.Equals(other));
+        }
+
+        [Fact]
+        public void Equals_ShouldReturnFalse_WhenKeyMissing()
+        {
+            // Arrange
+            var dict = new BindingDictionary<string, int> { { "a", 1 }, { "b", 2 } };
+            IDictionary<string, int> other = new Dictionary<string, int> { { "a", 1 }, { "c", 2 } };
+
+            // Act & Assert
+            Assert.False(dict.Equals(other));
+        }
+
+        [Fact]
+        public void Equals_ShouldReturnFalse_WhenCountDiffers()
+        {
+            // Arrange
+            var dict = new BindingDictionary<string, int> { { "a", 1 } };
+            IDictionary<string, int> other = new Dictionary<string, int> { { "a", 1 }, { "b", 2 } };
+
+            // Act & Assert
+            Assert.False(dict.Equals(other));
+        }
+
+        [Fact]
+        public void Equals_ShouldReturnFalse_WhenOtherIsNull()
+        {
+            // Arrange
+            var dict = new BindingDictionary<string, int> { { "a", 1 } };
+
+            // Act & Assert
+            Assert.False(dict.Equals((IDictionary<string, int>?)null));
+        }
+
+        [Fact]
+        public void Equals_ShouldReturnTrue_WhenBothEmpty()
+        {
+            // Arrange
+            var dict = new BindingDictionary<string, int>();
+            IDictionary<string, int> other = new Dictionary<string, int>();
+
+            // Act & Assert
+            Assert.True(dict.Equals(other));
+        }
     }
 }
