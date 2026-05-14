@@ -500,7 +500,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
             lock (_lock)
 #endif
             {
-                _stringBuilder.Append(value);
+                _stringBuilder.AppendLine(value);
                 return this;
             }
         }
