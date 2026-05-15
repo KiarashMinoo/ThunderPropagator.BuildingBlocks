@@ -76,7 +76,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
         protected T GetValueOrDefault<T>(T @default, [CallerMemberName] string? key = null) => GetValueOrNull<T>(key) ?? @default;
 
         object ICloneable.Clone() => MemberwiseClone();
-        IDictionary<string, object?> ICloneable<IDictionary<string, object?>>.Clone() => _dictionary;
+        IDictionary<string, object?> ICloneable<IDictionary<string, object?>>.Clone() => new Dictionary<string, object?>(_dictionary);
 
         void IDictionary<string, object?>.Add(string key, object? value) => _dictionary.TryAdd(key, value);
         void ICollection<KeyValuePair<string, object?>>.Add(KeyValuePair<string, object?> item) => _dictionary.TryAdd(item.Key, item.Value);

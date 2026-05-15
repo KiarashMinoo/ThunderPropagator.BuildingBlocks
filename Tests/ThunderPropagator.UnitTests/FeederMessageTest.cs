@@ -21,6 +21,27 @@ public class FeederMessageTest
         Assert.NotNull(feederMessage.CorrelationId);
     }
 
+    [Fact]
+    public void Clone_Returns_New_Dictionary_Instance()
+    {
+        var message = new TestFeederMessage { Id = Guid.NewGuid() };
+
+        var clone = ((ICloneable<IDictionary<string, object?>>)message).Clone();
+
+        Assert.NotSame(message, clone);
+    }
+
+    [Fact]
+    public void Clone_Mutations_Do_Not_Affect_Original()
+    {
+        var message = new TestFeederMessage { Id = Guid.NewGuid() };
+
+        var clone = ((ICloneable<IDictionary<string, object?>>)message).Clone();
+        clone["InjectedKey"] = "InjectedValue";
+
+        Assert.False(((IDictionary<string, object?>)message).ContainsKey("InjectedKey"));
+    }
+
     private class TestFeederMessage : FeederMessage
     {
         public Guid Id
