@@ -12,8 +12,8 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         public static byte[] ToByteArray(this string str)
         {
             const string activityName = $"{nameof(StringHelper)}_{nameof(ToByteArray)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal)?
-                .SetTag(nameof(string.Length), str.Length);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
+            activity?.SetTag(nameof(string.Length), str.Length);
 
             return Encoding.UTF8.GetBytes(str);
         }
@@ -21,8 +21,8 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         public static ReadOnlyMemory<byte> ToByteReadOnlyMemory(this string str)
         {
             const string activityName = $"{nameof(StringHelper)}_{nameof(ToByteReadOnlyMemory)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal)?
-                .SetTag(nameof(string.Length), str.Length);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
+            activity?.SetTag(nameof(string.Length), str.Length);
 
             return Encoding.UTF8.GetBytes(str);
         }
@@ -30,8 +30,8 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         public static string FromByteArray(this byte[] bytes)
         {
             const string activityName = $"{nameof(StringHelper)}_{nameof(FromByteArray)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal)?
-                .SetTag(nameof(string.Length), bytes.Length);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
+            activity?.SetTag(nameof(string.Length), bytes.Length);
 
             return Encoding.UTF8.GetString(bytes);
         }
@@ -39,8 +39,8 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         public static string ToBase64(this string str)
         {
             const string activityName = $"{nameof(StringHelper)}_{nameof(ToBase64)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal)?
-                .SetTag(nameof(string.Length), str.Length);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
+            activity?.SetTag(nameof(string.Length), str.Length);
 
             var bytes = ToByteArray(str);
             return Convert.ToBase64String(bytes);
@@ -49,8 +49,8 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         public static string FromBase64(this string str)
         {
             const string activityName = $"{nameof(StringHelper)}_{nameof(FromBase64)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal)?
-                .SetTag(nameof(string.Length), str.Length);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
+            activity?.SetTag(nameof(string.Length), str.Length);
 
             var bytes = Convert.FromBase64String(str);
             return FromByteArray(bytes);

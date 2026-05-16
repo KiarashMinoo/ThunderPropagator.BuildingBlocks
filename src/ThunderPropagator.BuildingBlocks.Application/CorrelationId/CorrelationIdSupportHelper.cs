@@ -8,7 +8,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.CorrelationId
             where T : class, ICorrelationIdSupport
         {
             const string activityName = $"{nameof(CorrelationIdSupportHelper)}_{nameof(GenerateCorrelationId)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             var correlationId = CorrelationIdProvider.GenerateCorrelationId(input);
 
@@ -21,7 +21,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.CorrelationId
             where T : class, ICorrelationIdSupport
         {
             const string activityName = $"{nameof(CorrelationIdSupportHelper)}_{nameof(GenerateCorrelationId)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             input.CorrelationId = correlationId;
 

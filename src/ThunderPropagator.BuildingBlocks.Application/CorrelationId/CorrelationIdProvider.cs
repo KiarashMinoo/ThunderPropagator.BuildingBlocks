@@ -9,7 +9,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.CorrelationId
             where T : notnull
         {
             const string activityName = $"{nameof(CorrelationIdProvider)}_{nameof(GenerateCorrelationId)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             StringBuilder stringBuilder = new();
 
