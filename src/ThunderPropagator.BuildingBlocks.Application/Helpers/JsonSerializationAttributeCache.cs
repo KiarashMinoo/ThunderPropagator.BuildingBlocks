@@ -9,7 +9,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
 
         public static JsonSerializationAttribute? Get(Type type)
         {
-            return Cache.GetOrAdd(type, t =>
+            return Cache.GetOrAdd(type, static t =>
                 t.GetCustomAttributes(typeof(JsonSerializationAttribute), true)
                  .FirstOrDefault() as JsonSerializationAttribute);
         }
