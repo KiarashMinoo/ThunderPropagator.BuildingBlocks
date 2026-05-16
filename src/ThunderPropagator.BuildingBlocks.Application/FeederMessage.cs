@@ -64,10 +64,15 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         protected void SetValue(object? value, [CallerMemberName] string? key = null)
         {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
             _dictionary[Guard.Against.NullOrWhiteSpace(key)] = value;
         }
 
-        protected T GetValue<T>([CallerMemberName] string? key = null) => (T)_dictionary[Guard.Against.NullOrWhiteSpace(key)]!;
+        protected T GetValue<T>([CallerMemberName] string? key = null)
+        {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+            return (T)_dictionary[Guard.Against.NullOrWhiteSpace(key)]!;
+        }
 
         protected T? GetValueOrNull<T>([CallerMemberName] string? key = null)
             => _dictionary.TryGetValue(Guard.Against.NullOrWhiteSpace(key), out var value) && value is T t ? t : default;
