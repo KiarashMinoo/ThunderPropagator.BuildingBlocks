@@ -42,6 +42,24 @@ public class FeederMessageTest
         Assert.False(((IDictionary<string, object?>)message).ContainsKey("InjectedKey"));
     }
 
+    [Fact]
+    public void SetValue_AfterDispose_ThrowsObjectDisposedException()
+    {
+        var message = new TestFeederMessage();
+        message.Dispose();
+
+        Assert.Throws<ObjectDisposedException>(() => message.Id = Guid.NewGuid());
+    }
+
+    [Fact]
+    public void GetValue_AfterDispose_ThrowsObjectDisposedException()
+    {
+        var message = new TestFeederMessage();
+        message.Dispose();
+
+        Assert.Throws<ObjectDisposedException>(() => _ = message.IdDirect);
+    }
+
     private class TestFeederMessage : FeederMessage
     {
         public Guid Id
@@ -49,5 +67,7 @@ public class FeederMessageTest
             get => GetValueOrDefault(Guid.NewGuid());
             set => SetValue(value);
         }
+
+        public Guid IdDirect => GetValue<Guid>();
     }
 }
