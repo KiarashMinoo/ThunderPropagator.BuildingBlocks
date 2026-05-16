@@ -7,52 +7,88 @@ namespace ThunderPropagator.BuildingBlocks.Application
         public const string MeterName = "thunderPropagator.meter";
         public const string ActivityName = "thunderPropagator.activity";
 
-        private static readonly ActivitySource? ActivitySource;
-        private static readonly Meter? Meter;
-        public static string Version { get; set; } = "1.0.0";
+        private static string _version = "1.0.0";
+        private static int _configured;
+
+        private static readonly Lazy<ActivitySource?> _activitySource = new(CreateActivitySource);
+        private static readonly Lazy<Meter?> _meter = new(CreateMeter);
+
+        /// <summary>Gets the version reported by the <see cref="ActivitySource"/>.</summary>
+        public static string Version => _version;
 
         public static KeyValuePair<string, object?> SuccessfulTag => new("Status", "Success");
         public static KeyValuePair<string, object?> UnsuccessfulTag => new("Status", "Failed");
 
-
-        static Telemetry()
+        /// <summary>
+        /// Sets the version reported by the <see cref="ActivitySource"/>. Must be called once
+        /// at application startup, before any telemetry activity is started.
+        /// Subsequent calls are silently ignored.
+        /// </summary>
+        /// <param name="version">The version string to use for the <see cref="ActivitySource"/>.</param>
+        public static void Configure(string version)
         {
-            var otelExporterEndpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT");
-            if (!string.IsNullOrEmpty(otelExporterEndpoint))
-            {
-                var activityName = Environment.GetEnvironmentVariable("ACTIVITY_NAME") ?? ActivityName;
-                var version = Environment.GetEnvironmentVariable("VERSION") ?? Version;
-                ActivitySource = new ActivitySource(activityName, version);
-            }
-
-            if (bool.TryParse(Environment.GetEnvironmentVariable("METER_ENABLED") ?? "true", out var meterEnabled) && meterEnabled)
-            {
-                var meterName = Environment.GetEnvironmentVariable("METER_NAME") ?? MeterName;
-                Meter = new Meter(meterName);
-            }
+            if (Interlocked.CompareExchange(ref _configured, 1, 0) == 0)
+                _version = version;
         }
 
-        public static bool HasListeners() => ActivitySource?.HasListeners() ?? false;
+        private static ActivitySource? CreateActivitySource()
+        {
+            var endpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT");
+            if (!string.IsNullOrEmpty(endpoint))
+            {
+                var name = Environment.GetEnvironmentVariable("ACTIVITY_NAME") ?? ActivityName;
+                return new ActivitySource(name, _version);
+            }
+            return null;
+        }
 
-        public static Activity? StartActivity(string name, ActivityKind kind) => ActivitySource?.StartActivity(kind, name: name);
+        private static Meter? CreateMeter()
+        {
+            if (bool.TryParse(Environment.GetEnvironmentVariable("METER_ENABLED") ?? "true", out var enabled) && enabled)
+            {
+                var name = Environment.GetEnvironmentVariable("METER_NAME") ?? MeterName;
+                return new Meter(name);
+            }
+            return null;
+        }
+
+        public static bool HasListeners()
+        {
+            return _activitySource.Value?.HasListeners() ?? false;
+        }
+
+        public static Activity? StartActivity(string name, ActivityKind kind)
+        {
+            return _activitySource.Value?.StartActivity(kind, name: name);
+        }
 
         public static Activity? StartActivity(string name, ActivityKind kind, ActivityContext parentContext)
-            => ActivitySource?.StartActivity(kind, name: name, parentContext: parentContext);
+        {
+            return _activitySource.Value?.StartActivity(kind, name: name, parentContext: parentContext);
+        }
 
         public static Counter<T>? CreateCounter<T>(string name, string? unit = null, string? description = null)
             where T : struct
-            => Meter?.CreateCounter<T>(name, unit, description);
+        {
+            return _meter.Value?.CreateCounter<T>(name, unit, description);
+        }
 
         public static UpDownCounter<T>? CreateUpDownCounter<T>(string name, string? unit = null, string? description = null)
             where T : struct
-            => Meter?.CreateUpDownCounter<T>(name, unit, description);
+        {
+            return _meter.Value?.CreateUpDownCounter<T>(name, unit, description);
+        }
 
         public static Histogram<T>? CreateHistogram<T>(string name, string? unit = null, string? description = null)
             where T : struct
-            => Meter?.CreateHistogram<T>(name, unit, description);
+        {
+            return _meter.Value?.CreateHistogram<T>(name, unit, description);
+        }
 
         public static ObservableGauge<T>? CreateObservableGauge<T>(string name, Func<T> observeValue, string? unit = null, string? description = null)
             where T : struct
-            => Meter?.CreateObservableGauge(name, observeValue, unit, description);
+        {
+            return _meter.Value?.CreateObservableGauge(name, observeValue, unit, description);
+        }
     }
 }
