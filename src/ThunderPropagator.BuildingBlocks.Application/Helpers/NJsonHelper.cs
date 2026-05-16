@@ -57,7 +57,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             using var memoryStream = new MemoryStream();
-            using var streamWriter = new StreamWriter(memoryStream, Encoding.UTF8);
+            using var streamWriter = new StreamWriter(memoryStream, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
             using var jsonWriter = new JsonTextWriter(streamWriter);
 
             var serializerSettings = NJsonSerializerSettings<T>(settings is not null ? BuildDefaultNSerializerSettings() : null);
@@ -131,18 +131,20 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
                 return default;
             }
 
-            using var memoryStream = new MemoryStream(bytes);
-            using var streamReader = new StreamReader(memoryStream, Encoding.UTF8);
-            using var jsonReader = new JsonTextReader(streamReader);
+            const string activityName = $"{nameof(NJsonHelper)}_{nameof(FromNJsonBytes)}";
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
-            var serializerSettings = NJsonSerializerSettings<T>(settings is not null ? BuildDefaultNSerializerSettings() : null);
+            var json = Encoding.UTF8.GetString(bytes);
+
+            JsonSerializerSettings? serializerSettings = null;
+
             if (settings is not null)
             {
+                serializerSettings = BuildDefaultNSerializerSettings();
                 settings(serializerSettings);
             }
 
-            var serializer = JsonSerializer.Create(serializerSettings);
-            return serializer.Deserialize<T>(jsonReader);
+            return JsonConvert.DeserializeObject<T>(json, NJsonSerializerSettings<T>(serializerSettings));
         }
 
         public static T? FromNJsonBase64<T>(this string str, Func<JsonSerializerSettings, JsonSerializerSettings>? settings = null)
