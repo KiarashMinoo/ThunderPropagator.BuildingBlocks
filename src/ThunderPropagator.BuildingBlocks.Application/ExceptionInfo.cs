@@ -1,24 +1,24 @@
-using Newtonsoft.Json;
 using System.Text.Json.Serialization;
+using ThunderPropagator.BuildingBlocks.Application.Helpers;
 
 namespace ThunderPropagator.BuildingBlocks.Application
 {
+    [Newtonsoft.Json.JsonConverter(typeof(ExceptionInfoNewtonsoftConverter))]
     public
 #if !DEBUG
         sealed
 #endif
         class ExceptionInfo
     {
-        [JsonProperty, JsonInclude] public string Type { get; private set; } = null!;
+        public string Type { get; init; } = null!;
 
-        [JsonProperty, JsonInclude] public string Message { get; private set; } = null!;
+        public string Message { get; init; } = null!;
 
-        [JsonProperty, JsonInclude] public string? Source { get; private set; }
+        public string? Source { get; init; }
 
-        [JsonProperty, JsonInclude] public ExceptionInfo? InnerException { get; set; }
+        public ExceptionInfo? InnerException { get; init; }
 
-        [Newtonsoft.Json.JsonConstructor]
-        [System.Text.Json.Serialization.JsonConstructor]
+        [JsonConstructor]
         private ExceptionInfo()
         {
         }
@@ -37,6 +37,17 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         internal ExceptionInfo(Exception exception) : this(exception, 0)
         {
+        }
+
+        internal static ExceptionInfo Create(string type, string message, string? source, ExceptionInfo? innerException)
+        {
+            return new ExceptionInfo
+            {
+                Type = type,
+                Message = message,
+                Source = source,
+                InnerException = innerException
+            };
         }
 
         public static explicit operator ExceptionInfo(Exception exception) => new(exception);
