@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Text;
 using NetJSON;
 using ThunderPropagator.BuildingBlocks.Application.Attributes;
@@ -7,8 +6,6 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
 {
     public static class NetJsonHelper
     {
-        private static readonly ConcurrentDictionary<Type, JsonSerializationAttribute?> JsonSerializationAttributes = new();
-
         private static NetJSONSettings BuildDefaultNSerializerSettings()
             => new()
             {
@@ -22,14 +19,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         {
             netJsonSettings ??= BuildDefaultNSerializerSettings();
 
-            var jsonSerializationAttribute = JsonSerializationAttributes.GetOrAdd(type, key =>
-            {
-                var jsonSerializationAttributes = key.GetCustomAttributes(typeof(JsonSerializationAttribute), true);
-                if (jsonSerializationAttributes.Length == 0)
-                    return null;
-
-                return jsonSerializationAttributes.First() as JsonSerializationAttribute;
-            });
+            var jsonSerializationAttribute = JsonSerializationAttributeCache.Get(type);
 
             if (jsonSerializationAttribute?.CamelCase == false)
                 netJsonSettings.CamelCase = false;

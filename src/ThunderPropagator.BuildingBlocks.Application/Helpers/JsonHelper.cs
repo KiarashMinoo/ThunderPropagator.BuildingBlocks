@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using ThunderPropagator.BuildingBlocks.Application.Attributes;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -8,8 +7,6 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
 {
     public static class JsonHelper
     {
-        private static readonly ConcurrentDictionary<Type, JsonSerializationAttribute?> JsonSerializationAttributes = new();
-
         internal static JsonSerializerOptions BuildDefaultSerializerOptions() => new()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -20,14 +17,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
 
         internal static JsonSerializerOptions JsonSerializerOptions(Type type, JsonSerializerOptions? serializerOptions = null)
         {
-            var jsonSerializationAttribute = JsonSerializationAttributes.GetOrAdd(type, key =>
-            {
-                var jsonSerializationAttributes = key.GetCustomAttributes(typeof(JsonSerializationAttribute), true);
-                if (jsonSerializationAttributes.Length == 0)
-                    return null;
-
-                return jsonSerializationAttributes.First() as JsonSerializationAttribute;
-            });
+            var jsonSerializationAttribute = JsonSerializationAttributeCache.Get(type);
 
             serializerOptions ??= BuildDefaultSerializerOptions();
 

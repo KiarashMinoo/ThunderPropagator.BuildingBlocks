@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using ThunderPropagator.BuildingBlocks.Application.Attributes;
@@ -8,8 +7,6 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
 {
     public static class NJsonHelper
     {
-        private static readonly ConcurrentDictionary<Type, JsonSerializationAttribute?> JsonSerializationAttributes = new();
-
         private static JsonSerializerSettings BuildDefaultNSerializerSettings() => new()
         {
             ContractResolver = new CamelCasePropertyNamesContractResolver(),
@@ -23,14 +20,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         {
             serializerSettings ??= BuildDefaultNSerializerSettings();
 
-            var jsonSerializationAttribute = JsonSerializationAttributes.GetOrAdd(type, key =>
-            {
-                var jsonSerializationAttributes = key.GetCustomAttributes(typeof(JsonSerializationAttribute), true);
-                if (jsonSerializationAttributes.Length == 0)
-                    return null;
-
-                return jsonSerializationAttributes.First() as JsonSerializationAttribute;
-            });
+            var jsonSerializationAttribute = JsonSerializationAttributeCache.Get(type);
 
             if (jsonSerializationAttribute?.CamelCase == false)
                 serializerSettings.ContractResolver = null;
