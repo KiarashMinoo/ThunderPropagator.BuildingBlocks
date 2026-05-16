@@ -40,7 +40,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         public static string ToJson<T>(this T instance, Func<JsonSerializerOptions, JsonSerializerOptions>? options = null)
         {
             const string activityName = $"{nameof(JsonHelper)}_{nameof(ToJson)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             JsonSerializerOptions? serializerOptions = null;
 
@@ -63,7 +63,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             where T : notnull
         {
             const string activityName = $"{nameof(JsonHelper)}_{nameof(ToJsonBytes)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             JsonSerializerOptions? serializerOptions = null;
 
@@ -92,7 +92,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         public static T? FromJson<T>(this string json, Func<JsonSerializerOptions, JsonSerializerOptions>? options = null)
         {
             const string activityName = $"{nameof(JsonHelper)}_{nameof(FromJson)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             JsonSerializerOptions? serializerOptions = null;
 
@@ -108,7 +108,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         public static object? FromJson(this string json, Type type, Func<JsonSerializerOptions, JsonSerializerOptions>? options = null)
         {
             const string activityName = $"{nameof(JsonHelper)}_{nameof(FromJson)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             JsonSerializerOptions? serializerOptions = null;
 
@@ -124,7 +124,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         public static T? FromJsonBytes<T>(this byte[] bytes, Func<JsonSerializerOptions, JsonSerializerOptions>? options = null)
         {
             const string activityName = $"{nameof(JsonHelper)}_{nameof(FromJsonBytes)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             if (bytes.Length == 0)
             {

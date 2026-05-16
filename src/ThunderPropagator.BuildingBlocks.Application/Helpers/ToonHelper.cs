@@ -25,7 +25,7 @@ public static class ToonHelper
     public static string ToToon<T>(this T instance, Func<ToonOptions, ToonOptions>? settings = null)
     {
         const string activityName = $"{nameof(ToonHelper)}_{nameof(ToToon)}";
-        using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+        using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
         ToonOptions? serializerSettings = null;
 
@@ -48,7 +48,7 @@ public static class ToonHelper
         where T : notnull
     {
         const string activityName = $"{nameof(ToonHelper)}_{nameof(ToToonBytes)}";
-        using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+        using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
         var toon = ToToon(instance, settings);
         return Encoding.UTF8.GetBytes(toon);
@@ -58,7 +58,7 @@ public static class ToonHelper
         where T : notnull
     {
         const string activityName = $"{nameof(ToonHelper)}_{nameof(ToToonBase64)}";
-        using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+        using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
         var bytes = instance.ToToonBytes(settings);
         return Convert.ToBase64String(bytes);
@@ -67,7 +67,7 @@ public static class ToonHelper
     public static T? FromToon<T>(this string toon, Func<ToonDecodeOptions, ToonDecodeOptions>? settings = null)
     {
         const string activityName = $"{nameof(ToonHelper)}_{nameof(FromToon)}";
-        using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+        using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
         ToonDecodeOptions? serializerSettings = null;
 

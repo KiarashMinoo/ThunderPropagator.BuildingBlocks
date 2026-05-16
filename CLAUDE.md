@@ -42,7 +42,7 @@ public Guid Id
 
 **Telemetry** — Wrap all significant operations with OpenTelemetry activities:
 ```csharp
-using var activity = Telemetry.StartActivity("ClassName_MethodName", ActivityKind.Internal);
+using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(ClassName_MethodName, ActivityKind.Internal) : null;
 activity?.SetTag("key", value);
 ```
 Naming convention: `{ClassName}_{MethodName}`.

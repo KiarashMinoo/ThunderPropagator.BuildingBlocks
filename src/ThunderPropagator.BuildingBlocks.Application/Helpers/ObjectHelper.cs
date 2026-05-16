@@ -74,7 +74,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             where T : notnull
         {
             const string activityName = $"{nameof(ObjectHelper)}_{nameof(IsDisposed)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             try
             {

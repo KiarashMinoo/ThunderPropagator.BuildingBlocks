@@ -12,8 +12,8 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             var array = enumerable as T[] ?? enumerable?.ToArray() ?? [];
 
             const string activityName = $"{nameof(CollectionHelper)}_{nameof(Filter)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal)?
-                .SetTag(nameof(array.Length), array.Length);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
+            activity?.SetTag(nameof(array.Length), array.Length);
 
             if (array.Length == 0)
                 return LinkedArray<T>.Empty;
@@ -41,8 +41,8 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         public static TR[]? Convert<T, TR>(this T[]? array, Func<T, TR> func)
         {
             const string activityName = $"{nameof(CollectionHelper)}_{nameof(Convert)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal)?
-                .SetTag(nameof(Array.Length), array?.Length);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
+            activity?.SetTag(nameof(Array.Length), array?.Length);
 
             if (array is null || array.Length <= 0)
             {
@@ -90,7 +90,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         public static void ForEach<T>(this IEnumerable<T>? collection, Action<int, T> action)
         {
             const string activityName = $"{nameof(CollectionHelper)}_{nameof(ForEach)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             switch (collection)
             {
@@ -131,8 +131,8 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         public static void ForEach<T>(this T[]? array, Action<int, T> execution)
         {
             const string activityName = $"{nameof(CollectionHelper)}_{nameof(ForEach)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal)?
-                .SetTag(nameof(Array.Length), array?.Length);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
+            activity?.SetTag(nameof(Array.Length), array?.Length);
 
             if (array is not null && array.Length > 0)
             {
@@ -158,8 +158,8 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         public static void ForEach<T>(this ArraySegment<T> array, Action<int, T> execution)
         {
             const string activityName = $"{nameof(CollectionHelper)}_{nameof(ForEach)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal)?
-                .SetTag(nameof(Array.Length), array.Count);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
+            activity?.SetTag(nameof(Array.Length), array.Count);
 
             if (array.Count > 0)
             {

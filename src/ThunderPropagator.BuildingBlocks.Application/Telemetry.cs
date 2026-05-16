@@ -32,6 +32,8 @@ namespace ThunderPropagator.BuildingBlocks.Application
             }
         }
 
+        public static bool HasListeners() => ActivitySource?.HasListeners() ?? false;
+
         public static Activity? StartActivity(string name, ActivityKind kind) => ActivitySource?.StartActivity(kind, name: name);
 
         public static Activity? StartActivity(string name, ActivityKind kind, ActivityContext parentContext)

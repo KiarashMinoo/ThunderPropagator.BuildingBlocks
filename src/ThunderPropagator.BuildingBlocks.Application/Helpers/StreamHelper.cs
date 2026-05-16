@@ -12,8 +12,8 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         public static byte[] ToByteArray(this Stream stream)
         {
             const string activityName = $"{nameof(StreamHelper)}_{nameof(ToByteArray)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal)?
-                .SetTag(nameof(Stream.Length), stream.Length);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
+            activity?.SetTag(nameof(Stream.Length), stream.Length);
 
             if (stream.Position != 0)
             {
@@ -32,8 +32,8 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         public static Stream ToStream(this string str)
         {
             const string activityName = $"{nameof(StreamHelper)}_{nameof(ToStream)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal)?
-                .SetTag(nameof(string.Length), str.Length);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
+            activity?.SetTag(nameof(string.Length), str.Length);
 
             var bytes = Encoding.UTF8.GetBytes(str);
             MemoryStream memoryStream = new(bytes);

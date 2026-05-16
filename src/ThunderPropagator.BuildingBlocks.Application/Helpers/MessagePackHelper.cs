@@ -8,7 +8,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         public static string ToMessagePackJson(this object instance, MessagePackSerializerOptions? serializerOptions = null, CancellationToken cancellationToken = default)
         {
             const string activityName = $"{nameof(MessagePackHelper)}_{nameof(ToMessagePackJson)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             return MessagePackSerializer.SerializeToJson(instance, serializerOptions, cancellationToken);
         }
@@ -16,7 +16,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         public static Stream ToMessagePack(this object instance, MessagePackSerializerOptions? serializerOptions = null, CancellationToken cancellationToken = default)
         {
             const string activityName = $"{nameof(MessagePackHelper)}_{nameof(ToMessagePack)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             MemoryStream memoryStream = new();
             MessagePackSerializer.Serialize(memoryStream, instance, serializerOptions, cancellationToken);
@@ -26,7 +26,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         public static T FromMessagePack<T>(this Stream stream, MessagePackSerializerOptions? serializerOptions = null, CancellationToken cancellationToken = default)
         {
             const string activityName = $"{nameof(MessagePackHelper)}_{nameof(FromMessagePack)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             return MessagePackSerializer.Deserialize<T>(stream, serializerOptions, cancellationToken);
         }
@@ -40,7 +40,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         public static T FromMessagePackJson<T>(this string json, MessagePackSerializerOptions? serializerOptions = null, CancellationToken cancellationToken = default)
         {
             const string activityName = $"{nameof(MessagePackHelper)}_{nameof(FromMessagePackJson)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             var bytes = MessagePackSerializer.ConvertFromJson(json, serializerOptions, cancellationToken);
             using MemoryStream memoryStream = new(bytes);

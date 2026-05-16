@@ -42,7 +42,7 @@ Consistent disposal pattern for all resources:
 **5. Telemetry & Observability**
 All operations should use `Telemetry.StartActivity()` for OpenTelemetry integration:
 ```csharp
-using var activity = Telemetry.StartActivity("OperationName", ActivityKind.Internal);
+using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(OperationName, ActivityKind.Internal) : null;
 activity?.SetTag("key", value);
 ```
 - Controlled by `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable

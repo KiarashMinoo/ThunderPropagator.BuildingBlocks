@@ -230,7 +230,7 @@ public class OrderService
     public async Task ProcessOrderAsync(Order order)
     {
         const string activityName = $"{nameof(OrderService)}_{nameof(ProcessOrderAsync)}";
-        using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+        using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
         
         activity?.SetTag("order.id", order.Id);
         activity?.SetTag("order.amount", order.Amount);
