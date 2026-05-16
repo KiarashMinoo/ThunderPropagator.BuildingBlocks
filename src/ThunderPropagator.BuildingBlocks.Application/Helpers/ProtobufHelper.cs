@@ -8,7 +8,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         public static Stream ToProtobuf(this object instance)
         {
             const string activityName = $"{nameof(ProtobufHelper)}_{nameof(ToProtobuf)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             MemoryStream memoryStream = new();
             Serializer.Serialize(memoryStream, instance);
@@ -24,7 +24,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         public static T FromProtobuf<T>(this Stream stream)
         {
             const string activityName = $"{nameof(ProtobufHelper)}_{nameof(FromProtobuf)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             return Serializer.Deserialize<T>(stream);
         }

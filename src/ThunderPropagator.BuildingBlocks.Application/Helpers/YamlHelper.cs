@@ -73,7 +73,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         public static string ToYaml<T>(this T instance, YamlSerializerSettings? serializerSettings = null)
         {
             const string activityName = $"{nameof(YamlHelper)}_{nameof(ToYaml)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             var serializer = YamlSerializer(typeof(T), serializerSettings);
             return serializer.Serialize(instance);
@@ -142,7 +142,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         public static T FromYaml<T>(this string yaml, YamlSerializerSettings? serializerSettings = null)
         {
             const string activityName = $"{nameof(YamlHelper)}_{nameof(FromYaml)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             var deserializer = YamlDeserializer(typeof(T), serializerSettings);
             return deserializer.Deserialize<T>(yaml);
@@ -151,7 +151,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         public static object? FromYaml(this string yaml, Type type, YamlSerializerSettings? serializerSettings = null)
         {
             const string activityName = $"{nameof(YamlHelper)}_{nameof(FromYaml)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             var deserializer = YamlDeserializer(type, serializerSettings);
             return deserializer.Deserialize(yaml);
@@ -161,7 +161,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             where T : notnull
         {
             const string activityName = $"{nameof(YamlHelper)}_{nameof(ToYamlBytes)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             var serializer = YamlSerializer(typeof(T), serializerSettings);
             using var memoryStream = new MemoryStream();
@@ -179,7 +179,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             }
 
             const string activityName = $"{nameof(YamlHelper)}_{nameof(FromYamlBytes)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             var deserializer = YamlDeserializer(typeof(T), serializerSettings);
             using var memoryStream = new MemoryStream(bytes);
@@ -191,7 +191,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             where T : notnull
         {
             const string activityName = $"{nameof(YamlHelper)}_{nameof(ToYamlBase64)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             var bytes = instance.ToYamlBytes(serializerSettings);
             return Convert.ToBase64String(bytes);
@@ -205,7 +205,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             }
 
             const string activityName = $"{nameof(YamlHelper)}_{nameof(FromYamlBase64)}";
-            using var activity = Telemetry.StartActivity(activityName, ActivityKind.Internal);
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             var bytes = Convert.FromBase64String(str);
             return bytes.FromYamlBytes<T>(serializerSettings);
