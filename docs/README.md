@@ -191,6 +191,12 @@ var base64 = myObject.ToMessagePackBase64();
 var obj = base64.FromMessagePackBase64<MyType>();
 ```
 
+## Design RFCs
+
+| RFC | Title | Status |
+|-----|-------|--------|
+| [RFC-48](./RFC/RFC-48-FeederMessage-Envelope-Payload-Split.md) | FeederMessage Envelope/Payload Split | Proposed |
+
 ## See Also
 
 - [Application Layer Documentation](./BuildingBlocks.Application/README.md)
