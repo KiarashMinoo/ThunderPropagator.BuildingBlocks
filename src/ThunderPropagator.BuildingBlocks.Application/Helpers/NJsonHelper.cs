@@ -8,6 +8,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
 {
     public static class NJsonHelper
     {
+        private static readonly CamelCasePropertyNamesContractResolver _camelCaseResolver = new();
         private static readonly ConcurrentDictionary<int, JsonSerializerSettings> _settingsCache = new();
 
         private static JsonSerializerSettings GetCachedSettings(TypeNameHandling typeNameHandling, bool camelCase)
@@ -16,7 +17,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             return _settingsCache.GetOrAdd(key, static (_, args) =>
                 new JsonSerializerSettings
                 {
-                    ContractResolver = args.camelCase ? new CamelCasePropertyNamesContractResolver() : null,
+                    ContractResolver = args.camelCase ? _camelCaseResolver : null,
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                     TypeNameHandling = args.typeNameHandling
                 }, (typeNameHandling, camelCase));
@@ -31,7 +32,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         {
             return new JsonSerializerSettings
             {
-                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                ContractResolver = _camelCaseResolver,
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
         }
@@ -43,7 +44,10 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
 
         private static JsonSerializerSettings NJsonSerializerSettings(Type type, JsonSerializerSettings? serializerSettings = null)
         {
-            serializerSettings ??= BuildDefaultNSerializerSettings();
+            if (serializerSettings is null)
+            {
+                return GetCachedSettings(TypeNameHandling.None, IsCamelCase(type));
+            }
 
             var jsonSerializationAttribute = JsonSerializationAttributeCache.Get(type);
 
