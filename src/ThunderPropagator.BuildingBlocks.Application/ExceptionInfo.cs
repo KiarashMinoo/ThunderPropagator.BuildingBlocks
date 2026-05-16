@@ -23,14 +23,16 @@ namespace ThunderPropagator.BuildingBlocks.Application
         {
         }
 
-        private ExceptionInfo(Exception exception, int level)
+        private const int MaxDepth = 10;
+
+        private ExceptionInfo(Exception exception, int depth)
         {
             Type = exception.GetType().FullName!;
             Message = exception.Message;
             Source = exception.Source;
 
-            if (level == 0 && exception.InnerException is not null)
-                InnerException = new ExceptionInfo(exception.InnerException, 1);
+            if (depth < MaxDepth && exception.InnerException is not null)
+                InnerException = new ExceptionInfo(exception.InnerException, depth + 1);
         }
 
         internal ExceptionInfo(Exception exception) : this(exception, 0)
