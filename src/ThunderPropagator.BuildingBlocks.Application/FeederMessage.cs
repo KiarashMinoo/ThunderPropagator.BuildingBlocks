@@ -5,7 +5,6 @@ using ThunderPropagator.BuildingBlocks.Application.CorrelationId;
 using ThunderPropagator.BuildingBlocks.Application.Enums;
 using ThunderPropagator.BuildingBlocks.Application.Objects;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 
 namespace ThunderPropagator.BuildingBlocks.Application
@@ -18,7 +17,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
         ICloneable,
         ICloneable<IDictionary<string, object?>>
     {
-        [IgnoreMember] private readonly ConcurrentDictionary<string, object?> _dictionary = [];
+        [IgnoreMember] private readonly Dictionary<string, object?> _dictionary = [];
 
         [IgnoreMember]
         public object? this[string key]
@@ -83,7 +82,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
         void ICollection<KeyValuePair<string, object?>>.Clear() => throw new NotImplementedException();
         bool IDictionary<string, object?>.Remove(string key) => throw new NotImplementedException();
         bool ICollection<KeyValuePair<string, object?>>.Remove(KeyValuePair<string, object?> item) => throw new NotImplementedException();
-        bool ICollection<KeyValuePair<string, object?>>.Contains(KeyValuePair<string, object?> item) => _dictionary.Contains(item);
+        bool ICollection<KeyValuePair<string, object?>>.Contains(KeyValuePair<string, object?> item) => ((ICollection<KeyValuePair<string, object?>>)_dictionary).Contains(item);
         bool IDictionary<string, object?>.ContainsKey(string key) => _dictionary.ContainsKey(key);
         bool IReadOnlyDictionary<string, object?>.ContainsKey(string key) => _dictionary.ContainsKey(key);
         bool IDictionary<string, object?>.TryGetValue(string key, out object? value) => _dictionary.TryGetValue(key, out value);
