@@ -136,10 +136,6 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             return JsonConvert.DeserializeObject<T>(json, NJsonSerializerSettings<T>(serializerSettings));
         }
 
-        /// <summary>
-        /// Deserializes JSON using cached settings for the specified <paramref name="typeNameHandling"/>.
-        /// Zero <see cref="JsonSerializerSettings"/> allocation on repeated calls with the same configuration.
-        /// </summary>
         public static T? FromNJson<T>(this string json, TypeNameHandling typeNameHandling)
         {
             const string activityName = $"{nameof(NJsonHelper)}_{nameof(FromNJson)}";
@@ -163,10 +159,6 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             return JsonConvert.DeserializeObject(json, type, NJsonSerializerSettings(type, serializerSettings));
         }
 
-        /// <summary>
-        /// Deserializes JSON using cached settings for the specified <paramref name="typeNameHandling"/>.
-        /// Zero <see cref="JsonSerializerSettings"/> allocation on repeated calls with the same configuration.
-        /// </summary>
         public static object? FromNJson(this string json, Type type, TypeNameHandling typeNameHandling)
         {
             const string activityName = $"{nameof(NJsonHelper)}_{nameof(FromNJson)}";
@@ -197,10 +189,6 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             return JsonConvert.DeserializeObject<T>(json, NJsonSerializerSettings<T>(serializerSettings));
         }
 
-        /// <summary>
-        /// Deserializes bytes using cached settings for the specified <paramref name="typeNameHandling"/>.
-        /// Zero <see cref="JsonSerializerSettings"/> allocation on repeated calls with the same configuration.
-        /// </summary>
         public static T? FromNJsonBytes<T>(this byte[] bytes, TypeNameHandling typeNameHandling)
         {
             if (bytes.Length == 0)
@@ -227,10 +215,6 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             return bytes.FromNJsonBytes<T>(settings);
         }
 
-        /// <summary>
-        /// Deserializes a Base64-encoded JSON string using cached settings for the specified <paramref name="typeNameHandling"/>.
-        /// Zero <see cref="JsonSerializerSettings"/> allocation on repeated calls with the same configuration.
-        /// </summary>
         public static T? FromNJsonBase64<T>(this string str, TypeNameHandling typeNameHandling)
         {
             if (string.IsNullOrWhiteSpace(str))
@@ -241,6 +225,28 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             var bytes = Convert.FromBase64String(str);
 
             return bytes.FromNJsonBytes<T>(typeNameHandling);
+        }
+
+        public static void PopulateFromNJson<T>(this string json, T target, Func<JsonSerializerSettings, JsonSerializerSettings>? settings = null)
+        {
+            if (settings is null)
+            {
+                JsonConvert.PopulateObject(json, target, GetCachedSettings(TypeNameHandling.None, IsCamelCase(typeof(T))));
+                return;
+            }
+
+            var serializerSettings = BuildDefaultNSerializerSettings();
+            settings(serializerSettings);
+            JsonConvert.PopulateObject(json, target, NJsonSerializerSettings<T>(serializerSettings));
+        }
+
+        public static void PopulateFromNJsonBytes<T>(this byte[] bytes, T target, Func<JsonSerializerSettings, JsonSerializerSettings>? settings = null)
+        {
+            if (bytes.Length == 0)
+                return;
+
+            var json = Encoding.UTF8.GetString(bytes);
+            json.PopulateFromNJson(target, settings);
         }
     }
 }
