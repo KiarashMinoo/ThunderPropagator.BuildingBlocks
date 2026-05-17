@@ -120,6 +120,18 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public override int GetHashCode() => ((IDictionary<string, object?>)_payload).Keys.Aggregate(0, HashCode.Combine);
 
+        /// <summary>
+        /// Resets all fields to their initial state so the instance can be returned to an object pool.
+        /// </summary>
+        public virtual void Reset()
+        {
+            _payload.Clear();
+            _envelope.CorrelationId = string.Empty;
+            _envelope.HashKey = null;
+            _envelope.CastType = CastType.Multicast;
+            _envelope.IsDeleted = false;
+        }
+
         protected override void DisposeManagedResources() => _payload.Clear();
     }
 }
