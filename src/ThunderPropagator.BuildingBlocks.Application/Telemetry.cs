@@ -39,6 +39,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
                 var name = Environment.GetEnvironmentVariable("ACTIVITY_NAME") ?? ActivityName;
                 return new ActivitySource(name, _version);
             }
+
             return null;
         }
 
@@ -49,6 +50,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
                 var name = Environment.GetEnvironmentVariable("METER_NAME") ?? MeterName;
                 return new Meter(name);
             }
+
             return null;
         }
 
@@ -73,22 +75,118 @@ namespace ThunderPropagator.BuildingBlocks.Application
             return _meter.Value?.CreateCounter<T>(name, unit, description);
         }
 
+        public static Counter<T>? CreateCounter<T>(string name, string? unit, string? description, IEnumerable<KeyValuePair<string, object?>> tags)
+            where T : struct
+        {
+            return _meter.Value?.CreateCounter<T>(name, unit, description, tags);
+        }
+
         public static UpDownCounter<T>? CreateUpDownCounter<T>(string name, string? unit = null, string? description = null)
             where T : struct
         {
             return _meter.Value?.CreateUpDownCounter<T>(name, unit, description);
         }
 
-        public static Histogram<T>? CreateHistogram<T>(string name, string? unit = null, string? description = null)
+        public static UpDownCounter<T>? CreateUpDownCounter<T>(string name, string? unit, string? description, IEnumerable<KeyValuePair<string, object?>> tags)
             where T : struct
         {
-            return _meter.Value?.CreateHistogram<T>(name, unit, description);
+            return _meter.Value?.CreateUpDownCounter<T>(name, unit, description, tags);
+        }
+
+        public static ObservableUpDownCounter<T>? CreateObservableUpDownCounter<T>(string name, Func<T> observeValue, string? unit = null, string? description = null)
+            where T : struct
+        {
+            return _meter.Value?.CreateObservableUpDownCounter(name, observeValue, unit, description);
+        }
+
+        public static ObservableUpDownCounter<T>? CreateObservableUpDownCounter<T>(string name, Func<T> observeValue, string? unit, string? description, IEnumerable<KeyValuePair<string, object?>> tags)
+            where T : struct
+        {
+            return _meter.Value?.CreateObservableUpDownCounter(name, observeValue, unit, description, tags);
+        }
+
+        public static ObservableUpDownCounter<T>? CreateObservableUpDownCounter<T>(string name, Func<Measurement<T>> observeValue, string? unit = null, string? description = null)
+            where T : struct
+        {
+            return _meter.Value?.CreateObservableUpDownCounter(name, observeValue, unit, description);
+        }
+
+        public static ObservableUpDownCounter<T>? CreateObservableUpDownCounter<T>(string name, Func<IEnumerable<Measurement<T>>> observeValues, string? unit, string? description, IEnumerable<KeyValuePair<string, object?>> tags)
+            where T : struct
+        {
+            return _meter.Value?.CreateObservableUpDownCounter(name, observeValues, unit, description, tags);
+        }
+
+        public static ObservableCounter<T>? CreateObservableCounter<T>(string name, Func<T> observeValue, string? unit = null, string? description = null)
+            where T : struct
+        {
+            return _meter.Value?.CreateObservableCounter(name, observeValue, unit, description);
+        }
+
+        public static ObservableCounter<T>? CreateObservableCounter<T>(string name, Func<T> observeValue, string? unit, string? description, IEnumerable<KeyValuePair<string, object?>> tags)
+            where T : struct
+        {
+            return _meter.Value?.CreateObservableCounter(name, observeValue, unit, description, tags);
+        }
+
+        public static ObservableCounter<T>? CreateObservableCounter<T>(string name, Func<Measurement<T>> observeValue, string? unit = null, string? description = null)
+            where T : struct
+        {
+            return _meter.Value?.CreateObservableCounter(name, observeValue, unit, description);
+        }
+
+        public static ObservableCounter<T>? CreateObservableCounter<T>(string name, Func<Measurement<T>> observeValue, string? unit, string? description, IEnumerable<KeyValuePair<string, object?>> tags)
+            where T : struct
+        {
+            return _meter.Value?.CreateObservableCounter(name, observeValue, unit, description, tags);
+        }
+
+        public static ObservableCounter<T>? CreateObservableCounter<T>(string name, Func<IEnumerable<Measurement<T>>> observeValues, string? unit = null, string? description = null)
+            where T : struct
+        {
+            return _meter.Value?.CreateObservableCounter(name, observeValues, unit, description);
+        }
+
+        public static ObservableCounter<T>? CreateObservableCounter<T>(string name, Func<IEnumerable<Measurement<T>>> observeValues, string? unit, string? description, IEnumerable<KeyValuePair<string, object?>> tags)
+            where T : struct
+        {
+            return _meter.Value?.CreateObservableCounter(name, observeValues, unit, description, tags);
         }
 
         public static ObservableGauge<T>? CreateObservableGauge<T>(string name, Func<T> observeValue, string? unit = null, string? description = null)
             where T : struct
         {
             return _meter.Value?.CreateObservableGauge(name, observeValue, unit, description);
+        }
+
+        public static ObservableGauge<T>? CreateObservableGauge<T>(string name, Func<T> observeValue, string? unit, string? description, IEnumerable<KeyValuePair<string, object?>> tags)
+            where T : struct
+        {
+            return _meter.Value?.CreateObservableGauge(name, observeValue, unit, description, tags);
+        }
+
+        public static ObservableGauge<T>? CreateObservableGauge<T>(string name, Func<Measurement<T>> observeValue, string? unit = null, string? description = null)
+            where T : struct
+        {
+            return _meter.Value?.CreateObservableGauge(name, observeValue, unit, description);
+        }
+
+        public static ObservableGauge<T>? CreateObservableGauge<T>(string name, Func<Measurement<T>> observeValue, string? unit, string? description, IEnumerable<KeyValuePair<string, object?>> tags)
+            where T : struct
+        {
+            return _meter.Value?.CreateObservableGauge(name, observeValue, unit, description, tags);
+        }
+
+        public static ObservableGauge<T>? CreateObservableGauge<T>(string name, Func<IEnumerable<Measurement<T>>> observeValues, string? unit = null, string? description = null)
+            where T : struct
+        {
+            return _meter.Value?.CreateObservableGauge(name, observeValues, unit, description);
+        }
+
+        public static ObservableGauge<T>? CreateObservableGauge<T>(string name, Func<IEnumerable<Measurement<T>>> observeValues, string? unit, string? description, IEnumerable<KeyValuePair<string, object?>> tags)
+            where T : struct
+        {
+            return _meter.Value?.CreateObservableGauge(name, observeValues, unit, description, tags);
         }
     }
 }
