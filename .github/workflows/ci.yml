@@ -10,7 +10,7 @@ jobs:
     if: github.ref == 'refs/heads/develop'
     uses: KiarashMinoo/.github/.github/workflows/reusable-beta-ci.yml@main
     with:
-      solution-path: 'ThunderPropagator.BuildingBlocks.slnxx'
+      solution-path: 'ThunderPropagator.BuildingBlocks.slnx'
     secrets:
       gh-token: ${{ secrets.GITHUB_TOKEN }}
       nuget-api-key: ${{ secrets.NUGET_API_KEY }}
