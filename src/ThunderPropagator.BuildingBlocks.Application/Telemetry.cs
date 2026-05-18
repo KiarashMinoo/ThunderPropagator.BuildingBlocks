@@ -188,5 +188,17 @@ namespace ThunderPropagator.BuildingBlocks.Application
         {
             return _meter.Value?.CreateObservableGauge(name, observeValues, unit, description, tags);
         }
+
+        public static Histogram<T>? CreateHistogram<T>(string name, string? unit = null, string? description = null)
+            where T : struct
+        {
+            return _meter.Value?.CreateHistogram<T>(name, unit, description);
+        }
+
+        public static Histogram<T>? CreateHistogram<T>(string name, string? unit, string? description, IEnumerable<KeyValuePair<string, object?>> tags)
+            where T : struct
+        {
+            return _meter.Value?.CreateHistogram<T>(name, unit, description, tags);
+        }
     }
 }
