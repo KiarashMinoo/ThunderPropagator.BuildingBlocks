@@ -17,7 +17,14 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations
         /// </summary>
         NetJson = SerializerType.NetJson,
 
-        SchemaJson,
-        Avro
+        /// <summary>
+        /// Schema-backed JSON
+        /// </summary>
+        SchemaJson = 10,
+
+        /// <summary>
+        /// Apache Avro
+        /// </summary>
+        Avro = 11
     }
 }
