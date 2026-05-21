@@ -8,36 +8,46 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations
         /// <summary>
         /// System.Text.Json — application/json
         /// </summary>
-        Json = 0,
+        Proprietary = 0,
+
+        /// <summary>
+        /// System.Text.Json — application/json
+        /// </summary>
+        Json = 1,
 
         /// <summary>
         /// Newtonsoft.Json — application/json
         /// </summary>
-        NJson = 1,
+        NJson = 2,
 
         /// <summary>
         /// NetJSON — application/json
         /// </summary>
-        NetJson = 2,
+        NetJson = 3,
 
         /// <summary>
         /// protobuf-net — application/x-protobuf
         /// </summary>
-        Protobuf = 3,
+        Protobuf = 4,
 
         /// <summary>
         /// MessagePack-CSharp — application/x-msgpack
         /// </summary>
-        MessagePack = 4,
+        MessagePack = 5,
 
         /// <summary>
         /// System.Xml — application/xml
         /// </summary>
-        Xml = 5,
+        Xml = 6,
 
         /// <summary>
         /// YamlDotNet — application/yaml
         /// </summary>
-        Yaml = 6,
+        Yaml = 7,
+
+        /// <summary>
+        /// YamlDotNet — text/toon
+        /// </summary>
+        Toon = 8,
     }
 }

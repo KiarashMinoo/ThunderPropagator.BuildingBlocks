@@ -1,43 +1,42 @@
-using System.Text;
-using NetJSON;
 using ThunderPropagator.BuildingBlocks.Application.Helpers;
 
-namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Json
+namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Toon
 {
     /// <summary>
     /// <see cref="IFormatSerializer"/> and <see cref="IFormatDeserializer"/> implementation
-    /// backed by NetJSON.
+    /// backed by Toon-CSharp.
+    /// String representations are Base64-encoded Toon bytes.
     /// </summary>
-    public sealed class NetJsonFormatSerializer : IFormatSerializer, IFormatDeserializer
+    public sealed class ToonFormatSerializer : IFormatSerializer, IFormatDeserializer
     {
         /// <inheritdoc/>
-        public SerializerType SerializerType => SerializerType.NetJson;
+        public SerializerType SerializerType => SerializerType.Toon;
 
         /// <inheritdoc/>
-        public string MediaType => SerializerMediaTypes.Json;
+        public string MediaType => SerializerMediaTypes.Toon;
 
         /// <inheritdoc/>
         public string Serialize<T>(T instance)
         {
-            const string activityName = $"{nameof(NetJsonFormatSerializer)}_{nameof(Serialize)}";
+            const string activityName = $"{nameof(ToonFormatSerializer)}_{nameof(Serialize)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
-            return instance.ToNetJson();
+            return instance.ToToonBase64();
         }
 
         /// <inheritdoc/>
         public byte[] SerializeToBytes<T>(T instance)
         {
-            const string activityName = $"{nameof(NetJsonFormatSerializer)}_{nameof(SerializeToBytes)}";
+            const string activityName = $"{nameof(ToonFormatSerializer)}_{nameof(SerializeToBytes)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
-            return instance.ToNetJsonBytes();
+            return instance.ToToonBytes();
         }
 
         /// <inheritdoc/>
         public T? Deserialize<T>(string data)
         {
-            const string activityName = $"{nameof(NetJsonFormatSerializer)}_{nameof(Deserialize)}";
+            const string activityName = $"{nameof(ToonFormatSerializer)}_{nameof(Deserialize)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             if (string.IsNullOrWhiteSpace(data))
@@ -45,13 +44,13 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Json
                 return default;
             }
 
-            return data.FromNetJson<T>();
+            return data.FromToonBase64<T>();
         }
 
         /// <inheritdoc/>
         public T? Deserialize<T>(byte[] bytes)
         {
-            const string activityName = $"{nameof(NetJsonFormatSerializer)}_{nameof(Deserialize)}";
+            const string activityName = $"{nameof(ToonFormatSerializer)}_{nameof(Deserialize)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             if (bytes.Length == 0)
@@ -59,8 +58,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Json
                 return default;
             }
 
-            return bytes.FromNetJsonBytes<T>();
+            return bytes.FromToonBytes<T>();
         }
     }
 }
-

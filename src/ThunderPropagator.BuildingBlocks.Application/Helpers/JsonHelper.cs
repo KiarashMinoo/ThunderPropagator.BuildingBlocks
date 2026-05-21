@@ -50,7 +50,6 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         }
 
         public static byte[] ToJsonBytes<T>(this T instance, Func<JsonSerializerOptions, JsonSerializerOptions>? options = null)
-            where T : notnull
         {
             const string activityName = $"{nameof(JsonHelper)}_{nameof(ToJsonBytes)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
@@ -73,7 +72,6 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         }
 
         public static string ToJsonBase64<T>(this T instance, Func<JsonSerializerOptions, JsonSerializerOptions>? options = null)
-            where T : notnull
         {
             var bytes = instance.ToJsonBytes(options);
             return Convert.ToBase64String(bytes);

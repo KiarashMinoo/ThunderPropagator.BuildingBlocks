@@ -11,14 +11,6 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Json
     /// </summary>
     public sealed class NJsonFormatSerializer : IFormatSerializer, IFormatDeserializer
     {
-        private static readonly CamelCasePropertyNamesContractResolver _camelCaseResolver = new();
-
-        private static readonly JsonSerializerSettings _defaultSettings = new()
-        {
-            ContractResolver = _camelCaseResolver,
-            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-        };
-
         /// <inheritdoc/>
         public SerializerType SerializerType => SerializerType.NJson;
 
@@ -31,15 +23,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Json
             const string activityName = $"{nameof(NJsonFormatSerializer)}_{nameof(Serialize)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
-            var settings = NJsonSerializerSettings<T>();
-
-            if (instance is Exception exception)
-            {
-                ExceptionInfo exceptionInfo = new(exception);
-                return JsonConvert.SerializeObject(exceptionInfo, settings);
-            }
-
-            return JsonConvert.SerializeObject(instance, settings);
+            return instance.ToNJson();
         }
 
         /// <inheritdoc/>
@@ -48,7 +32,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Json
             const string activityName = $"{nameof(NJsonFormatSerializer)}_{nameof(SerializeToBytes)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
-            return Encoding.UTF8.GetBytes(Serialize<T>(instance));
+            return instance.ToNJsonBytes();
         }
 
         /// <inheritdoc/>
@@ -62,7 +46,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Json
                 return default;
             }
 
-            return JsonConvert.DeserializeObject<T>(data, NJsonSerializerSettings<T>());
+            return data.FromNJson<T>();
         }
 
         /// <inheritdoc/>
@@ -76,19 +60,8 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Json
                 return default;
             }
 
-            var json = Encoding.UTF8.GetString(bytes);
-            return JsonConvert.DeserializeObject<T>(json, NJsonSerializerSettings<T>());
-        }
-
-        private static JsonSerializerSettings NJsonSerializerSettings<T>()
-        {
-            var attribute = JsonSerializationAttributeCache.Get(typeof(T));
-            if (attribute?.CamelCase == false)
-            {
-                return new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
-            }
-
-            return _defaultSettings;
+            return bytes.FromNJsonBytes<T>();
         }
     }
 }
+

@@ -45,7 +45,6 @@ public static class ToonHelper
     }
 
     public static byte[] ToToonBytes<T>(this T instance, Func<ToonOptions, ToonOptions>? settings = null)
-        where T : notnull
     {
         const string activityName = $"{nameof(ToonHelper)}_{nameof(ToToonBytes)}";
         using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
@@ -55,7 +54,6 @@ public static class ToonHelper
     }
 
     public static string ToToonBase64<T>(this T instance, Func<ToonOptions, ToonOptions>? settings = null)
-        where T : notnull
     {
         const string activityName = $"{nameof(ToonHelper)}_{nameof(ToToonBase64)}";
         using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;

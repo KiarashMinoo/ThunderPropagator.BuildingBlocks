@@ -5,6 +5,7 @@ using ThunderPropagator.BuildingBlocks.Application.Serializations;
 using ThunderPropagator.BuildingBlocks.Application.Serializations.Json;
 using ThunderPropagator.BuildingBlocks.Application.Serializations.MessagePack;
 using ThunderPropagator.BuildingBlocks.Application.Serializations.Protobuf;
+using ThunderPropagator.BuildingBlocks.Application.Serializations.Toon;
 using ThunderPropagator.BuildingBlocks.Application.Serializations.Xml;
 using ThunderPropagator.BuildingBlocks.Application.Serializations.Yaml;
 
@@ -20,7 +21,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
         /// (<see cref="SerializerType.Json"/>, <see cref="SerializerType.NJson"/>,
         /// <see cref="SerializerType.NetJson"/>, <see cref="SerializerType.Protobuf"/>,
         /// <see cref="SerializerType.MessagePack"/>, <see cref="SerializerType.Xml"/>,
-        /// <see cref="SerializerType.Yaml"/>) with the DI container.
+        /// <see cref="SerializerType.Yaml"/>, <see cref="SerializerType.Toon"/>) with the DI container.
         /// </summary>
         /// <param name="services">The service collection.</param>
         /// <returns>The service collection for chaining.</returns>
@@ -42,6 +43,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
             services.TryAddSingleton<MessagePackFormatSerializer>();
             services.TryAddSingleton<XmlFormatSerializer>();
             services.TryAddSingleton<YamlFormatSerializer>();
+            services.TryAddSingleton<ToonFormatSerializer>();
 
             // Register as IFormatSerializer (order determines media-type priority: Json wins for application/json)
             services.AddSingleton<IFormatSerializer>(sp => sp.GetRequiredService<JsonFormatSerializer>());
@@ -51,6 +53,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
             services.AddSingleton<IFormatSerializer>(sp => sp.GetRequiredService<MessagePackFormatSerializer>());
             services.AddSingleton<IFormatSerializer>(sp => sp.GetRequiredService<XmlFormatSerializer>());
             services.AddSingleton<IFormatSerializer>(sp => sp.GetRequiredService<YamlFormatSerializer>());
+            services.AddSingleton<IFormatSerializer>(sp => sp.GetRequiredService<ToonFormatSerializer>());
 
             // Register as IFormatDeserializer (same ordering)
             services.AddSingleton<IFormatDeserializer>(sp => sp.GetRequiredService<JsonFormatSerializer>());
@@ -60,6 +63,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
             services.AddSingleton<IFormatDeserializer>(sp => sp.GetRequiredService<MessagePackFormatSerializer>());
             services.AddSingleton<IFormatDeserializer>(sp => sp.GetRequiredService<XmlFormatSerializer>());
             services.AddSingleton<IFormatDeserializer>(sp => sp.GetRequiredService<YamlFormatSerializer>());
+            services.AddSingleton<IFormatDeserializer>(sp => sp.GetRequiredService<ToonFormatSerializer>());
 
             services.TryAddSingleton<IFormatSerializerRegistry, FormatSerializerRegistry>();
 

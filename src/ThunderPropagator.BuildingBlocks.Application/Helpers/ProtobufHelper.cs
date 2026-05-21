@@ -5,7 +5,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
 {
     public static class ProtobufHelper
     {
-        public static Stream ToProtobuf(this object instance)
+        public static Stream ToProtobuf<T>(this T instance)
         {
             const string activityName = $"{nameof(ProtobufHelper)}_{nameof(ToProtobuf)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
@@ -15,10 +15,22 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             return memoryStream;
         }
 
-        public static string ToProtobufBase64(this object instance)
+        public static byte[] ToProtobufBytes<T>(this T instance)
         {
+            const string activityName = $"{nameof(ProtobufHelper)}_{nameof(ToProtobufBytes)}";
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
+
             using var stream = ToProtobuf(instance);
-            return Convert.ToBase64String(stream.ToByteArray());
+            return stream.ToByteArray();
+        }
+
+        public static string ToProtobufBase64<T>(this T instance)
+        {
+            const string activityName = $"{nameof(ProtobufHelper)}_{nameof(ToProtobufBase64)}";
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
+
+            var bytes = instance.ToProtobufBytes();
+            return Convert.ToBase64String(bytes);
         }
 
         public static T FromProtobuf<T>(this Stream stream)
@@ -31,14 +43,20 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
 
         public static T FromProtobuf<T>(this byte[] bytes)
         {
+            const string activityName = $"{nameof(ProtobufHelper)}_{nameof(FromProtobuf)}";
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
+
             using MemoryStream memoryStream = new(bytes);
             return FromProtobuf<T>(memoryStream);
         }
 
         public static T FromProtobufBase64<T>(this string base64String)
         {
+            const string activityName = $"{nameof(ProtobufHelper)}_{nameof(FromProtobufBase64)}";
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
+
             var bytes = Convert.FromBase64String(base64String);
-            return FromProtobuf<T>(bytes);
+            return bytes.FromProtobuf<T>();
         }
     }
 }

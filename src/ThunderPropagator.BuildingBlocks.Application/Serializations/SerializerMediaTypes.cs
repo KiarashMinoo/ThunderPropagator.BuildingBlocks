@@ -5,6 +5,9 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations
     /// </summary>
     public static class SerializerMediaTypes
     {
+        /// <summary>application/tpg</summary>
+        public const string Proprietary = "application/tpg";
+
         /// <summary>application/json</summary>
         public const string Json = "application/json";
 
@@ -20,6 +23,9 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations
         /// <summary>application/yaml</summary>
         public const string Yaml = "application/yaml";
 
+        /// <summary>text/toon</summary>
+        public const string Toon = "text/toon";
+
         /// <summary>
         /// Returns the canonical MIME type for the given <paramref name="type"/>.
         /// </summary>
@@ -29,10 +35,12 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations
         {
             return type switch
             {
+                SerializerType.Proprietary => Proprietary,
                 SerializerType.Protobuf    => Protobuf,
                 SerializerType.MessagePack => MessagePack,
                 SerializerType.Xml         => Xml,
                 SerializerType.Yaml        => Yaml,
+                SerializerType.Toon        => Toon,
                 _                          => Json,
             };
         }
@@ -47,10 +55,12 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations
         {
             return mediaType switch
             {
+                Proprietary => SerializerType.Proprietary,
                 Protobuf    => SerializerType.Protobuf,
                 MessagePack => SerializerType.MessagePack,
                 Xml         => SerializerType.Xml,
                 Yaml        => SerializerType.Yaml,
+                Toon        => SerializerType.Toon,
                 _           => SerializerType.Json,
             };
         }

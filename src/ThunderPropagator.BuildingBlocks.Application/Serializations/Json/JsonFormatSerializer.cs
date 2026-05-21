@@ -21,7 +21,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Json
             const string activityName = $"{nameof(JsonFormatSerializer)}_{nameof(Serialize)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
-            return JsonSerializer.Serialize(instance, JsonHelper.JsonSerializerOptions<T>());
+            return instance.ToJson();
         }
 
         /// <inheritdoc/>
@@ -30,7 +30,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Json
             const string activityName = $"{nameof(JsonFormatSerializer)}_{nameof(SerializeToBytes)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
-            return JsonSerializer.SerializeToUtf8Bytes(instance, JsonHelper.JsonSerializerOptions<T>());
+            return instance.ToJsonBytes();
         }
 
         /// <inheritdoc/>
@@ -44,7 +44,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Json
                 return default;
             }
 
-            return JsonSerializer.Deserialize<T>(data, JsonHelper.JsonSerializerOptions<T>());
+            return data.FromJson<T>();
         }
 
         /// <inheritdoc/>
@@ -58,7 +58,9 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Json
                 return default;
             }
 
-            return JsonSerializer.Deserialize<T>(bytes, JsonHelper.JsonSerializerOptions<T>());
+            return bytes.FromJsonBytes<T>();
         }
     }
 }
+
+

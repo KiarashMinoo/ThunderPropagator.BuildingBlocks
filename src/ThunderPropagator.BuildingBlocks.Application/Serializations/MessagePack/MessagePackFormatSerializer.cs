@@ -1,4 +1,5 @@
 using MessagePack;
+using ThunderPropagator.BuildingBlocks.Application.Helpers;
 
 namespace ThunderPropagator.BuildingBlocks.Application.Serializations.MessagePack
 {
@@ -21,7 +22,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.MessagePac
             const string activityName = $"{nameof(MessagePackFormatSerializer)}_{nameof(Serialize)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
-            return Convert.ToBase64String(SerializeToBytes<T>(instance));
+            return instance.ToMessagePackBase64();
         }
 
         /// <inheritdoc/>
@@ -30,7 +31,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.MessagePac
             const string activityName = $"{nameof(MessagePackFormatSerializer)}_{nameof(SerializeToBytes)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
-            return MessagePackSerializer.Serialize(instance);
+            return instance.ToMessagePackBytes();
         }
 
         /// <inheritdoc/>
@@ -44,7 +45,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.MessagePac
                 return default;
             }
 
-            return Deserialize<T>(Convert.FromBase64String(data));
+            return data.FromMessagePackBase64<T>();
         }
 
         /// <inheritdoc/>
@@ -58,7 +59,9 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.MessagePac
                 return default;
             }
 
-            return MessagePackSerializer.Deserialize<T>(bytes);
+            return bytes.FromMessagePack<T>();
         }
     }
 }
+
+

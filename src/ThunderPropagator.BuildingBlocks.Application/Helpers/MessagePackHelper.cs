@@ -5,7 +5,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
 {
     public static class MessagePackHelper
     {
-        public static string ToMessagePackJson(this object instance, MessagePackSerializerOptions? serializerOptions = null, CancellationToken cancellationToken = default)
+        public static string ToMessagePackJson<T>(this T instance, MessagePackSerializerOptions? serializerOptions = null, CancellationToken cancellationToken = default)
         {
             const string activityName = $"{nameof(MessagePackHelper)}_{nameof(ToMessagePackJson)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
@@ -13,7 +13,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             return MessagePackSerializer.SerializeToJson(instance, serializerOptions, cancellationToken);
         }
 
-        public static Stream ToMessagePack(this object instance, MessagePackSerializerOptions? serializerOptions = null, CancellationToken cancellationToken = default)
+        public static Stream ToMessagePack<T>(this T instance, MessagePackSerializerOptions? serializerOptions = null, CancellationToken cancellationToken = default)
         {
             const string activityName = $"{nameof(MessagePackHelper)}_{nameof(ToMessagePack)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
@@ -21,6 +21,23 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             MemoryStream memoryStream = new();
             MessagePackSerializer.Serialize(memoryStream, instance, serializerOptions, cancellationToken);
             return memoryStream;
+        }
+
+        public static byte[] ToMessagePackBytes<T>(this T instance, MessagePackSerializerOptions? serializerOptions = null, CancellationToken cancellationToken = default)
+        {
+            const string activityName = $"{nameof(MessagePackHelper)}_{nameof(ToMessagePackBytes)}";
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
+
+            return MessagePackSerializer.Serialize(instance, serializerOptions, cancellationToken);
+        }
+
+        public static string ToMessagePackBase64<T>(this T instance, MessagePackSerializerOptions? serializerOptions = null, CancellationToken cancellationToken = default)
+        {
+            const string activityName = $"{nameof(MessagePackHelper)}_{nameof(ToMessagePackBase64)}";
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
+
+            var bytes = instance.ToMessagePackBytes(serializerOptions, cancellationToken);
+            return Convert.ToBase64String(bytes);
         }
 
         public static T FromMessagePack<T>(this Stream stream, MessagePackSerializerOptions? serializerOptions = null, CancellationToken cancellationToken = default)
@@ -33,6 +50,9 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
 
         public static T FromMessagePack<T>(this byte[] bytes, MessagePackSerializerOptions? serializerOptions = null, CancellationToken cancellationToken = default)
         {
+            const string activityName = $"{nameof(MessagePackHelper)}_{nameof(FromMessagePack)}";
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
+
             using MemoryStream memoryStream = new(bytes);
             return FromMessagePack<T>(memoryStream, serializerOptions, cancellationToken);
         }
@@ -45,6 +65,15 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             var bytes = MessagePackSerializer.ConvertFromJson(json, serializerOptions, cancellationToken);
             using MemoryStream memoryStream = new(bytes);
             return FromMessagePack<T>(memoryStream, serializerOptions, cancellationToken);
+        }
+
+        public static T FromMessagePackBase64<T>(this string base64String, MessagePackSerializerOptions? serializerOptions = null, CancellationToken cancellationToken = default)
+        {
+            const string activityName = $"{nameof(MessagePackHelper)}_{nameof(FromMessagePackBase64)}";
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
+
+            var bytes = Convert.FromBase64String(base64String);
+            return bytes.FromMessagePack<T>(serializerOptions, cancellationToken);
         }
     }
 }

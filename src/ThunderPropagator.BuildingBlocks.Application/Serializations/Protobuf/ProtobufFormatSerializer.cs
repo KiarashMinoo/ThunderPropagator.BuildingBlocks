@@ -1,4 +1,5 @@
 using ProtoBuf;
+using ThunderPropagator.BuildingBlocks.Application.Helpers;
 
 namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Protobuf
 {
@@ -21,7 +22,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Protobuf
             const string activityName = $"{nameof(ProtobufFormatSerializer)}_{nameof(Serialize)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
-            return Convert.ToBase64String(SerializeToBytes<T>(instance));
+            return instance.ToProtobufBase64();
         }
 
         /// <inheritdoc/>
@@ -30,9 +31,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Protobuf
             const string activityName = $"{nameof(ProtobufFormatSerializer)}_{nameof(SerializeToBytes)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
-            using var memoryStream = new MemoryStream();
-            Serializer.Serialize(memoryStream, instance);
-            return memoryStream.ToArray();
+            return instance.ToProtobufBytes();
         }
 
         /// <inheritdoc/>
@@ -46,7 +45,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Protobuf
                 return default;
             }
 
-            return Deserialize<T>(Convert.FromBase64String(data));
+            return data.FromProtobufBase64<T>();
         }
 
         /// <inheritdoc/>
@@ -60,8 +59,9 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Protobuf
                 return default;
             }
 
-            using var memoryStream = new MemoryStream(bytes);
-            return Serializer.Deserialize<T>(memoryStream);
+            return bytes.FromProtobuf<T>();
         }
     }
 }
+
+

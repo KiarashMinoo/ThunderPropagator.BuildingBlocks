@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using System.Text;
 using System.Xml.Serialization;
-using XmlSerializer = System.Xml.Serialization.XmlSerializer;
+using ThunderPropagator.BuildingBlocks.Application.Helpers;
 
 namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Xml
 {
@@ -11,8 +11,6 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Xml
     /// </summary>
     public sealed class XmlFormatSerializer : IFormatSerializer, IFormatDeserializer
     {
-        private static readonly ConcurrentDictionary<Type, XmlSerializer> _serializerCache = new();
-
         /// <inheritdoc/>
         public SerializerType SerializerType => SerializerType.Xml;
 
@@ -25,9 +23,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Xml
             const string activityName = $"{nameof(XmlFormatSerializer)}_{nameof(Serialize)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
-            using var writer = new StringWriter();
-            GetSerializer(typeof(T)).Serialize(writer, instance);
-            return writer.ToString();
+            return instance.ToXml();
         }
 
         /// <inheritdoc/>
@@ -36,11 +32,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Xml
             const string activityName = $"{nameof(XmlFormatSerializer)}_{nameof(SerializeToBytes)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
-            using var memoryStream = new MemoryStream();
-            using var streamWriter = new StreamWriter(memoryStream, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
-            GetSerializer(typeof(T)).Serialize(streamWriter, instance);
-            streamWriter.Flush();
-            return memoryStream.ToArray();
+            return instance.ToXmlBytes();
         }
 
         /// <inheritdoc/>
@@ -54,8 +46,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Xml
                 return default;
             }
 
-            using var reader = new StringReader(data);
-            return (T?)GetSerializer(typeof(T)).Deserialize(reader);
+            return data.FromXml<T>();
         }
 
         /// <inheritdoc/>
@@ -69,13 +60,8 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Xml
                 return default;
             }
 
-            using var memoryStream = new MemoryStream(bytes);
-            return (T?)GetSerializer(typeof(T)).Deserialize(memoryStream);
-        }
-
-        private static XmlSerializer GetSerializer(Type type)
-        {
-            return _serializerCache.GetOrAdd(type, static t => new XmlSerializer(t));
+            return bytes.FromXmlBytes<T>();
         }
     }
 }
+

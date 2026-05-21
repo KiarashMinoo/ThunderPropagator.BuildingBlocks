@@ -158,7 +158,6 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         }
 
         public static byte[] ToYamlBytes<T>(this T instance, YamlSerializerSettings? serializerSettings = null)
-            where T : notnull
         {
             const string activityName = $"{nameof(YamlHelper)}_{nameof(ToYamlBytes)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
@@ -188,7 +187,6 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         }
 
         public static string ToYamlBase64<T>(this T instance, YamlSerializerSettings? serializerSettings = null)
-            where T : notnull
         {
             const string activityName = $"{nameof(YamlHelper)}_{nameof(ToYamlBase64)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;

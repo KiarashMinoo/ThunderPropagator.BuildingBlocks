@@ -50,7 +50,6 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         }
 
         public static byte[] ToNetJsonBytes<T>(this T instance, Func<NetJSONSettings, NetJSONSettings>? settings = null)
-            where T : notnull
         {
             const string activityName = $"{nameof(NetJsonHelper)}_{nameof(ToNetJsonBytes)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
@@ -61,7 +60,6 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         }
 
         public static string ToNetJsonBase64<T>(this T instance, Func<NetJSONSettings, NetJSONSettings>? settings = null)
-            where T : notnull
         {
             const string activityName = $"{nameof(NetJsonHelper)}_{nameof(ToNetJsonBase64)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
