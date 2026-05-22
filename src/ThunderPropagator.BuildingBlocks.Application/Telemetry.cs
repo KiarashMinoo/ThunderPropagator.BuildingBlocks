@@ -4,8 +4,8 @@ namespace ThunderPropagator.BuildingBlocks.Application
 {
     public static class Telemetry
     {
-        public const string MeterName = "thunderPropagator.meter";
-        public const string ActivityName = "thunderPropagator.activity";
+        public const string MeterName = "thunderpropagator.meter";
+        public const string ActivityName = "thunderpropagator.activity";
 
         private static string _version = "1.0.0";
         private static int _configured;
