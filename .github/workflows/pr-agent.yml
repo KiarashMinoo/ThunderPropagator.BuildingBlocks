@@ -43,19 +43,18 @@ jobs:
           # Primary FREE Models
           # Keep strongest free models first
           # =====================================================
-          CONFIG.MODEL: openrouter/deepseek/deepseek-chat-v3-0324:free
+          CONFIG.MODEL: openai/gpt-oss-120b:free
 
           # =====================================================
           # Fallback FREE Models ONLY
           # =====================================================
           CONFIG.FALLBACK_MODELS: >
             [
-              "openrouter/qwen/qwen3-32b:free",
-              "openrouter/qwen/qwen-2.5-coder-32b-instruct:free",
-              "openrouter/meta-llama/llama-3.3-70b-instruct:free",
-              "openrouter/mistralai/mistral-small-3.1-24b-instruct:free",
-              "openrouter/google/gemma-3-27b-it:free",
-              "openrouter/deepseek/deepseek-r1:free"
+              "nvidia/nemotron-3-super-120b-a12b:free",
+              "poolside/laguna-m.1:free",
+              "z-ai/glm-4.5-air:free",
+              "arcee-ai/trinity-large-thinking:free",
+              "deepseek/deepseek-v4-flash:free",
             ]
 
           # =====================================================
