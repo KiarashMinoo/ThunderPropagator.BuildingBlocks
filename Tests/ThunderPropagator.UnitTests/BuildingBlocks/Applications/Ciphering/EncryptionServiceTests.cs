@@ -42,6 +42,28 @@ namespace ThunderPropagator.UnitTests.BuildingBlocks.Applications.Ciphering
         }
 
         [Fact]
+        public void Encrypt_ShouldReturnDifferentCiphertext_ForSamePlainTextAndKey()
+        {
+            // Act
+            var firstCipherText = EncryptionService.Encrypt(TestPlainText, _key);
+            var secondCipherText = EncryptionService.Encrypt(TestPlainText, _key);
+
+            // Assert
+            Assert.NotEqual(firstCipherText, secondCipherText);
+        }
+
+        [Fact]
+        public void Encrypt_ShouldPrependInitializationVectorToCiphertext()
+        {
+            // Act
+            var cipherText = EncryptionService.Encrypt(TestPlainText, _key);
+            var encryptedBytes = Convert.FromBase64String(AddBase64Padding(cipherText));
+
+            // Assert
+            Assert.True(encryptedBytes.Length > 16);
+        }
+
+        [Fact]
         public void CreateKey_ShouldGenerateSecureKey()
         {
             // Arrange
@@ -65,5 +87,11 @@ namespace ThunderPropagator.UnitTests.BuildingBlocks.Applications.Ciphering
         }
 
         // Additional tests for edge cases and security considerations can be added here
+
+        private static string AddBase64Padding(string value)
+        {
+            var padding = value.Length % 4;
+            return padding == 0 ? value : value.PadRight(value.Length + 4 - padding, '=');
+        }
     }
 }
