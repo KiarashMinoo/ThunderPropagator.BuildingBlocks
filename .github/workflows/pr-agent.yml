@@ -13,131 +13,182 @@ permissions:
   pull-requests: write
   issues: write
 
+concurrency:
+  group: pr-agent-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   pr-agent:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: PR Agent Review
         uses: qodo-ai/pr-agent@main
+
         env:
-          OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENAI_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          # =====================================================
+          # Authentication
+          # =====================================================
+          OPENAI_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
           # =====================================================
-          # OpenRouter
+          # OpenRouter Endpoint
           # =====================================================
           OPENAI.API_BASE: https://openrouter.ai/api/v1
 
           # =====================================================
-          # Primary Model (FREE FIRST)
+          # Primary FREE Models
+          # Keep strongest free models first
           # =====================================================
-          CONFIG.MODEL: openrouter/deepseek/deepseek-chat:free
+          CONFIG.MODEL: openrouter/deepseek/deepseek-chat-v3-0324:free
 
           # =====================================================
-          # Fallback / Retry Models
-          # Ordered from cheaper/free -> stronger
+          # Fallback FREE Models ONLY
           # =====================================================
           CONFIG.FALLBACK_MODELS: >
             [
+              "openrouter/qwen/qwen3-32b:free",
               "openrouter/qwen/qwen-2.5-coder-32b-instruct:free",
               "openrouter/meta-llama/llama-3.3-70b-instruct:free",
               "openrouter/mistralai/mistral-small-3.1-24b-instruct:free",
-              "openrouter/deepseek/deepseek-chat",
-              "openrouter/qwen/qwen-2.5-coder-32b-instruct"
+              "openrouter/google/gemma-3-27b-it:free",
+              "openrouter/deepseek/deepseek-r1:free"
             ]
 
           # =====================================================
-          # LiteLLM Reliability / Retry
+          # LiteLLM Reliability
           # =====================================================
           LITELLM.DROP_PARAMS: "true"
-          LITELLM.RETRY: "3"
-          LITELLM.RETRY_WAIT: "5"
-          LITELLM.TIMEOUT: "180"
+          LITELLM.RETRY: "5"
+          LITELLM.RETRY_WAIT: "8"
+          LITELLM.TIMEOUT: "240"
 
           # =====================================================
-          # General
+          # General Configuration
           # =====================================================
           CONFIG.RESPONSE_LANGUAGE: en-US
-          CONFIG.MAX_DESCRIPTION_TOKENS: "800"
-          CONFIG.CUSTOM_MODEL_MAX_TOKENS: "32000"
-          CONFIG.TEMPERATURE: "0.1"
+          CONFIG.MAX_DESCRIPTION_TOKENS: "1200"
+          CONFIG.CUSTOM_MODEL_MAX_TOKENS: "64000"
+          CONFIG.TEMPERATURE: "0.05"
 
           # =====================================================
-          # Review Features
+          # Smart Cost Protection
+          # =====================================================
+          CONFIG.MAX_MODEL_TOKENS: "64000"
+          CONFIG.MAX_CONTEXT_TOKENS: "120000"
+
+          # =====================================================
+          # PR Review Features
           # =====================================================
           PR_REVIEWER.REQUIRE_SCORE_REVIEW: "true"
           PR_REVIEWER.REQUIRE_TESTS_REVIEW: "true"
           PR_REVIEWER.REQUIRE_SECURITY_REVIEW: "true"
           PR_REVIEWER.REQUIRE_ESTIMATE_EFFORT_TO_REVIEW: "true"
-
           PR_REVIEWER.ENABLE_REVIEW_LABELS_SECURITY: "true"
 
           # =====================================================
-          # Inline Suggestions / Comments
+          # Reduce Noise
           # =====================================================
-          PR_CODE_SUGGESTIONS.NUM_CODE_SUGGESTIONS: "8"
+          PR_REVIEWER.INLINE_CODE_COMMENTS: "true"
+          PR_REVIEWER.NUM_CODE_SUGGESTIONS: "6"
+
+          # =====================================================
+          # Inline Suggestions
+          # =====================================================
+          PR_CODE_SUGGESTIONS.NUM_CODE_SUGGESTIONS: "6"
           PR_CODE_SUGGESTIONS.COMMITABLE_CODE_SUGGESTIONS: "true"
 
           # =====================================================
-          # PR Summary / Analysis
+          # PR Description / Summary
           # =====================================================
           PR_DESCRIPTION.PUBLISH_DESCRIPTION_AS_COMMENT: "true"
           PR_DESCRIPTION.USE_DESCRIPTION_MARKERS: "false"
 
           # =====================================================
-          # Advanced C#/.NET Review Rules
+          # Enterprise .NET Review Rules
           # =====================================================
           PR_REVIEWER.EXTRA_INSTRUCTIONS: |
-            You are reviewing enterprise-grade C#/.NET backend code.
+            You are reviewing enterprise-grade C#/.NET backend systems.
 
-            Prioritize finding:
-            - bugs
-            - concurrency issues
-            - thread safety issues
-            - memory inefficiencies
-            - security vulnerabilities
-            - architecture violations
-            - performance bottlenecks
+            Prioritize:
+            - correctness
+            - security
+            - scalability
+            - reliability
+            - maintainability
+            - production readiness
 
             Focus heavily on:
 
+            Concurrency & Async:
             - async/await correctness
             - cancellation token propagation
             - ConfigureAwait usage
             - hidden Task.Result / Wait deadlocks
+            - race conditions
+            - thread safety
+            - lock contention
+            - parallel execution issues
+
+            Performance:
             - memory allocations
             - boxing/unboxing
             - Span<T>/Memory<T> opportunities
-            - LINQ multiple enumeration
+            - pooling opportunities
+            - excessive LINQ allocations
+            - multiple enumeration
             - unnecessary ToList()/ToArray()
-            - EF Core query optimization
+            - hot path inefficiencies
+
+            EF Core & Data:
             - N+1 query issues
             - missing AsNoTracking()
+            - inefficient Includes
+            - query materialization issues
             - transaction consistency
             - retry/idempotency issues
-            - caching opportunities
+            - connection lifetime problems
+
+            Distributed Systems:
             - Redis usage patterns
-            - Kafka/event streaming concerns
-            - nullable reference types
+            - Kafka/event-streaming issues
+            - duplicate message handling
+            - eventual consistency concerns
+            - outbox/inbox considerations
+            - retry storms
+            - resiliency gaps
+
+            Architecture:
+            - CQRS violations
+            - clean architecture boundary leaks
+            - DTO/domain leakage
             - dependency injection lifetime mismatches
             - service locator anti-patterns
-            - DTO/domain leakage
-            - CQRS violations
-            - clean architecture boundary violations
-            - SOLID principle violations
-            - logging quality
-            - structured logging
-            - exception handling
-            - validation gaps
+            - SOLID violations
+            - tight coupling
+
+            Reliability & Security:
+            - exception handling gaps
+            - missing validation
+            - nullability issues
+            - unsafe deserialization
+            - secrets exposure
             - API security concerns
+            - authentication/authorization gaps
 
-            Add inline comments with:
-            - exact problematic code
-            - root cause
-            - improved implementation suggestion
+            Observability:
+            - structured logging quality
+            - missing correlation IDs
+            - poor telemetry practices
 
-            Prefer actionable comments over generic advice.
-
-            Avoid style nitpicks unless they impact maintainability.
+            Review behavior:
+            - Prefer actionable findings over generic advice
+            - Avoid style nitpicks unless maintainability is affected
+            - Add precise inline comments with:
+              - problematic code
+              - root cause
+              - production impact
+              - concrete fix suggestion
