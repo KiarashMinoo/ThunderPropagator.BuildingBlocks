@@ -40,13 +40,14 @@ AES encryption service with PBKDF2 key derivation supporting SHA3-256.
 **Key Methods**:
 - `string Encrypt(string plainText, byte[] encryptionKeyBytes)` — Encrypts to Base64
 - `string Decrypt(string cipherText, byte[] encryptionKeyBytes)` — Decrypts from Base64
-- `byte[] CreateKey(string password, int keyBytes = 32, int iterations = 300, HashAlgorithmName? algorithmName = null)` — Derives encryption key from password
+- `(byte[] Key, byte[] Salt) CreateKey(string password, int keyBytes = 32, int iterations = 300, HashAlgorithmName? algorithmName = null)` — Derives a key with a freshly generated random salt; store the returned salt alongside the ciphertext
+- `byte[] CreateKey(string password, byte[] salt, int keyBytes = 32, int iterations = 300, HashAlgorithmName? algorithmName = null)` — Re-derives the same key from a previously stored salt (use this during decryption)
 
 **Key Derivation**:
 - Uses `Rfc2898DeriveBytes.Pbkdf2` on .NET 10+
 - Falls back to `Rfc2898DeriveBytes` on earlier versions
 - Default: SHA3-256, 32 bytes (256-bit), 300 iterations
-- Fixed salt: `[10, 20, 30, 40, 50, 60, 70, 80]`
+- Salt: 16 random bytes generated per call via `RandomNumberGenerator.GetBytes(16)`
 
 **Usage Recipe**:
 
@@ -54,19 +55,23 @@ AES encryption service with PBKDF2 key derivation supporting SHA3-256.
 using ThunderPropagator.BuildingBlocks.Application.Ciphering;
 
 var password = "mySecurePassword123!";
-var key = EncryptionService.CreateKey(password);
 
-// Encrypt
+// Encrypt — generate key with a unique random salt
+var (key, salt) = EncryptionService.CreateKey(password);
 var plainText = "Sensitive data here";
 var encrypted = EncryptionService.Encrypt(plainText, key);
-Console.WriteLine($"Encrypted: {encrypted}");
 
-// Decrypt
-var decrypted = EncryptionService.Decrypt(encrypted, key);
+// Persist both `encrypted` and `salt` — they are both required for decryption.
+Console.WriteLine($"Encrypted: {encrypted}");
+Console.WriteLine($"Salt (Base64): {Convert.ToBase64String(salt)}");
+
+// Decrypt — re-derive the same key using the stored salt
+var reKey = EncryptionService.CreateKey(password, salt);
+var decrypted = EncryptionService.Decrypt(encrypted, reKey);
 Console.WriteLine($"Decrypted: {decrypted}"); // "Sensitive data here"
 
 // Custom key derivation
-var strongKey = EncryptionService.CreateKey(
+var (strongKey, strongSalt) = EncryptionService.CreateKey(
     password,
     keyBytes: 32,
     iterations: 10000,
@@ -87,9 +92,10 @@ sequenceDiagram
     participant PBKDF2 as Rfc2898DeriveBytes
     
     C->>ES: CreateKey(password)
+    ES->>ES: RandomNumberGenerator.GetBytes(16) → salt
     ES->>PBKDF2: Pbkdf2(password, salt, 300, SHA3-256, 32)
     PBKDF2-->>ES: key bytes
-    ES-->>C: key bytes
+    ES-->>C: (key bytes, salt)
     
     C->>ES: Encrypt(plainText, key)
     ES->>AES: Create()
@@ -135,42 +141,24 @@ flowchart TD
 using ThunderPropagator.BuildingBlocks.Application.Ciphering;
 using ThunderPropagator.BuildingBlocks.Application.Helpers;
 
-public class SecureConfig
-{
-    private static readonly byte[] Key = EncryptionService.CreateKey(
-        Environment.GetEnvironmentVariable("ENCRYPTION_KEY") ?? "default-key",
-        iterations: 10000);
-    
-    public string ConnectionString { get; set; } = string.Empty;
-    public string ApiKey { get; set; } = string.Empty;
-    
-    public string Encrypt()
-    {
-        var json = this.ToJson();
-        return EncryptionService.Encrypt(json, Key);
-    }
-    
-    public static SecureConfig Decrypt(string encrypted)
-    {
-        var json = EncryptionService.Decrypt(encrypted, Key);
-        return json.FromJson<SecureConfig>() ?? new SecureConfig();
-    }
-}
+// Encrypt — generate a key with a unique random salt
+var password = Environment.GetEnvironmentVariable("ENCRYPTION_KEY") ?? "default-key";
+var (key, salt) = EncryptionService.CreateKey(password, iterations: 10000);
 
-// Usage
-var config = new SecureConfig
-{
-    ConnectionString = "Server=prod-db;Database=myapp",
-    ApiKey = "secret-api-key-12345"
-};
+var config = new { ConnectionString = "Server=prod-db;Database=myapp", ApiKey = "secret-api-key-12345" };
+var json = System.Text.Json.JsonSerializer.Serialize(config);
 
-// Encrypt and store
-var encrypted = config.Encrypt();
+var encrypted = EncryptionService.Encrypt(json, key);
+
+// Persist both ciphertext and salt (e.g., Base64-encode the salt and store alongside the encrypted value)
 File.WriteAllText("config.encrypted", encrypted);
+File.WriteAllText("config.salt", Convert.ToBase64String(salt));
 
-// Later: decrypt and load
-var loaded = SecureConfig.Decrypt(File.ReadAllText("config.encrypted"));
-Console.WriteLine($"Loaded connection: {loaded.ConnectionString}");
+// Later: decrypt — re-derive the key using the stored salt
+var storedSalt = Convert.FromBase64String(File.ReadAllText("config.salt"));
+var reKey = EncryptionService.CreateKey(password, storedSalt, iterations: 10000);
+var decrypted = EncryptionService.Decrypt(File.ReadAllText("config.encrypted"), reKey);
+Console.WriteLine($"Decrypted: {decrypted}");
 ```
 
 ### Generating Secure Passwords
