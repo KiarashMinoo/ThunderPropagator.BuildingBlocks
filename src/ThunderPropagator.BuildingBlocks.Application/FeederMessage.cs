@@ -17,6 +17,8 @@ namespace ThunderPropagator.BuildingBlocks.Application
         ICloneable,
         ICloneable<IDictionary<string, object?>>
     {
+        private static int _instanceCounter;
+        private readonly int _hashCode = System.Threading.Interlocked.Increment(ref _instanceCounter);
         private readonly FeederMessageEnvelope _envelope = new();
         [IgnoreMember] private readonly FeederMessagePayload _payload = new();
 
@@ -118,7 +120,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
         [MustDisposeResource]
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public override int GetHashCode() => ((IDictionary<string, object?>)_payload).Keys.Aggregate(0, HashCode.Combine);
+        public override int GetHashCode() => _hashCode;
 
         /// <summary>
         /// Resets all fields to their initial state so the instance can be returned to an object pool.

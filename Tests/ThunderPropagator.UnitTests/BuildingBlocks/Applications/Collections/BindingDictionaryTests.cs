@@ -202,6 +202,17 @@ namespace ThunderPropagator.UnitTests.BuildingBlocks.Applications.Collections
         }
 
         [Fact]
+        public void Equals_ShouldReturnFalse_WhenComparedDictionaryContainsSameValuesWithDifferentLength()
+        {
+            // Arrange
+            var dict = new BindingDictionary<string, int> { { "a", 1 }, { "b", 1 } };
+            IDictionary<string, int> other = new Dictionary<string, int> { { "a", 1 } };
+
+            // Act & Assert
+            Assert.False(dict.Equals(other));
+        }
+
+        [Fact]
         public void Equals_ShouldReturnFalse_WhenOtherIsNull()
         {
             // Arrange
