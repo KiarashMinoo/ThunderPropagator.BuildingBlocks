@@ -10,7 +10,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Collections
         ICollection<T>,
         IReadOnlyCollection<T>
     {
-        public static LinkedArray<T> Empty { get; } = new([]);
+        public static LinkedArray<T> Empty => new([]);
 
         private T[] _array;
         private List<int> _indices;

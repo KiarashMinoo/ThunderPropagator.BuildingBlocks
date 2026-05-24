@@ -184,6 +184,18 @@ namespace ThunderPropagator.UnitTests.BuildingBlocks.Applications.Collections
         }
 
         [Fact]
+        public void Empty_ShouldReturnNewInstance_OnEachAccess()
+        {
+            var first = LinkedArray<int>.Empty;
+            first.Add(1);
+
+            var second = LinkedArray<int>.Empty;
+
+            Assert.NotSame(first, second);
+            Assert.Empty(second);
+        }
+
+        [Fact]
         public void ContainsInvalidIndexReturnsFalse()
         {
             var array = new[] { 1, 2, 3, 4, 5 };
