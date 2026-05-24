@@ -11,11 +11,11 @@ namespace ThunderPropagator.UnitTests.BuildingBlocks.Applications.Ciphering
         private const string TestPassword = "securePassword123!";
         private const string TestPlainText = "Hello, World!";
         private readonly byte[] _key;
+        private readonly byte[] _salt;
 
         public EncryptionServiceTests()
         {
-            // Create a key using the password
-            _key = EncryptionService.CreateKey(TestPassword);
+            (_key, _salt) = EncryptionService.CreateKey(TestPassword);
         }
 
         [Fact]
@@ -70,10 +70,50 @@ namespace ThunderPropagator.UnitTests.BuildingBlocks.Applications.Ciphering
             const int expectedKeySize = 32; // 256 bits
 
             // Act
-            var key = EncryptionService.CreateKey(TestPassword, expectedKeySize);
+            var (key, salt) = EncryptionService.CreateKey(TestPassword, expectedKeySize);
 
             // Assert
-            Assert.Equal(expectedKeySize, key.Length); // Key length should match the expected size
+            Assert.Equal(expectedKeySize, key.Length);
+            Assert.Equal(16, salt.Length);
+        }
+
+        [Fact]
+        public void CreateKey_ShouldGenerateDifferentSalt_EachCall()
+        {
+            // Act
+            var (_, firstSalt) = EncryptionService.CreateKey(TestPassword);
+            var (_, secondSalt) = EncryptionService.CreateKey(TestPassword);
+
+            // Assert
+            Assert.False(firstSalt.SequenceEqual(secondSalt));
+        }
+
+        [Fact]
+        public void CreateKey_WithExistingSalt_ShouldDeriveIdenticalKey()
+        {
+            // Arrange
+            var (originalKey, salt) = EncryptionService.CreateKey(TestPassword);
+
+            // Act
+            var rederived = EncryptionService.CreateKey(TestPassword, salt);
+
+            // Assert
+            Assert.Equal(originalKey, rederived);
+        }
+
+        [Fact]
+        public void CreateKey_WithExistingSalt_ShouldDecryptCipherTextEncryptedWithOriginalKey()
+        {
+            // Arrange
+            var (key, salt) = EncryptionService.CreateKey(TestPassword);
+            var cipherText = EncryptionService.Encrypt(TestPlainText, key);
+
+            // Act
+            var rederived = EncryptionService.CreateKey(TestPassword, salt);
+            var decrypted = EncryptionService.Decrypt(cipherText, rederived);
+
+            // Assert
+            Assert.Equal(TestPlainText, decrypted);
         }
 
         [Fact]
