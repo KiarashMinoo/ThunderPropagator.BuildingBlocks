@@ -49,8 +49,8 @@ namespace ThunderPropagator.UnitTests.BuildingBlocks.Applications.Collections
             // Act
             bool result = dictionary.TryGetValue("nonexistent", out var value);
 
-            // Assert - current implementation returns default value and a truthy result
-            Assert.True(result);
+            // Assert
+            Assert.False(result);
             Assert.Equal(default, value); // default int value
         }
 

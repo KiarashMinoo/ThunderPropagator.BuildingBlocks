@@ -142,7 +142,14 @@ namespace ThunderPropagator.BuildingBlocks.Application.Collections
 
         public bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value)
         {
-            return (value = AsTValue(_dictionary[(object)key])) is not null;
+            if (!_dictionary.Contains((object)key))
+            {
+                value = default;
+                return false;
+            }
+
+            value = AsTValue(_dictionary[(object)key]);
+            return true;
         }
 
         #region "ICollection<KeyValuePair<TKey, TValue>>"
