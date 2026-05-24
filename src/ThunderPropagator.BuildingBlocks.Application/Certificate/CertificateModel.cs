@@ -53,44 +53,50 @@ public class CertificateModel
 
     private void GenerateCertificate()
     {
+        var certificate = CreateCertificate();
+        var oldCertificate = Certificate;
+
+        Certificate = certificate;
+        oldCertificate?.Dispose();
+    }
+
+    private X509Certificate2? CreateCertificate()
+    {
         if (!string.IsNullOrWhiteSpace(Path))
         {
 #if NET9_0_OR_GREATER
-            Certificate = !string.IsNullOrWhiteSpace(Passphrase)
+            return !string.IsNullOrWhiteSpace(Passphrase)
                 ? KeyStorageFlags != null
                     ? X509CertificateLoader.LoadPkcs12FromFile(Path, Passphrase, KeyStorageFlags.Value)
                     : X509CertificateLoader.LoadPkcs12FromFile(Path, Passphrase)
                 : X509CertificateLoader.LoadCertificateFromFile(Path);
 #else
-            Certificate = !string.IsNullOrWhiteSpace(Passphrase)
+            return !string.IsNullOrWhiteSpace(Passphrase)
                 ? KeyStorageFlags != null
                     ? new X509Certificate2(Path, Passphrase, KeyStorageFlags.Value)
                     : new X509Certificate2(Path, Passphrase)
                 : new X509Certificate2(Path);
 #endif
-
-            return;
         }
 
         if (RawData is { Length: > 0 })
         {
 #if NET9_0_OR_GREATER
-            Certificate = !string.IsNullOrWhiteSpace(Passphrase)
+            return !string.IsNullOrWhiteSpace(Passphrase)
                 ? KeyStorageFlags != null
                     ? X509CertificateLoader.LoadPkcs12(RawData, Passphrase, KeyStorageFlags.Value)
                     : X509CertificateLoader.LoadPkcs12(RawData, Passphrase)
                 : X509CertificateLoader.LoadCertificate(RawData);
 #else
-            Certificate = !string.IsNullOrWhiteSpace(Passphrase)
+            return !string.IsNullOrWhiteSpace(Passphrase)
                 ? KeyStorageFlags != null
                     ? new X509Certificate2(RawData, Passphrase, KeyStorageFlags.Value)
                     : new X509Certificate2(RawData, Passphrase)
                 : new X509Certificate2(RawData);
 
 #endif
-            return;
         }
 
-        Certificate = null;
+        return null;
     }
 }
