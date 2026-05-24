@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Concurrent;
 using JetBrains.Annotations;
 
 namespace ThunderPropagator.BuildingBlocks.Application
@@ -14,7 +15,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 #endif
         class FeederMessagePayload : IDictionary<string, object?>, IReadOnlyDictionary<string, object?>
     {
-        private readonly Dictionary<string, object?> _store = [];
+        private readonly ConcurrentDictionary<string, object?> _store = [];
 
         internal void SetValue(object? value, string key) => _store[key] = value;
 

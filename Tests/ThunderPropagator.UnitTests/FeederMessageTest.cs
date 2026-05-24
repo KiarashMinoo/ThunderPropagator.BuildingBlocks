@@ -72,6 +72,24 @@ public class FeederMessageTest
         Assert.Equal(hashCode, message.GetHashCode());
     }
 
+    [Fact]
+    public void Payload_ShouldSupportConcurrentReadsAndWrites()
+    {
+        var message = new TestFeederMessage();
+        var payload = (IDictionary<string, object?>)message;
+
+        Parallel.For(0, 1_000, index =>
+        {
+            var key = $"Key{index}";
+            payload[key] = index;
+
+            Assert.True(payload.TryGetValue(key, out var value));
+            Assert.Equal(index, value);
+        });
+
+        Assert.Equal(1_000, payload.Count);
+    }
+
     private class TestFeederMessage : FeederMessage
     {
         public Guid Id
