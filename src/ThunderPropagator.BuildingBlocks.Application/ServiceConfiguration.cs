@@ -77,19 +77,23 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         protected void Set<T>(T? value, [CallerMemberName] string? key = null)
         {
-            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(Guard.Against.NullOrWhiteSpace(key, nameof(key))));
+            var propertyName = Guard.Against.NullOrWhiteSpace(key, nameof(key));
 
             var type = typeof(T);
             var stringValue = !type.IsClass ? value?.ToString() : value as string ?? value?.ToNJson();
 
             if (!string.IsNullOrWhiteSpace(stringValue))
             {
-                var previousValue = _properties.AddOrUpdate(Guard.Against.NullOrWhiteSpace(key), _ => stringValue, (_, _) => stringValue);
-                if (PropertyChanged is not null)
+                if (_properties.TryGetValue(propertyName, out var previousValue) && stringValue.Equals(previousValue))
                 {
-                    if (!stringValue.Equals(previousValue))
-                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(key));
+                    return;
                 }
+
+                PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(propertyName));
+
+                _properties[propertyName] = stringValue;
+
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
             }
         }
 
