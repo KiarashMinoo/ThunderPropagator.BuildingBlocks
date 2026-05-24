@@ -83,5 +83,41 @@ namespace ThunderPropagator.UnitTests.BuildingBlocks.Applications.Collections
             // Assert - current implementation returns true for non-existing keys
             Assert.True(result);
         }
+
+        [Fact]
+        public void CopyTo_ShouldCopyDictionaryEntries_ToDestinationOffset()
+        {
+            // Arrange
+            var dictionary = new GenericOrderedDictionary<string, int>
+            {
+                { "apple", 1 },
+                { "banana", 2 }
+            };
+            var destination = new KeyValuePair<string, int>[3];
+            destination[0] = new KeyValuePair<string, int>("existing", 99);
+
+            // Act
+            dictionary.CopyTo(destination, 1);
+
+            // Assert
+            Assert.Equal(new KeyValuePair<string, int>("existing", 99), destination[0]);
+            Assert.Equal(new KeyValuePair<string, int>("apple", 1), destination[1]);
+            Assert.Equal(new KeyValuePair<string, int>("banana", 2), destination[2]);
+        }
+
+        [Fact]
+        public void CopyTo_ShouldThrowArgumentException_WhenDestinationHasInsufficientSpace()
+        {
+            // Arrange
+            var dictionary = new GenericOrderedDictionary<string, int>
+            {
+                { "apple", 1 },
+                { "banana", 2 }
+            };
+            var destination = new KeyValuePair<string, int>[2];
+
+            // Act & Assert
+            Assert.Throws<ArgumentException>(() => dictionary.CopyTo(destination, 1));
+        }
     }
 }

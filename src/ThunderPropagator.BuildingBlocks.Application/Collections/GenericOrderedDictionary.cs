@@ -168,19 +168,16 @@ namespace ThunderPropagator.BuildingBlocks.Application.Collections
         public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
         {
             ArgumentNullException.ThrowIfNull(array, nameof(array));
-            ArgumentOutOfRangeException.ThrowIfGreaterThan(arrayIndex, _dictionary.Count, nameof(arrayIndex));
-            ArgumentOutOfRangeException.ThrowIfLessThan(array.Length - arrayIndex, _dictionary.Count, nameof(array));
+            ArgumentOutOfRangeException.ThrowIfNegative(arrayIndex, nameof(arrayIndex));
 
-            var keys = (IList)_dictionary.Keys;
-            var values = (IList)_dictionary.Values;
-
-            for (var index = 0; index < _dictionary.Count - arrayIndex; index++)
+            if (array.Length - arrayIndex < _dictionary.Count)
             {
-                var key = AsTKey(keys[arrayIndex]!);
-                var value = AsTValue(values[arrayIndex]);
+                throw new ArgumentException("The destination array has insufficient space.", nameof(array));
+            }
 
-                array[index] = new KeyValuePair<TKey, TValue>(key, value);
-                arrayIndex++;
+            foreach (DictionaryEntry entry in _dictionary)
+            {
+                array[arrayIndex++] = new KeyValuePair<TKey, TValue>(AsTKey(entry.Key), AsTValue(entry.Value));
             }
         }
 
