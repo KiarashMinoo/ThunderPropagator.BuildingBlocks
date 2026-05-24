@@ -44,7 +44,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Objects
 
             for (int i = 0; i < left.Count; i++)
             {
-                if (Equals(left[i], right[i]))
+                if (!Equals(left[i], right[i]))
                     return false;
             }
 
