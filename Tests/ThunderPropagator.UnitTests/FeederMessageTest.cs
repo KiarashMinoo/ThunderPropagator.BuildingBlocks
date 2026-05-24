@@ -60,6 +60,18 @@ public class FeederMessageTest
         Assert.Throws<ObjectDisposedException>(() => _ = message.IdDirect);
     }
 
+    [Fact]
+    public void GetHashCode_ShouldRemainStable_WhenPayloadChanges()
+    {
+        var message = new TestFeederMessage();
+        var hashCode = message.GetHashCode();
+
+        message.Id = Guid.NewGuid();
+        ((IDictionary<string, object?>)message).Add("Name", "value");
+
+        Assert.Equal(hashCode, message.GetHashCode());
+    }
+
     private class TestFeederMessage : FeederMessage
     {
         public Guid Id
