@@ -27,7 +27,7 @@ Cryptography and security utilities including AES/RSA encryption services and se
 | Type | Kind | Summary | Inherits/Implements | Key Members |
 |------|------|---------|---------------------|-------------|
 | `EncryptionService` | Static Class | AES encryption with PBKDF2 key derivation | - | `Encrypt()`, `Decrypt()`, `CreateKey()` |
-| `RsaEncryptionService` | Static Class | RSA asymmetric encryption | - | `Encrypt()`, `Decrypt()`, `GenerateKeys()` |
+| `RsaEncryptionService` | Static Class | RSA asymmetric encryption with OAEP SHA-256 | - | `Encrypt()`, `Decrypt()`, `GenerateKeys()` |
 | `PasswordGenerator` | Static Class | Secure password generation | - | `Generate()`, complexity options |
 
 ### EncryptionService
