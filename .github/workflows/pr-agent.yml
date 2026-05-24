@@ -1,26 +1,143 @@
+name: PR-Agent AI Code Review
+
 on:
   pull_request:
-    types: [opened, reopened, ready_for_review]
-  issue_comment:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
-  pr_agent_job:
-    if: ${{ github.event.sender.type != 'Bot' }}
+  pr-agent:
     runs-on: ubuntu-latest
-    permissions:
-      issues: write
-      pull-requests: write
-      contents: write
-    name: Run pr agent on every pull request, respond to user comments
+
     steps:
-      - name: PR Agent action step
-        id: pragent
-        uses: the-pr-agent/pr-agent@main
+      - name: PR Agent Review
+        uses: qodo-ai/pr-agent@main
         env:
           OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENAI_KEY }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          # Enable/disable automatic tools
-          github_action_config.auto_review: "true"
-          github_action_config.auto_describe: "true"
-          github_action_config.auto_improve: "false"
-          # Configure which PR events trigger the action
-          github_action_config.pr_actions: '["opened", "reopened", "ready_for_review", "review_requested"]'
+
+          # =====================================================
+          # OpenRouter
+          # =====================================================
+          OPENAI.API_BASE: https://openrouter.ai/api/v1
+
+          # =====================================================
+          # Primary Model (FREE FIRST)
+          # =====================================================
+          CONFIG.MODEL: openrouter/deepseek/deepseek-chat:free
+
+          # =====================================================
+          # Fallback / Retry Models
+          # Ordered from cheaper/free -> stronger
+          # =====================================================
+          CONFIG.FALLBACK_MODELS: >
+            [
+              "openrouter/qwen/qwen-2.5-coder-32b-instruct:free",
+              "openrouter/meta-llama/llama-3.3-70b-instruct:free",
+              "openrouter/mistralai/mistral-small-3.1-24b-instruct:free",
+              "openrouter/deepseek/deepseek-chat",
+              "openrouter/qwen/qwen-2.5-coder-32b-instruct"
+            ]
+
+          # =====================================================
+          # LiteLLM Reliability / Retry
+          # =====================================================
+          LITELLM.DROP_PARAMS: "true"
+          LITELLM.RETRY: "3"
+          LITELLM.RETRY_WAIT: "5"
+          LITELLM.TIMEOUT: "180"
+
+          # =====================================================
+          # General
+          # =====================================================
+          CONFIG.RESPONSE_LANGUAGE: en-US
+          CONFIG.MAX_DESCRIPTION_TOKENS: "800"
+          CONFIG.CUSTOM_MODEL_MAX_TOKENS: "32000"
+          CONFIG.TEMPERATURE: "0.1"
+
+          # =====================================================
+          # Review Features
+          # =====================================================
+          PR_REVIEWER.REQUIRE_SCORE_REVIEW: "true"
+          PR_REVIEWER.REQUIRE_TESTS_REVIEW: "true"
+          PR_REVIEWER.REQUIRE_SECURITY_REVIEW: "true"
+          PR_REVIEWER.REQUIRE_ESTIMATE_EFFORT_TO_REVIEW: "true"
+
+          PR_REVIEWER.ENABLE_REVIEW_LABELS_SECURITY: "true"
+
+          # =====================================================
+          # Inline Suggestions / Comments
+          # =====================================================
+          PR_CODE_SUGGESTIONS.NUM_CODE_SUGGESTIONS: "8"
+          PR_CODE_SUGGESTIONS.COMMITABLE_CODE_SUGGESTIONS: "true"
+
+          # =====================================================
+          # PR Summary / Analysis
+          # =====================================================
+          PR_DESCRIPTION.PUBLISH_DESCRIPTION_AS_COMMENT: "true"
+          PR_DESCRIPTION.USE_DESCRIPTION_MARKERS: "false"
+
+          # =====================================================
+          # Advanced C#/.NET Review Rules
+          # =====================================================
+          PR_REVIEWER.EXTRA_INSTRUCTIONS: |
+            You are reviewing enterprise-grade C#/.NET backend code.
+
+            Prioritize finding:
+            - bugs
+            - concurrency issues
+            - thread safety issues
+            - memory inefficiencies
+            - security vulnerabilities
+            - architecture violations
+            - performance bottlenecks
+
+            Focus heavily on:
+
+            - async/await correctness
+            - cancellation token propagation
+            - ConfigureAwait usage
+            - hidden Task.Result / Wait deadlocks
+            - memory allocations
+            - boxing/unboxing
+            - Span<T>/Memory<T> opportunities
+            - LINQ multiple enumeration
+            - unnecessary ToList()/ToArray()
+            - EF Core query optimization
+            - N+1 query issues
+            - missing AsNoTracking()
+            - transaction consistency
+            - retry/idempotency issues
+            - caching opportunities
+            - Redis usage patterns
+            - Kafka/event streaming concerns
+            - nullable reference types
+            - dependency injection lifetime mismatches
+            - service locator anti-patterns
+            - DTO/domain leakage
+            - CQRS violations
+            - clean architecture boundary violations
+            - SOLID principle violations
+            - logging quality
+            - structured logging
+            - exception handling
+            - validation gaps
+            - API security concerns
+
+            Add inline comments with:
+            - exact problematic code
+            - root cause
+            - improved implementation suggestion
+
+            Prefer actionable comments over generic advice.
+
+            Avoid style nitpicks unless they impact maintainability.
