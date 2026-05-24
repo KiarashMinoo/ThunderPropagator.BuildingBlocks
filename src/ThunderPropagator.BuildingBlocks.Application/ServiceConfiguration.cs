@@ -145,7 +145,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
             using var enumerator = _properties.GetEnumerator();
             while (enumerator.MoveNext())
             {
-                if (!other._properties.TryGetValue(enumerator.Current.Key, out var value) && value != enumerator.Current.Value)
+                if (!other._properties.TryGetValue(enumerator.Current.Key, out var value) || value != enumerator.Current.Value)
                     return false;
             }
 
