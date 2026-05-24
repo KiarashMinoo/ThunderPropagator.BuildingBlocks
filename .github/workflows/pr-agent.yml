@@ -43,13 +43,14 @@ jobs:
           # Primary FREE Models
           # Keep strongest free models first
           # =====================================================
-          CONFIG.MODEL: openai/gpt-oss-120b:free
+          CONFIG.MODEL: openrouter/free
 
           # =====================================================
           # Fallback FREE Models ONLY
           # =====================================================
           CONFIG.FALLBACK_MODELS: >
             [
+              "openai/gpt-oss-120b:free",
               "nvidia/nemotron-3-super-120b-a12b:free",
               "poolside/laguna-m.1:free",
               "z-ai/glm-4.5-air:free",
