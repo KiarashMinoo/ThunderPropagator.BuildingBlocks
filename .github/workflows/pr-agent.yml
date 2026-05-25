@@ -30,9 +30,9 @@ jobs:
           # =====================================================
           # Authentication
           # =====================================================
-          OPENAI_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENAI_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
           # =====================================================
           # OpenRouter Endpoint
