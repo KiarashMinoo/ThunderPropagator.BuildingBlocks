@@ -58,32 +58,36 @@ internal sealed class MemoryMetricsClient : IMemoryMetricsClient
 
     private static async Task<MemoryMetrics> GetUnixMetricsAsync(CancellationToken cancellationToken)
     {
-        var info = new ProcessStartInfo
-        {
-            FileName = "/bin/bash",
-            Arguments = "-c \"free -m\"",
-            RedirectStandardOutput = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
-
-        using var process = Process.Start(info);
-        if (process == null)
-        {
+        // /proc/meminfo is the kernel memory interface — named fields are stable
+        // across all Linux distros and procps versions, no column layout assumptions needed.
+        const string procMeminfo = "/proc/meminfo";
+        if (!File.Exists(procMeminfo))
             return new MemoryMetrics(0, 0);
+
+        var content = await File.ReadAllTextAsync(procMeminfo, cancellationToken).ConfigureAwait(false);
+        long totalKb = 0, availableKb = 0, freeKb = 0;
+
+        foreach (var line in content.Split('\n'))
+        {
+            var sep = line.IndexOf(':');
+            if (sep < 0) continue;
+
+            var key = line[..sep].Trim();
+            var valueStr = line[(sep + 1)..].Trim();
+            // Each value is "<number> kB"; strip the unit before parsing.
+            var spaceIdx = valueStr.IndexOf(' ');
+            var numStr = spaceIdx > 0 ? valueStr[..spaceIdx] : valueStr;
+
+            if (key == "MemTotal" && long.TryParse(numStr, out var total)) totalKb = total;
+            else if (key == "MemAvailable" && long.TryParse(numStr, out var avail)) availableKb = avail;
+            else if (key == "MemFree" && long.TryParse(numStr, out var free)) freeKb = free;
         }
 
-        await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
-        var output = await process.StandardOutput.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
-
-        var memLine = output.Split('\n').FirstOrDefault(l => l.StartsWith("Mem:", StringComparison.OrdinalIgnoreCase));
-        if (memLine == null)
-            return new MemoryMetrics(0, 0);
-
-        var memory = memLine.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (memory.Length < 4 || !double.TryParse(memory[1], out var total) || !double.TryParse(memory[3], out var free))
-            return new MemoryMetrics(0, 0);
-
-        return new MemoryMetrics(total, free);
+        // MemAvailable accounts for reclaimable buffers/cache; fall back to MemFree on older kernels.
+        var effectiveFreeKb = availableKb > 0 ? availableKb : freeKb;
+        return new MemoryMetrics(
+            Math.Round(totalKb / 1024.0, 0),
+            Math.Round(effectiveFreeKb / 1024.0, 0)
+        );
     }
 }
