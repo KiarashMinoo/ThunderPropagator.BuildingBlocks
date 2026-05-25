@@ -83,6 +83,28 @@ namespace ThunderPropagator.UnitTests.BuildingBlocks.Applications.Ciphering
             Assert.Throws<FormatException>(() => _rsaService.Decrypt(invalidCipherText));
         }
 
-        // Additional tests can be added for edge cases and specific error conditions
+        [Fact]
+        public void GenerateKeys_WithKeySize_BelowMinimum_ShouldThrow()
+        {
+            Assert.Throws<ArgumentException>(() => RsaEncryptionService.GenerateKeys(256));
+        }
+
+        [Fact]
+        public void GenerateKeys_WithKeySize_AboveMaximum_ShouldThrow()
+        {
+            Assert.Throws<ArgumentException>(() => RsaEncryptionService.GenerateKeys(32768));
+        }
+
+        [Fact]
+        public void Encrypt_WithKeySize_BelowMinimum_ShouldThrow()
+        {
+            Assert.Throws<ArgumentException>(() => RsaEncryptionService.Encrypt(TestPlainText, _keys.publicKey, 256));
+        }
+
+        [Fact]
+        public void Encrypt_WithKeySize_AboveMaximum_ShouldThrow()
+        {
+            Assert.Throws<ArgumentException>(() => RsaEncryptionService.Encrypt(TestPlainText, _keys.publicKey, 32768));
+        }
     }
 }

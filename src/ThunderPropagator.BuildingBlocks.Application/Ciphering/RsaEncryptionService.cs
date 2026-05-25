@@ -67,11 +67,17 @@ namespace ThunderPropagator.BuildingBlocks.Application.Ciphering
         {
         }
 
-        internal static RSACryptoServiceProvider GenerateProvider(int dwKeySize = 512) => new(Guard.Against.GreaterThanOrEqual(dwKeySize, 512, nameof(dwKeySize)));
+        internal static RSACryptoServiceProvider GenerateProvider(int dwKeySize = 512)
+        {
+            Guard.Against.GreaterThanOrEqual(dwKeySize, 512, nameof(dwKeySize));
+            Guard.Against.LessThanOrEqual(dwKeySize, 16384, nameof(dwKeySize));
+            return new RSACryptoServiceProvider(dwKeySize);
+        }
 
         private static RSA CreateRsaInstance(int dwKeySize)
         {
             Guard.Against.GreaterThanOrEqual(dwKeySize, 512, nameof(dwKeySize));
+            Guard.Against.LessThanOrEqual(dwKeySize, 16384, nameof(dwKeySize));
             return RSA.Create();
         }
 
