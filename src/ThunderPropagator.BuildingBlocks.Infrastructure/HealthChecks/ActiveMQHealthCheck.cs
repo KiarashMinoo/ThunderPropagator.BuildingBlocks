@@ -40,6 +40,7 @@ namespace ThunderPropagator.BuildingBlocks.Infrastructure.HealthChecks
                 using var connection = await connectionFactory.CreateConnectionAsync();
                 await connection.StartAsync();
                 using var session = await connection.CreateSessionAsync();
+                await session.CloseAsync();
 
                 return HealthCheckResult.Healthy();
             }
