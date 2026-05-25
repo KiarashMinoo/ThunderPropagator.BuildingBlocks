@@ -7,21 +7,48 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
 {
     public static class JsonHelper
     {
-        internal static JsonSerializerOptions BuildDefaultSerializerOptions() => new()
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            ReferenceHandler = ReferenceHandler.IgnoreCycles,
-        };
+        // Shared instance constructed once and reused on every default-path call.
+        // Never passed to code that mutates it — clones are created for callers
+        // that need customisation (options callback or CamelCase-false types).
+        private static readonly JsonSerializerOptions _defaultOptions = BuildAndFreezeDefaultOptions();
 
-        internal static JsonSerializerOptions JsonSerializerOptions<T>(JsonSerializerOptions? serializerOptions = null) => JsonSerializerOptions(typeof(T), serializerOptions);
+        private static JsonSerializerOptions BuildAndFreezeDefaultOptions()
+        {
+            return new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
+            };
+        }
+
+        // Returns a mutable clone of the default options for callers that need to customise
+        // the settings (e.g. ToonHelper) without touching the shared frozen instance.
+        internal static JsonSerializerOptions BuildDefaultSerializerOptions()
+        {
+            return new JsonSerializerOptions(_defaultOptions);
+        }
+
+        internal static JsonSerializerOptions JsonSerializerOptions<T>(JsonSerializerOptions? serializerOptions = null)
+        {
+            return JsonSerializerOptions(typeof(T), serializerOptions);
+        }
 
         internal static JsonSerializerOptions JsonSerializerOptions(Type type, JsonSerializerOptions? serializerOptions = null)
         {
             var jsonSerializationAttribute = JsonSerializationAttributeCache.Get(type);
+            var disableCamelCase = jsonSerializationAttribute?.CamelCase == false;
 
-            serializerOptions ??= BuildDefaultSerializerOptions();
+            if (serializerOptions == null)
+            {
+                // Default path: return the shared frozen instance when no override is needed.
+                // If the type opts out of camelCase, return a fresh copy with the policy cleared.
+                if (!disableCamelCase)
+                    return _defaultOptions;
 
-            if (serializerOptions is { IsReadOnly: false, PropertyNamingPolicy: not null } && jsonSerializationAttribute?.CamelCase == false)
+                return new JsonSerializerOptions(_defaultOptions) { PropertyNamingPolicy = null };
+            }
+
+            if (disableCamelCase && serializerOptions is { IsReadOnly: false, PropertyNamingPolicy: not null })
                 serializerOptions.PropertyNamingPolicy = null;
 
             return serializerOptions;
@@ -36,7 +63,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
 
             if (options is not null)
             {
-                serializerOptions = BuildDefaultSerializerOptions();
+                serializerOptions = new JsonSerializerOptions(_defaultOptions);
                 options(serializerOptions);
             }
 
@@ -58,7 +85,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
 
             if (options is not null)
             {
-                serializerOptions = BuildDefaultSerializerOptions();
+                serializerOptions = new JsonSerializerOptions(_defaultOptions);
                 options(serializerOptions);
             }
 
@@ -86,7 +113,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
 
             if (options is not null)
             {
-                serializerOptions = BuildDefaultSerializerOptions();
+                serializerOptions = new JsonSerializerOptions(_defaultOptions);
                 options(serializerOptions);
             }
 
@@ -102,7 +129,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
 
             if (options is not null)
             {
-                serializerOptions = BuildDefaultSerializerOptions();
+                serializerOptions = new JsonSerializerOptions(_defaultOptions);
                 options(serializerOptions);
             }
 
@@ -123,7 +150,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
 
             if (options is not null)
             {
-                serializerOptions = BuildDefaultSerializerOptions();
+                serializerOptions = new JsonSerializerOptions(_defaultOptions);
                 options(serializerOptions);
             }
 
