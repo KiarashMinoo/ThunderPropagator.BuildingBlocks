@@ -91,7 +91,7 @@ public
         {
             var data = new byte[4];
             RandomNumberGenerator.Fill(data);
-            return BitConverter.ToInt32(data, 0) & int.MaxValue % max;
+            return (int)(BitConverter.ToUInt32(data, 0) % (uint)max);
         }
     }
 }
