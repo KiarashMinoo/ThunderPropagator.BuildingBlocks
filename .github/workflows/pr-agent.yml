@@ -8,15 +8,6 @@ on:
       - synchronize
       - ready_for_review
 
-permissions:
-  contents: read
-  pull-requests: write
-  issues: write
-
-concurrency:
-  group: pr-agent-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
-
 jobs:
   pr-agent:
     uses: KiarashMinoo/.github/.github/workflows/pr-agent.yml@main
