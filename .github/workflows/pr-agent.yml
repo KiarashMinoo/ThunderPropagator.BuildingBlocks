@@ -20,7 +20,7 @@ concurrency:
 jobs:
   pr-agent:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
 
     steps:
       - name: PR Agent Review
@@ -40,44 +40,42 @@ jobs:
           OPENAI.API_BASE: https://openrouter.ai/api/v1
 
           # =====================================================
-          # Primary Model (free via OpenRouter)
+          # Primary Model — fast flash model
           # =====================================================
-          CONFIG.MODEL: openrouter/nvidia/nemotron-3-super-120b-a12b:free
+          CONFIG.MODEL: openrouter/deepseek/deepseek-v4-flash:free
 
           # =====================================================
-          # Fallback Models (free via OpenRouter, ordered strongest first)
+          # Fallback Models (fast-to-slow order)
           # =====================================================
           CONFIG.FALLBACK_MODELS: >
             [
-              "openrouter/openai/gpt-oss-120b:free",
-              "openrouter/deepseek/deepseek-v4-flash:free",
-              "openrouter/google/gemma-4-31b-it:free",
-              "openrouter/arcee-ai/trinity-large-thinking:free",
+              "openrouter/openai/gpt-oss-20b:free",
+              "openrouter/google/gemma-4-26b-a4b-it:free",
               "openrouter/meta-llama/llama-3.3-70b-instruct:free",
-              "openrouter/openai/gpt-oss-20b:free"
+              "openrouter/openai/gpt-oss-120b:free"
             ]
 
           # =====================================================
           # LiteLLM Reliability
           # =====================================================
           LITELLM.DROP_PARAMS: "true"
-          LITELLM.RETRY: "5"
-          LITELLM.RETRY_WAIT: "8"
-          LITELLM.TIMEOUT: "240"
+          LITELLM.RETRY: "2"
+          LITELLM.RETRY_WAIT: "3"
+          LITELLM.TIMEOUT: "90"
 
           # =====================================================
           # General Configuration
           # =====================================================
           CONFIG.RESPONSE_LANGUAGE: en-US
-          CONFIG.MAX_DESCRIPTION_TOKENS: "1200"
-          CONFIG.CUSTOM_MODEL_MAX_TOKENS: "64000"
+          CONFIG.MAX_DESCRIPTION_TOKENS: "800"
+          CONFIG.CUSTOM_MODEL_MAX_TOKENS: "32000"
           CONFIG.TEMPERATURE: "0.05"
 
           # =====================================================
-          # Smart Cost Protection
+          # Token Budget
           # =====================================================
-          CONFIG.MAX_MODEL_TOKENS: "64000"
-          CONFIG.MAX_CONTEXT_TOKENS: "120000"
+          CONFIG.MAX_MODEL_TOKENS: "32000"
+          CONFIG.MAX_CONTEXT_TOKENS: "60000"
 
           # =====================================================
           # PR Review Features
@@ -89,16 +87,12 @@ jobs:
           PR_REVIEWER.ENABLE_REVIEW_LABELS_SECURITY: "true"
 
           # =====================================================
-          # Reduce Noise
+          # Suggestions — fewer for speed
           # =====================================================
           PR_REVIEWER.INLINE_CODE_COMMENTS: "true"
-          PR_REVIEWER.NUM_CODE_SUGGESTIONS: "6"
-
-          # =====================================================
-          # Inline Suggestions
-          # =====================================================
-          PR_CODE_SUGGESTIONS.NUM_CODE_SUGGESTIONS: "6"
-          PR_CODE_SUGGESTIONS.COMMITABLE_CODE_SUGGESTIONS: "true"
+          PR_REVIEWER.NUM_CODE_SUGGESTIONS: "3"
+          PR_CODE_SUGGESTIONS.NUM_CODE_SUGGESTIONS: "3"
+          PR_CODE_SUGGESTIONS.COMMITABLE_CODE_SUGGESTIONS: "false"
 
           # =====================================================
           # PR Description / Summary
@@ -110,84 +104,11 @@ jobs:
           # Enterprise .NET Review Rules
           # =====================================================
           PR_REVIEWER.EXTRA_INSTRUCTIONS: |
-            You are reviewing enterprise-grade C#/.NET backend systems.
+            Enterprise C#/.NET review. Flag only actionable issues with root cause and fix.
 
-            Prioritize:
-            - correctness
-            - security
-            - scalability
-            - reliability
-            - maintainability
-            - production readiness
+            Check: async/await correctness, ConfigureAwait, cancellation propagation, deadlocks,
+            race conditions, boxing, excessive LINQ allocations, N+1 queries, missing AsNoTracking,
+            EF transaction consistency, DI lifetime mismatches, clean-arch boundary leaks,
+            null safety, missing validation, secrets exposure, auth gaps, structured logging quality.
 
-            Focus heavily on:
-
-            Concurrency & Async:
-            - async/await correctness
-            - cancellation token propagation
-            - ConfigureAwait usage
-            - hidden Task.Result / Wait deadlocks
-            - race conditions
-            - thread safety
-            - lock contention
-            - parallel execution issues
-
-            Performance:
-            - memory allocations
-            - boxing/unboxing
-            - Span<T>/Memory<T> opportunities
-            - pooling opportunities
-            - excessive LINQ allocations
-            - multiple enumeration
-            - unnecessary ToList()/ToArray()
-            - hot path inefficiencies
-
-            EF Core & Data:
-            - N+1 query issues
-            - missing AsNoTracking()
-            - inefficient Includes
-            - query materialization issues
-            - transaction consistency
-            - retry/idempotency issues
-            - connection lifetime problems
-
-            Distributed Systems:
-            - Redis usage patterns
-            - Kafka/event-streaming issues
-            - duplicate message handling
-            - eventual consistency concerns
-            - outbox/inbox considerations
-            - retry storms
-            - resiliency gaps
-
-            Architecture:
-            - CQRS violations
-            - clean architecture boundary leaks
-            - DTO/domain leakage
-            - dependency injection lifetime mismatches
-            - service locator anti-patterns
-            - SOLID violations
-            - tight coupling
-
-            Reliability & Security:
-            - exception handling gaps
-            - missing validation
-            - nullability issues
-            - unsafe deserialization
-            - secrets exposure
-            - API security concerns
-            - authentication/authorization gaps
-
-            Observability:
-            - structured logging quality
-            - missing correlation IDs
-            - poor telemetry practices
-
-            Review behavior:
-            - Prefer actionable findings over generic advice
-            - Avoid style nitpicks unless maintainability is affected
-            - Add precise inline comments with:
-              - problematic code
-              - root cause
-              - production impact
-              - concrete fix suggestion
+            Skip style nitpicks. No generic advice.
