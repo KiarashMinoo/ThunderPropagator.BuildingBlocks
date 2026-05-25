@@ -23,7 +23,7 @@ public class SystemResourceMonitorImplTest
     }
 
     [Fact]
-    public void SystemResources_Must_Return_CpuUsage_For_1_Second_And_NotThrow_For_New_Metrics()
+    public async Task SystemResources_Must_Return_CpuUsage_For_1_Second_And_NotThrow_For_New_Metrics()
     {
         // Arrange
         var cpuMetricsClient = new CpuMetricsClient();
@@ -54,7 +54,7 @@ public class SystemResourceMonitorImplTest
             options);
 
         // Act
-        var metrics = systemResourceMonitorImpl.GetMetrics(window: 1000, all: true);
+        var metrics = await systemResourceMonitorImpl.GetMetricsAsync(window: 1000, all: true);
 
         // Assert
         Assert.NotNull(metrics);
@@ -79,7 +79,7 @@ public class SystemResourceMonitorImplTest
     }
 
     [Fact]
-    public void Options_Disabling_Metric_Groups_Should_Return_Empty_Or_Null_As_Expected()
+    public async Task Options_Disabling_Metric_Groups_Should_Return_Empty_Or_Null_As_Expected()
     {
         // Arrange
         var cpuMetricsClient = new CpuMetricsClient();
@@ -112,7 +112,7 @@ public class SystemResourceMonitorImplTest
             options);
 
         // Act
-        var metrics = sut.GetMetrics(window: 10, all: false);
+        var metrics = await sut.GetMetricsAsync(window: 10, all: false);
 
         // Assert
         Assert.NotNull(metrics);
