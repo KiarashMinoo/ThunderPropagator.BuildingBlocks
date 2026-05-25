@@ -60,10 +60,20 @@ namespace ThunderPropagator.BuildingBlocks.Application.Ciphering
         /// </summary>
         /// <param name="password">The password to derive the key from.</param>
         /// <param name="keyBytes">The desired key length in bytes. Default is 32 (256-bit).</param>
-        /// <param name="iterations">The number of PBKDF2 iterations. Default is 300.</param>
+        /// <param name="iterations">
+        ///     The number of PBKDF2 iterations. Must be at least 100 000.
+        ///     Default is 600 000 per NIST SP 800-132 (2023) guidance for SHA-256/SHA3-256.
+        /// </param>
         /// <param name="algorithmName">The hash algorithm to use. Default is SHA3-256.</param>
         /// <returns>A tuple containing the derived key bytes and the randomly generated salt.</returns>
-        public static (byte[] Key, byte[] Salt) CreateKey(string password, int keyBytes = 32, int iterations = 300, HashAlgorithmName? algorithmName = null)
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///     Thrown when <paramref name="iterations"/> is less than 100 000.
+        /// </exception>
+        /// <remarks>
+        ///     The default was raised from 300 to 600 000. Data encrypted with the old default
+        ///     must be re-derived using the original iteration count passed explicitly.
+        /// </remarks>
+        public static (byte[] Key, byte[] Salt) CreateKey(string password, int keyBytes = 32, int iterations = 600_000, HashAlgorithmName? algorithmName = null)
         {
             var salt = RandomNumberGenerator.GetBytes(SaltSizeInBytes);
             var key = DeriveKey(password, salt, keyBytes, iterations, algorithmName);
@@ -77,16 +87,24 @@ namespace ThunderPropagator.BuildingBlocks.Application.Ciphering
         /// <param name="password">The password to derive the key from.</param>
         /// <param name="salt">The salt that was generated and stored at encryption time.</param>
         /// <param name="keyBytes">The desired key length in bytes. Default is 32 (256-bit).</param>
-        /// <param name="iterations">The number of PBKDF2 iterations. Default is 300.</param>
+        /// <param name="iterations">
+        ///     The number of PBKDF2 iterations. Must be at least 100 000.
+        ///     Default is 600 000 per NIST SP 800-132 (2023) guidance for SHA-256/SHA3-256.
+        /// </param>
         /// <param name="algorithmName">The hash algorithm to use. Default is SHA3-256.</param>
         /// <returns>The derived key bytes.</returns>
-        public static byte[] CreateKey(string password, byte[] salt, int keyBytes = 32, int iterations = 300, HashAlgorithmName? algorithmName = null)
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///     Thrown when <paramref name="iterations"/> is less than 100 000.
+        /// </exception>
+        public static byte[] CreateKey(string password, byte[] salt, int keyBytes = 32, int iterations = 600_000, HashAlgorithmName? algorithmName = null)
         {
             return DeriveKey(password, salt, keyBytes, iterations, algorithmName);
         }
 
         private static byte[] DeriveKey(string password, byte[] salt, int keyBytes, int iterations, HashAlgorithmName? algorithmName)
         {
+            if (iterations < 100_000)
+                throw new ArgumentOutOfRangeException(nameof(iterations), iterations, "PBKDF2 iteration count must be at least 100 000 to meet minimum security requirements (NIST SP 800-132).");
 #if NET10_0_OR_GREATER
             return Rfc2898DeriveBytes.Pbkdf2(password, salt, iterations, algorithmName ?? HashAlgorithmName.SHA3_256, keyBytes);
 #else

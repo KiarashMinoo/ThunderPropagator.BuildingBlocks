@@ -1,3 +1,5 @@
+using System.Reflection;
+using System.Security.Cryptography;
 using ThunderPropagator.BuildingBlocks.Application.Ciphering;
 
 namespace ThunderPropagator.UnitTests.BuildingBlocks.Applications.Ciphering
@@ -10,69 +12,62 @@ namespace ThunderPropagator.UnitTests.BuildingBlocks.Applications.Ciphering
     {
         private const string TestPassword = "securePassword123!";
         private const string TestPlainText = "Hello, World!";
+
+        // Use the minimum allowed iteration count so tests stay fast while still
+        // exercising real PBKDF2 key derivation through the production code path.
+        private const int TestIterations = 100_000;
+
         private readonly byte[] _key;
         private readonly byte[] _salt;
 
         public EncryptionServiceTests()
         {
-            (_key, _salt) = EncryptionService.CreateKey(TestPassword);
+            (_key, _salt) = EncryptionService.CreateKey(TestPassword, iterations: TestIterations);
         }
 
         [Fact]
         public void Encrypt_ShouldReturnNonEmptyCiphertext()
         {
-            // Act
             var cipherText = EncryptionService.Encrypt(TestPlainText, _key);
 
-            // Assert
-            Assert.False(string.IsNullOrEmpty(cipherText)); // Ciphertext should not be empty
+            Assert.False(string.IsNullOrEmpty(cipherText));
         }
 
         [Fact]
         public void Decrypt_ShouldReturnOriginalPlainText()
         {
-            // Arrange
             var cipherText = EncryptionService.Encrypt(TestPlainText, _key);
 
-            // Act
             var decryptedText = EncryptionService.Decrypt(cipherText, _key);
 
-            // Assert
-            Assert.Equal(TestPlainText, decryptedText); // Decrypted text should match the original plaintext
+            Assert.Equal(TestPlainText, decryptedText);
         }
 
         [Fact]
         public void Encrypt_ShouldReturnDifferentCiphertext_ForSamePlainTextAndKey()
         {
-            // Act
             var firstCipherText = EncryptionService.Encrypt(TestPlainText, _key);
             var secondCipherText = EncryptionService.Encrypt(TestPlainText, _key);
 
-            // Assert
             Assert.NotEqual(firstCipherText, secondCipherText);
         }
 
         [Fact]
         public void Encrypt_ShouldPrependInitializationVectorToCiphertext()
         {
-            // Act
             var cipherText = EncryptionService.Encrypt(TestPlainText, _key);
             var encryptedBytes = Convert.FromBase64String(AddBase64Padding(cipherText));
 
-            // Assert
             Assert.True(encryptedBytes.Length > 16);
         }
 
         [Fact]
         public void CreateKey_ShouldGenerateSecureKey()
         {
-            // Arrange
-            const int expectedKeySize = 32; // 256 bits
+            const int expectedKeySize = 32;
 
-            // Act
-            var (key, salt) = EncryptionService.CreateKey(TestPassword, expectedKeySize);
+            var (key, salt) = EncryptionService.CreateKey(TestPassword, expectedKeySize, iterations: TestIterations);
 
-            // Assert
             Assert.Equal(expectedKeySize, key.Length);
             Assert.Equal(16, salt.Length);
         }
@@ -80,53 +75,73 @@ namespace ThunderPropagator.UnitTests.BuildingBlocks.Applications.Ciphering
         [Fact]
         public void CreateKey_ShouldGenerateDifferentSalt_EachCall()
         {
-            // Act
-            var (_, firstSalt) = EncryptionService.CreateKey(TestPassword);
-            var (_, secondSalt) = EncryptionService.CreateKey(TestPassword);
+            var (_, firstSalt) = EncryptionService.CreateKey(TestPassword, iterations: TestIterations);
+            var (_, secondSalt) = EncryptionService.CreateKey(TestPassword, iterations: TestIterations);
 
-            // Assert
             Assert.False(firstSalt.SequenceEqual(secondSalt));
         }
 
         [Fact]
         public void CreateKey_WithExistingSalt_ShouldDeriveIdenticalKey()
         {
-            // Arrange
-            var (originalKey, salt) = EncryptionService.CreateKey(TestPassword);
+            var (originalKey, salt) = EncryptionService.CreateKey(TestPassword, iterations: TestIterations);
 
-            // Act
-            var rederived = EncryptionService.CreateKey(TestPassword, salt);
+            var rederived = EncryptionService.CreateKey(TestPassword, salt, iterations: TestIterations);
 
-            // Assert
             Assert.Equal(originalKey, rederived);
         }
 
         [Fact]
         public void CreateKey_WithExistingSalt_ShouldDecryptCipherTextEncryptedWithOriginalKey()
         {
-            // Arrange
-            var (key, salt) = EncryptionService.CreateKey(TestPassword);
+            var (key, salt) = EncryptionService.CreateKey(TestPassword, iterations: TestIterations);
             var cipherText = EncryptionService.Encrypt(TestPlainText, key);
 
-            // Act
-            var rederived = EncryptionService.CreateKey(TestPassword, salt);
+            var rederived = EncryptionService.CreateKey(TestPassword, salt, iterations: TestIterations);
             var decrypted = EncryptionService.Decrypt(cipherText, rederived);
 
-            // Assert
             Assert.Equal(TestPlainText, decrypted);
         }
 
         [Fact]
         public void Decrypt_InvalidCipherText_ShouldThrowFormatException()
         {
-            // Arrange
-            var invalidCipherText = "InvalidCipherText";
-
-            // Act & Assert
-            Assert.Throws<FormatException>(() => EncryptionService.Decrypt(invalidCipherText, _key));
+            Assert.Throws<FormatException>(() => EncryptionService.Decrypt("InvalidCipherText", _key));
         }
 
-        // Additional tests for edge cases and security considerations can be added here
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(300)]
+        [InlineData(99_999)]
+        public void CreateKey_IterationsBelowMinimum_ThrowsArgumentOutOfRangeException(int iterations)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => EncryptionService.CreateKey(TestPassword, iterations: iterations));
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(300)]
+        [InlineData(99_999)]
+        public void CreateKey_WithSalt_IterationsBelowMinimum_ThrowsArgumentOutOfRangeException(int iterations)
+        {
+            var salt = RandomNumberGenerator.GetBytes(16);
+            Assert.Throws<ArgumentOutOfRangeException>(() => EncryptionService.CreateKey(TestPassword, salt, iterations: iterations));
+        }
+
+        [Fact]
+        public void CreateKey_DefaultIterations_IsAtLeast600000()
+        {
+            // Verify the default parameter value meets NIST SP 800-132 guidance.
+            var method = typeof(EncryptionService).GetMethod(
+                nameof(EncryptionService.CreateKey),
+                [typeof(string), typeof(int), typeof(int), typeof(HashAlgorithmName?)])!;
+
+            var iterationsParam = method.GetParameters().First(p => p.Name == "iterations");
+            var defaultValue = (int)iterationsParam.DefaultValue!;
+
+            Assert.True(defaultValue >= 600_000, $"Default iteration count {defaultValue} is below the NIST-recommended minimum of 600 000.");
+        }
 
         private static string AddBase64Padding(string value)
         {
