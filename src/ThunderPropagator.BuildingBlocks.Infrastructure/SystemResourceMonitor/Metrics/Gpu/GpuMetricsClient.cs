@@ -153,8 +153,9 @@ internal sealed class WindowsGpuMetricsProvider : IGpuMetricsProvider
             using var process = Process.Start(psi);
             if (process == null) return null;
 
+            var outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
             await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
-            var output = await process.StandardOutput.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
+            var output = await outputTask.ConfigureAwait(false);
 
             if (process.ExitCode != 0 || string.IsNullOrWhiteSpace(output))
                 return null;
@@ -351,8 +352,12 @@ internal sealed class MacOsGpuMetricsProvider : IGpuMetricsProvider
                 return [new GpuMetrics { GpuIndex = 0, IsAvailable = false, ActiveProcesses = new List<GpuProcessInfo>(), ErrorMessage = "Failed to start system_profiler." }];
             }
 
-            var output = await process.StandardOutput.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
+            // Start reading output concurrently so the stdout buffer never fills and
+            // blocks system_profiler before it exits. Await the process first, then
+            // collect the already-buffered output.
+            var outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
             await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+            var output = await outputTask.ConfigureAwait(false);
 
             if (process.ExitCode != 0)
             {
