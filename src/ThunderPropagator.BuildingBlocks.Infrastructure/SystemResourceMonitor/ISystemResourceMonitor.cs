@@ -23,13 +23,6 @@ public interface ISystemResourceMonitor : IMetricsClient<SystemResourceMonitorMe
     /// <returns>Comprehensive system resource metrics.</returns>
     Task<SystemResourceMonitorMetrics> GetMetricsAsync(long? window = null, bool? all = null, CancellationToken cancellationToken = default);
 
-    /// <summary>
-    /// Gets all configured system resource metrics synchronously (back-compat wrapper).
-    /// </summary>
-    /// <param name="window">Sampling window in milliseconds for CPU usage calculation. If null, uses default from options.</param>
-    /// <param name="all">Whether to collect metrics for all processes or just current process.</param>
-    /// <returns>Comprehensive system resource metrics.</returns>
-    SystemResourceMonitorMetrics GetMetrics(long? window = null, bool? all = null);
 }
 
 internal sealed class SystemResourceMonitorImpl(
@@ -118,6 +111,4 @@ internal sealed class SystemResourceMonitorImpl(
         };
     }
 
-    public SystemResourceMonitorMetrics GetMetrics(long? window = null, bool? all = null)
-        => GetMetricsAsync(window, all).GetAwaiter().GetResult();
 }
