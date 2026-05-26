@@ -6,6 +6,6 @@ namespace ThunderPropagator.BuildingBlocks.Application.Enums
         None = 0,
         Redis = 1,
         MongoDb = 2,
-        Postgresql = 3,
+        Postgresql = 4,
     }
 }
