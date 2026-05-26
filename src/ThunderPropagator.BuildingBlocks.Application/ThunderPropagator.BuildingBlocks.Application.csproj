@@ -10,7 +10,10 @@
         <PackageReference Include="CaseConverter"/>
         <PackageReference Include="JetBrains.Annotations"/>
         <PackageReference Include="MessagePack"/>
-        <PackageReference Include="MessagePackAnalyzer"/>
+        <PackageReference Include="MessagePackAnalyzer">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="NetJSON"/>
         <PackageReference Include="Newtonsoft.Json"/>
         <PackageReference Include="protobuf-net"/>
