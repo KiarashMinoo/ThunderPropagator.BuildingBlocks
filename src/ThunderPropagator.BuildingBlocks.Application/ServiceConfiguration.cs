@@ -7,7 +7,6 @@ using ThunderPropagator.BuildingBlocks.Application.Helpers;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using JsonSerializer = Newtonsoft.Json.JsonSerializer;
@@ -152,12 +151,9 @@ namespace ThunderPropagator.BuildingBlocks.Application
             return true;
         }
 
-        public override bool Equals(object? obj)
-            => obj is not null && (ReferenceEquals(this, obj) || obj.GetType() == GetType() && Equals((ServiceConfiguration)obj));
+        public override bool Equals(object? obj) => ReferenceEquals(this, obj);
 
-        [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
-        public override int GetHashCode()
-            => _properties.Keys.Aggregate(0, HashCode.Combine);
+        public override int GetHashCode() => System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(this);
 
         public static implicit operator Dictionary<string, string>(ServiceConfiguration serviceConfiguration)
             => new(serviceConfiguration._properties);
