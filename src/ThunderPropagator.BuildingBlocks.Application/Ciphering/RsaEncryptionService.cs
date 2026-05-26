@@ -9,7 +9,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Ciphering
 {
     public static class RsaEncryptionHelper
     {
-        public static (string PrivateKey, string PublicKey) GeneratePemCodes(int dwKeySize = 512)
+        public static (string PrivateKey, string PublicKey) GeneratePemCodes(int dwKeySize = 2048)
         {
             using var rsaCryptoServiceProvider = RsaEncryptionService.GenerateProvider(dwKeySize);
             var privateKey = rsaCryptoServiceProvider.ExportRSAPrivateKeyPem();
@@ -17,7 +17,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Ciphering
             return (privateKey, publicKey);
         }
 
-        public static (byte[] PrivateKey, byte[] PublicKey) GenerateRsaCodes(int dwKeySize = 512)
+        public static (byte[] PrivateKey, byte[] PublicKey) GenerateRsaCodes(int dwKeySize = 2048)
         {
             using var rsaCryptoServiceProvider = RsaEncryptionService.GenerateProvider(dwKeySize);
             var privateKey = rsaCryptoServiceProvider.ExportRSAPrivateKey();
@@ -51,37 +51,37 @@ namespace ThunderPropagator.BuildingBlocks.Application.Ciphering
         public RSAParameters PrivateKey { get; }
         public RSAParameters PublicKey { get; }
 
-        public RsaEncryptionService(int dwKeySize = 512) => (PrivateKey, PublicKey) = GenerateKeys(dwKeySize);
+        public RsaEncryptionService(int dwKeySize = 2048) => (PrivateKey, PublicKey) = GenerateKeys(dwKeySize);
 
-        public RsaEncryptionService(RSAParameters privateKey, RSAParameters publicKey, int dwKeySize = 512)
+        public RsaEncryptionService(RSAParameters privateKey, RSAParameters publicKey, int dwKeySize = 2048)
             : this(dwKeySize)
         {
             PrivateKey = privateKey;
             PublicKey = publicKey;
         }
 
-        public RsaEncryptionService(string privateKey, string publicKey, int dwKeySize = 512)
+        public RsaEncryptionService(string privateKey, string publicKey, int dwKeySize = 2048)
             : this(Guard.Against.Null(privateKey.FromNJsonBase64<RSAParameters>()),
                 Guard.Against.Null(publicKey.FromNJsonBase64<RSAParameters>()),
                 dwKeySize)
         {
         }
 
-        internal static RSACryptoServiceProvider GenerateProvider(int dwKeySize = 512)
+        internal static RSACryptoServiceProvider GenerateProvider(int dwKeySize = 2048)
         {
-            Guard.Against.GreaterThanOrEqual(dwKeySize, 512, nameof(dwKeySize));
+            Guard.Against.GreaterThanOrEqual(dwKeySize, 2048, nameof(dwKeySize));
             Guard.Against.LessThanOrEqual(dwKeySize, 16384, nameof(dwKeySize));
             return new RSACryptoServiceProvider(dwKeySize);
         }
 
         private static RSA CreateRsaInstance(int dwKeySize)
         {
-            Guard.Against.GreaterThanOrEqual(dwKeySize, 512, nameof(dwKeySize));
+            Guard.Against.GreaterThanOrEqual(dwKeySize, 2048, nameof(dwKeySize));
             Guard.Against.LessThanOrEqual(dwKeySize, 16384, nameof(dwKeySize));
             return RSA.Create();
         }
 
-        public static (RSAParameters PrivateKey, RSAParameters PublicKey) GenerateKeys(int dwKeySize = 512)
+        public static (RSAParameters PrivateKey, RSAParameters PublicKey) GenerateKeys(int dwKeySize = 2048)
         {
             using var rsaCryptoServiceProvider = GenerateProvider(dwKeySize);
             var privateKey = rsaCryptoServiceProvider.ExportParameters(true);
@@ -89,7 +89,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Ciphering
             return (privateKey, publicKey);
         }
 
-        public static string Encrypt(string plainText, byte[] rsaPublicKey, int dwKeySize = 512)
+        public static string Encrypt(string plainText, byte[] rsaPublicKey, int dwKeySize = 2048)
         {
             using var rsa = CreateRsaInstance(dwKeySize);
             rsa.ImportRSAPublicKey(Guard.Against.NullOrEmpty(rsaPublicKey).ToArray(), out _);
@@ -98,7 +98,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Ciphering
             return Convert.ToBase64String(cipherData)[..^2];
         }
 
-        public static string Encrypt(string plainText, string pemPublicKey, int dwKeySize = 512)
+        public static string Encrypt(string plainText, string pemPublicKey, int dwKeySize = 2048)
         {
             using var rsa = CreateRsaInstance(dwKeySize);
             rsa.ImportFromPem(Guard.Against.NullOrWhiteSpace(pemPublicKey));
@@ -107,7 +107,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Ciphering
             return Convert.ToBase64String(cipherData)[..^2];
         }
 
-        public static string Encrypt(string plainText, RSAParameters publicKey, int dwKeySize = 512)
+        public static string Encrypt(string plainText, RSAParameters publicKey, int dwKeySize = 2048)
         {
             using var rsa = CreateRsaInstance(dwKeySize);
             rsa.ImportParameters(publicKey);
@@ -118,7 +118,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Ciphering
 
         public string Encrypt(string plainText) => Encrypt(Guard.Against.NullOrWhiteSpace(plainText), PublicKey);
 
-        public static string Decrypt(string cipherText, byte[] rsaPrivateKey, int dwKeySize = 512)
+        public static string Decrypt(string cipherText, byte[] rsaPrivateKey, int dwKeySize = 2048)
         {
             var dataBytes = Convert.FromBase64String(Guard.Against.NullOrWhiteSpace(cipherText));
             using var rsa = CreateRsaInstance(dwKeySize);
@@ -127,7 +127,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Ciphering
             return Encoding.UTF8.GetString(plainTextBytes);
         }
 
-        public static string Decrypt(string cipherText, string pemPrivateKey, int dwKeySize = 512)
+        public static string Decrypt(string cipherText, string pemPrivateKey, int dwKeySize = 2048)
         {
             var dataBytes = Convert.FromBase64String(Guard.Against.NullOrWhiteSpace(cipherText));
             using var rsa = CreateRsaInstance(dwKeySize);
@@ -136,7 +136,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Ciphering
             return Encoding.UTF8.GetString(plainTextBytes);
         }
 
-        public static string Decrypt(string cipherText, RSAParameters privateKey, int dwKeySize = 512)
+        public static string Decrypt(string cipherText, RSAParameters privateKey, int dwKeySize = 2048)
         {
             var dataBytes = Convert.FromBase64String(Guard.Against.NullOrWhiteSpace(cipherText));
             using var rsa = CreateRsaInstance(dwKeySize);

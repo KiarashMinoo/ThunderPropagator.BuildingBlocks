@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Security.Cryptography;
 using ThunderPropagator.BuildingBlocks.Application.Ciphering;
 
@@ -83,10 +84,14 @@ namespace ThunderPropagator.UnitTests.BuildingBlocks.Applications.Ciphering
             Assert.Throws<FormatException>(() => _rsaService.Decrypt(invalidCipherText));
         }
 
-        [Fact]
-        public void GenerateKeys_WithKeySize_BelowMinimum_ShouldThrow()
+        [Theory]
+        [InlineData(256)]
+        [InlineData(512)]
+        [InlineData(1024)]
+        [InlineData(2047)]
+        public void GenerateKeys_WithKeySize_BelowMinimum_ShouldThrow(int keySize)
         {
-            Assert.Throws<ArgumentException>(() => RsaEncryptionService.GenerateKeys(256));
+            Assert.Throws<ArgumentException>(() => RsaEncryptionService.GenerateKeys(keySize));
         }
 
         [Fact]
@@ -95,16 +100,32 @@ namespace ThunderPropagator.UnitTests.BuildingBlocks.Applications.Ciphering
             Assert.Throws<ArgumentException>(() => RsaEncryptionService.GenerateKeys(32768));
         }
 
-        [Fact]
-        public void Encrypt_WithKeySize_BelowMinimum_ShouldThrow()
+        [Theory]
+        [InlineData(256)]
+        [InlineData(512)]
+        [InlineData(1024)]
+        [InlineData(2047)]
+        public void Encrypt_WithKeySize_BelowMinimum_ShouldThrow(int keySize)
         {
-            Assert.Throws<ArgumentException>(() => RsaEncryptionService.Encrypt(TestPlainText, _keys.publicKey, 256));
+            Assert.Throws<ArgumentException>(() => RsaEncryptionService.Encrypt(TestPlainText, _keys.publicKey, keySize));
         }
 
         [Fact]
         public void Encrypt_WithKeySize_AboveMaximum_ShouldThrow()
         {
             Assert.Throws<ArgumentException>(() => RsaEncryptionService.Encrypt(TestPlainText, _keys.publicKey, 32768));
+        }
+
+        [Fact]
+        public void GenerateKeys_DefaultKeySize_IsAtLeast2048()
+        {
+            var method = typeof(RsaEncryptionService).GetMethod(
+                nameof(RsaEncryptionService.GenerateKeys),
+                [typeof(int)])!;
+
+            var defaultValue = (int)method.GetParameters()[0].DefaultValue!;
+
+            Assert.True(defaultValue >= 2048, $"Default key size {defaultValue} is below the NIST-recommended minimum of 2048 bits.");
         }
     }
 }
