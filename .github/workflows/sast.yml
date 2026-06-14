@@ -1,0 +1,53 @@
+name: SAST — Static Analysis Security Testing
+
+on:
+  push:
+    branches: [develop, release/**]
+  pull_request:
+    branches: [develop, main, release/**]
+  schedule:
+    # Run every Monday at 07:00 UTC so results are ready at the start of the week
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+    inputs:
+      enable-codeql:
+        description: Run CodeQL analysis
+        type: boolean
+        default: true
+      enable-semgrep:
+        description: Run Semgrep SAST
+        type: boolean
+        default: true
+      enable-gitleaks:
+        description: Run Gitleaks secret scanning
+        type: boolean
+        default: true
+      fail-on-findings:
+        description: Fail if any security findings are detected
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  sast:
+    uses: KiarashMinoo/.github/.github/workflows/reusable-sast.yml@main
+    with:
+      languages: '["csharp"]'
+      dotnet-versions: |
+        8.0.x
+        9.0.x
+        10.0.x
+      solution-path: 'ThunderPropagator.BuildingBlocks.slnx'
+      enable-codeql: ${{ github.event_name == 'workflow_dispatch' && inputs.enable-codeql || true }}
+      enable-semgrep: ${{ github.event_name == 'workflow_dispatch' && inputs.enable-semgrep || true }}
+      enable-gitleaks: ${{ github.event_name == 'workflow_dispatch' && inputs.enable-gitleaks || true }}
+      semgrep-config: 'p/csharp'
+      codeql-queries: 'security-extended,security-and-quality'
+      fail-on-findings: ${{ github.event_name == 'workflow_dispatch' && inputs.fail-on-findings || false }}
+    secrets:
+      gh-token: ${{ secrets.GH_TOKEN }}
+      semgrep-app-token: ${{ secrets.SEMGREP_APP_TOKEN }}

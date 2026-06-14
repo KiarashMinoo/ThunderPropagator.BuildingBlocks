@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   pr-agent:
-    uses: KiarashMinoo/.github/.github/workflows/pr-agent.yml@main
+    uses: KiarashMinoo/.github/.github/workflows/reusable-pr-agent.yml@main
 
     secrets:
       OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
