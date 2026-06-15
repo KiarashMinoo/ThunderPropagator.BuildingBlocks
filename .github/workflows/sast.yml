@@ -39,7 +39,7 @@ jobs:
         8.0.x
         9.0.x
         10.0.x
-      solution-path: 'ThunderPropagator.slnx'
+      solution-path: 'ThunderPropagator.BuildingBlocks.slnx'
       enable-codeql: ${{ github.event_name == 'workflow_dispatch' && inputs.enable-codeql || true }}
       enable-semgrep: ${{ github.event_name == 'workflow_dispatch' && inputs.enable-semgrep || true }}
       enable-gitleaks: ${{ github.event_name == 'workflow_dispatch' && inputs.enable-gitleaks || true }}
