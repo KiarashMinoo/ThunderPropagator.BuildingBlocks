@@ -2,9 +2,7 @@ name: SAST — Static Analysis Security Testing
 
 on:
   push:
-    branches: [develop, release/**]
-  pull_request:
-    branches: [develop, main, release/**]
+    branches: [develop]
   schedule:
     # Run every Monday at 07:00 UTC so results are ready at the start of the week
     - cron: '0 7 * * 1'
@@ -41,7 +39,7 @@ jobs:
         8.0.x
         9.0.x
         10.0.x
-      solution-path: 'ThunderPropagator.BuildingBlocks.slnx'
+      solution-path: 'ThunderPropagator.slnx'
       enable-codeql: ${{ github.event_name == 'workflow_dispatch' && inputs.enable-codeql || true }}
       enable-semgrep: ${{ github.event_name == 'workflow_dispatch' && inputs.enable-semgrep || true }}
       enable-gitleaks: ${{ github.event_name == 'workflow_dispatch' && inputs.enable-gitleaks || true }}
