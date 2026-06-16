@@ -20,7 +20,16 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             using var writer = new StringWriter();
-            GetSerializer(typeof(T)).Serialize(writer, instance);
+            var originals = SensitiveDataEncryption.EncryptInPlace(instance);
+            try
+            {
+                GetSerializer(typeof(T)).Serialize(writer, instance);
+            }
+            finally
+            {
+                if (originals is not null)
+                    SensitiveDataEncryption.RevertEncryption(instance, originals);
+            }
             return writer.ToString();
         }
 
@@ -31,8 +40,17 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
 
             using var memoryStream = new MemoryStream();
             using var streamWriter = new StreamWriter(memoryStream, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
-            GetSerializer(typeof(T)).Serialize(streamWriter, instance);
-            streamWriter.Flush();
+            var originals = SensitiveDataEncryption.EncryptInPlace(instance);
+            try
+            {
+                GetSerializer(typeof(T)).Serialize(streamWriter, instance);
+                streamWriter.Flush();
+            }
+            finally
+            {
+                if (originals is not null)
+                    SensitiveDataEncryption.RevertEncryption(instance, originals);
+            }
             return memoryStream.ToArray();
         }
 
@@ -56,7 +74,9 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             }
 
             using var reader = new StringReader(xml);
-            return (T?)GetSerializer(typeof(T)).Deserialize(reader);
+            var result = (T?)GetSerializer(typeof(T)).Deserialize(reader);
+            SensitiveDataEncryption.DecryptInPlace(result);
+            return result;
         }
 
         public static T? FromXmlBytes<T>(this byte[] bytes)
@@ -70,7 +90,9 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             using var memoryStream = new MemoryStream(bytes);
-            return (T?)GetSerializer(typeof(T)).Deserialize(memoryStream);
+            var result = (T?)GetSerializer(typeof(T)).Deserialize(memoryStream);
+            SensitiveDataEncryption.DecryptInPlace(result);
+            return result;
         }
 
         public static T? FromXmlBase64<T>(this string str)

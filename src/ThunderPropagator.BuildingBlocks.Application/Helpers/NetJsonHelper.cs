@@ -46,7 +46,16 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
                 return NetJSON.NetJSON.Serialize(exceptionInfo, NetJsonSettings<T>(serializerSettings));
             }
 
-            return NetJSON.NetJSON.Serialize(instance, NetJsonSettings<T>(serializerSettings));
+            var originals = SensitiveDataEncryption.EncryptInPlace(instance);
+            try
+            {
+                return NetJSON.NetJSON.Serialize(instance, NetJsonSettings<T>(serializerSettings));
+            }
+            finally
+            {
+                if (originals is not null)
+                    SensitiveDataEncryption.RevertEncryption(instance, originals);
+            }
         }
 
         public static byte[] ToNetJsonBytes<T>(this T instance, Func<NetJSONSettings, NetJSONSettings>? settings = null)
@@ -80,7 +89,9 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
                 settings(serializerSettings);
             }
 
-            return NetJSON.NetJSON.Deserialize<T>(json, NetJsonSettings<T>(serializerSettings));
+            var result = NetJSON.NetJSON.Deserialize<T>(json, NetJsonSettings<T>(serializerSettings));
+            SensitiveDataEncryption.DecryptInPlace(result);
+            return result;
         }
 
         public static object? FromNetJson(this string json, Type type, Func<NetJSONSettings, NetJSONSettings>? settings = null)
@@ -96,7 +107,9 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
                 settings(serializerSettings);
             }
 
-            return NetJSON.NetJSON.Deserialize(type, json, NetJsonSettings(type, serializerSettings));
+            var result = NetJSON.NetJSON.Deserialize(type, json, NetJsonSettings(type, serializerSettings));
+            SensitiveDataEncryption.DecryptInPlace(result);
+            return result;
         }
 
         public static T? FromNetJsonBytes<T>(this byte[] bytes, Func<NetJSONSettings, NetJSONSettings>? settings = null)

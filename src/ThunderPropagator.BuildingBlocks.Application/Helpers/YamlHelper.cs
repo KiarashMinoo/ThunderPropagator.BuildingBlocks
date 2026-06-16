@@ -76,7 +76,16 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             var serializer = YamlSerializer(typeof(T), serializerSettings);
-            return serializer.Serialize(instance);
+            var originals = SensitiveDataEncryption.EncryptInPlace(instance);
+            try
+            {
+                return serializer.Serialize(instance);
+            }
+            finally
+            {
+                if (originals is not null)
+                    SensitiveDataEncryption.RevertEncryption(instance, originals);
+            }
         }
 
         private static IDeserializer YamlDeserializer(Type type, YamlSerializerSettings? serializerSettings = null)
@@ -145,7 +154,9 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             var deserializer = YamlDeserializer(typeof(T), serializerSettings);
-            return deserializer.Deserialize<T>(yaml);
+            var result = deserializer.Deserialize<T>(yaml);
+            SensitiveDataEncryption.DecryptInPlace(result);
+            return result;
         }
 
         public static object? FromYaml(this string yaml, Type type, YamlSerializerSettings? serializerSettings = null)
@@ -154,7 +165,9 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             var deserializer = YamlDeserializer(type, serializerSettings);
-            return deserializer.Deserialize(yaml);
+            var result = deserializer.Deserialize(yaml);
+            SensitiveDataEncryption.DecryptInPlace(result);
+            return result;
         }
 
         public static byte[] ToYamlBytes<T>(this T instance, YamlSerializerSettings? serializerSettings = null)
@@ -165,8 +178,17 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             var serializer = YamlSerializer(typeof(T), serializerSettings);
             using var memoryStream = new MemoryStream();
             using var streamWriter = new StreamWriter(memoryStream, Encoding.UTF8);
-            serializer.Serialize(streamWriter, instance);
-            streamWriter.Flush();
+            var originals = SensitiveDataEncryption.EncryptInPlace(instance);
+            try
+            {
+                serializer.Serialize(streamWriter, instance);
+                streamWriter.Flush();
+            }
+            finally
+            {
+                if (originals is not null)
+                    SensitiveDataEncryption.RevertEncryption(instance, originals);
+            }
             return memoryStream.ToArray();
         }
 
@@ -183,7 +205,9 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             var deserializer = YamlDeserializer(typeof(T), serializerSettings);
             using var memoryStream = new MemoryStream(bytes);
             using var streamReader = new StreamReader(memoryStream, Encoding.UTF8);
-            return deserializer.Deserialize<T>(streamReader);
+            var result = deserializer.Deserialize<T>(streamReader);
+            SensitiveDataEncryption.DecryptInPlace(result);
+            return result;
         }
 
         public static string ToYamlBase64<T>(this T instance, YamlSerializerSettings? serializerSettings = null)

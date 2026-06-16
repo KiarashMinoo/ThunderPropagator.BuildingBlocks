@@ -1,4 +1,6 @@
+using MessagePack;
 using Newtonsoft.Json;
+using ProtoBuf;
 using ThunderPropagator.BuildingBlocks.Application;
 using ThunderPropagator.BuildingBlocks.Application.Attributes;
 using ThunderPropagator.BuildingBlocks.Application.Helpers;
@@ -173,6 +175,206 @@ namespace ThunderPropagator.UnitTests
             Assert.Equal("alice", restored?.Username);
         }
 
+        // ─── JsonHelper (STJ) ─────────────────────────────────────────────────────
+
+        [Fact]
+        public void JsonHelper_SensitiveProperty_IsEncryptedInJson()
+        {
+            var config = new TestJwtConfig
+            {
+                IssuerSigningKey = SecretValue,
+                ValidAudience = "audience",
+                ValidIssuer = "issuer"
+            };
+
+            var json = config.ToJson();
+
+            Assert.DoesNotContain(SecretValue, json, StringComparison.Ordinal);
+            Assert.Contains("audience", json, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void JsonHelper_SensitiveProperty_RoundTrips()
+        {
+            var original = new TestJwtConfig
+            {
+                IssuerSigningKey = SecretValue,
+                ValidAudience = "audience",
+                ValidIssuer = "issuer"
+            };
+
+            var json = original.ToJson();
+            var restored = json.FromJson<TestJwtConfig>();
+
+            Assert.Equal(SecretValue, restored?.IssuerSigningKey);
+            Assert.Equal("audience", restored?.ValidAudience);
+        }
+
+        // ─── NetJsonHelper ────────────────────────────────────────────────────────
+
+        [Fact]
+        public void NetJsonHelper_SensitiveProperty_IsEncryptedInJson()
+        {
+            var obj = new SensitiveNetJsonObject { Secret = SecretValue, Public = PublicValue };
+
+            var json = obj.ToNetJson();
+
+            Assert.DoesNotContain(SecretValue, json, StringComparison.Ordinal);
+            Assert.Contains(PublicValue, json, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void NetJsonHelper_SensitiveProperty_RoundTrips()
+        {
+            var original = new SensitiveNetJsonObject { Secret = SecretValue, Public = PublicValue };
+
+            var json = original.ToNetJson();
+            var restored = json.FromNetJson<SensitiveNetJsonObject>();
+
+            Assert.Equal(SecretValue, restored?.Secret);
+            Assert.Equal(PublicValue, restored?.Public);
+        }
+
+        // ─── YamlHelper ───────────────────────────────────────────────────────────
+
+        [Fact]
+        public void YamlHelper_SensitiveProperty_IsEncryptedInYaml()
+        {
+            var config = new TestJwtConfig
+            {
+                IssuerSigningKey = SecretValue,
+                ValidAudience = "audience",
+                ValidIssuer = "issuer"
+            };
+
+            var yaml = config.ToYaml();
+
+            Assert.DoesNotContain(SecretValue, yaml, StringComparison.Ordinal);
+            Assert.Contains("audience", yaml, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void YamlHelper_SensitiveProperty_RoundTrips()
+        {
+            var original = new TestJwtConfig
+            {
+                IssuerSigningKey = SecretValue,
+                ValidAudience = "audience",
+                ValidIssuer = "issuer"
+            };
+
+            var yaml = original.ToYaml();
+            var restored = yaml.FromYaml<TestJwtConfig>();
+
+            Assert.Equal(SecretValue, restored?.IssuerSigningKey);
+            Assert.Equal("audience", restored?.ValidAudience);
+        }
+
+        // ─── ProtobufHelper ───────────────────────────────────────────────────────
+
+        [Fact]
+        public void ProtobufHelper_SensitiveProperty_IsEncryptedInBytes()
+        {
+            var obj = new SensitiveProtoObject { Secret = SecretValue, Public = PublicValue };
+
+            var bytes = obj.ToProtobufBytes();
+            var serialized = System.Text.Encoding.UTF8.GetString(bytes);
+
+            Assert.DoesNotContain(SecretValue, serialized, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void ProtobufHelper_SensitiveProperty_RoundTrips()
+        {
+            var original = new SensitiveProtoObject { Secret = SecretValue, Public = PublicValue };
+
+            var bytes = original.ToProtobufBytes();
+            var restored = bytes.FromProtobuf<SensitiveProtoObject>();
+
+            Assert.Equal(SecretValue, restored.Secret);
+            Assert.Equal(PublicValue, restored.Public);
+        }
+
+        [Fact]
+        public void ProtobufHelper_CallerInstanceNotMutatedAfterSerialize()
+        {
+            var obj = new SensitiveProtoObject { Secret = SecretValue, Public = PublicValue };
+
+            _ = obj.ToProtobufBytes();
+
+            Assert.Equal(SecretValue, obj.Secret);
+        }
+
+        // ─── MessagePackHelper ────────────────────────────────────────────────────
+
+        [Fact]
+        public void MessagePackHelper_SensitiveProperty_IsEncryptedInBytes()
+        {
+            var obj = new SensitiveMsgPackObject { Secret = SecretValue, Public = PublicValue };
+
+            var bytes = obj.ToMessagePackBytes();
+            var json = MessagePackSerializer.ConvertToJson(bytes);
+
+            Assert.DoesNotContain(SecretValue, json, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void MessagePackHelper_SensitiveProperty_RoundTrips()
+        {
+            var original = new SensitiveMsgPackObject { Secret = SecretValue, Public = PublicValue };
+
+            var bytes = original.ToMessagePackBytes();
+            var restored = bytes.FromMessagePack<SensitiveMsgPackObject>();
+
+            Assert.Equal(SecretValue, restored.Secret);
+            Assert.Equal(PublicValue, restored.Public);
+        }
+
+        [Fact]
+        public void MessagePackHelper_CallerInstanceNotMutatedAfterSerialize()
+        {
+            var obj = new SensitiveMsgPackObject { Secret = SecretValue, Public = PublicValue };
+
+            _ = obj.ToMessagePackBytes();
+
+            Assert.Equal(SecretValue, obj.Secret);
+        }
+
+        // ─── XmlHelper ────────────────────────────────────────────────────────────
+
+        [Fact]
+        public void XmlHelper_SensitiveProperty_IsEncryptedInXml()
+        {
+            var obj = new SensitiveXmlObject { Secret = SecretValue, Public = PublicValue };
+
+            var xml = obj.ToXml();
+
+            Assert.DoesNotContain(SecretValue, xml, StringComparison.Ordinal);
+            Assert.Contains(PublicValue, xml, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void XmlHelper_SensitiveProperty_RoundTrips()
+        {
+            var original = new SensitiveXmlObject { Secret = SecretValue, Public = PublicValue };
+
+            var xml = original.ToXml();
+            var restored = xml.FromXml<SensitiveXmlObject>();
+
+            Assert.Equal(SecretValue, restored?.Secret);
+            Assert.Equal(PublicValue, restored?.Public);
+        }
+
+        [Fact]
+        public void XmlHelper_CallerInstanceNotMutatedAfterSerialize()
+        {
+            var obj = new SensitiveXmlObject { Secret = SecretValue, Public = PublicValue };
+
+            _ = obj.ToXml();
+
+            Assert.Equal(SecretValue, obj.Secret);
+        }
+
         // ─── Configure is idempotent ───────────────────────────────────────────────
 
         [Fact]
@@ -229,5 +431,47 @@ namespace ThunderPropagator.UnitTests
                 Password = password;
             }
         }
+
+    }
+
+    // ── Namespace-level test fixtures (public required by MessagePack/XmlSerializer) ──
+
+    [ProtoContract]
+    internal sealed class SensitiveProtoObject
+    {
+        [ProtoMember(1), SensitiveData]
+        public string Secret { get; set; } = "";
+
+        [ProtoMember(2)]
+        public string Public { get; set; } = "";
+    }
+
+    [MessagePackObject]
+    public sealed class SensitiveMsgPackObject
+    {
+        [Key(0), SensitiveData]
+        public string Secret { get; set; } = "";
+
+        [Key(1)]
+        public string Public { get; set; } = "";
+    }
+
+    public sealed class SensitiveXmlObject
+    {
+        [SensitiveData]
+        public string Secret { get; set; } = "";
+
+        public string Public { get; set; } = "";
+    }
+
+    // CamelCase disabled: NetJSON's camelCase deserialization uses case-sensitive key matching,
+    // so round-tripping "Secret" → "secret" → property lookup fails. PascalCase avoids this.
+    [ThunderPropagator.BuildingBlocks.Application.Attributes.JsonSerialization(CamelCase = false)]
+    public sealed class SensitiveNetJsonObject
+    {
+        [SensitiveData]
+        public string Secret { get; set; } = "";
+
+        public string Public { get; set; } = "";
     }
 }

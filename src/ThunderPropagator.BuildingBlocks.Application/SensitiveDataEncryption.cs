@@ -1,3 +1,6 @@
+using System.Collections.Concurrent;
+using System.Reflection;
+using ThunderPropagator.BuildingBlocks.Application.Attributes;
 using ThunderPropagator.BuildingBlocks.Application.Ciphering;
 
 namespace ThunderPropagator.BuildingBlocks.Application
@@ -46,6 +49,77 @@ namespace ThunderPropagator.BuildingBlocks.Application
             return _key is not null
                 ? EncryptionService.Decrypt(ciphertext, _key)
                 : ciphertext;
+        }
+
+        private static readonly ConcurrentDictionary<Type, PropertyInfo[]> _sensitivePropsCache = new();
+
+        private static PropertyInfo[] GetSensitiveProperties(Type type)
+        {
+            return _sensitivePropsCache.GetOrAdd(type, static t =>
+                t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(p => p.CanRead && p.CanWrite
+                        && p.PropertyType == typeof(string)
+                        && p.GetCustomAttribute<SensitiveDataAttribute>() is not null)
+                    .ToArray());
+        }
+
+        /// <summary>
+        /// Encrypts all <see cref="Attributes.SensitiveDataAttribute"/>-marked string properties
+        /// on <paramref name="instance"/> in-place and returns the original values so the caller
+        /// can revert after serialization. Returns <see langword="null"/> when encryption is not
+        /// configured, the instance is <see langword="null"/>, or the type is a value type.
+        /// </summary>
+        internal static (PropertyInfo Prop, string? Original)[]? EncryptInPlace(object? instance)
+        {
+            if (!IsConfigured || instance is null || instance.GetType().IsValueType)
+                return null;
+
+            var props = GetSensitiveProperties(instance.GetType());
+            if (props.Length == 0)
+                return null;
+
+            var originals = new (PropertyInfo Prop, string? Original)[props.Length];
+            for (var i = 0; i < props.Length; i++)
+            {
+                var original = props[i].GetValue(instance) as string;
+                originals[i] = (props[i], original);
+                if (original is not null)
+                    props[i].SetValue(instance, Encrypt(original));
+            }
+
+            return originals;
+        }
+
+        /// <summary>
+        /// Restores the original (plain-text) property values that were encrypted by
+        /// <see cref="EncryptInPlace"/>. Always call this in a <see langword="finally"/>
+        /// block after serialization completes.
+        /// </summary>
+        internal static void RevertEncryption(object? instance, (PropertyInfo Prop, string? Original)[] originals)
+        {
+            if (instance is null)
+                return;
+
+            foreach (var (prop, original) in originals)
+                prop.SetValue(instance, original);
+        }
+
+        /// <summary>
+        /// Decrypts all <see cref="Attributes.SensitiveDataAttribute"/>-marked string properties
+        /// on <paramref name="instance"/> in-place after deserialization. No-op when encryption is
+        /// not configured, the instance is <see langword="null"/>, or the type is a value type.
+        /// </summary>
+        internal static void DecryptInPlace(object? instance)
+        {
+            if (!IsConfigured || instance is null || instance.GetType().IsValueType)
+                return;
+
+            var props = GetSensitiveProperties(instance.GetType());
+            foreach (var prop in props)
+            {
+                if (prop.GetValue(instance) is string { Length: > 0 } encrypted)
+                    prop.SetValue(instance, Decrypt(encrypted));
+            }
         }
 
         /// <summary>Clears the configured key. For unit-test infrastructure only.</summary>
