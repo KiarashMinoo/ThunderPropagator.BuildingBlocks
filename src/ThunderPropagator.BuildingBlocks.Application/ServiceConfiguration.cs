@@ -27,6 +27,17 @@ namespace ThunderPropagator.BuildingBlocks.Application
 #endif
             class ServiceConfigurationJsonConverter : JsonConverter<ServiceConfiguration>
         {
+            // One allowlist per concrete subclass, built once via reflection and reused.
+            private static readonly ConcurrentDictionary<Type, IReadOnlySet<string>> _allowedKeysCache = new();
+
+            private static IReadOnlySet<string> GetAllowedKeys(Type type)
+            {
+                return _allowedKeysCache.GetOrAdd(type, static t =>
+                    t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                        .Select(p => p.Name)
+                        .ToHashSet(StringComparer.OrdinalIgnoreCase));
+            }
+
             public override void WriteJson(JsonWriter writer, ServiceConfiguration? value, JsonSerializer serializer)
             {
                 if (value is null)
@@ -50,9 +61,15 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
                 if (rtn is not null)
                 {
+                    var allowedKeys = GetAllowedKeys(objectType);
                     var jObject = JObject.Load(reader);
                     foreach (var property in jObject)
-                        rtn._properties[property.Key.ToPascalCase()] = property.Value!.ToString();
+                    {
+                        var key = property.Key.ToPascalCase();
+                        if (allowedKeys.Count > 0 && !allowedKeys.Contains(key))
+                            continue;
+                        rtn._properties[key] = property.Value!.ToString();
+                    }
                 }
 
                 return rtn;
