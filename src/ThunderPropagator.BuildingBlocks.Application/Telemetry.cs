@@ -2,10 +2,35 @@ using System.Diagnostics.Metrics;
 
 namespace ThunderPropagator.BuildingBlocks.Application
 {
+    /// <summary>
+    /// Central telemetry facade for the ThunderPropagator.BuildingBlocks library.
+    /// Wraps <see cref="ActivitySource"/> and <see cref="System.Diagnostics.Metrics.Meter"/> so
+    /// callers never reference the underlying instances directly.
+    /// <para>
+    /// <b>Naming conventions (OTel semantic conventions):</b><br/>
+    /// Meter name: <c>thunderpropagator.{subsystem}</c> — e.g., <c>thunderpropagator.buildingblocks</c>.<br/>
+    /// Metric name: <c>thunderpropagator.{subsystem}.{noun}.{verb}</c> — all lowercase, dot-separated.<br/>
+    /// Unit strings: use OTel units — <c>{message}</c>, <c>{request}</c>, <c>ms</c>, <c>By</c>, <c>1</c>, etc.<br/>
+    /// No <c>snake_case</c> or <c>PascalCase</c> in metric names.
+    /// </para>
+    /// </summary>
     public static class Telemetry
     {
-        public const string MeterName = "thunderpropagator.meter";
-        public const string ActivityName = "thunderpropagator.activity";
+        /// <summary>
+        /// The default <see cref="System.Diagnostics.Metrics.Meter"/> name.
+        /// Subsystem-specific packages should override this via the <c>METER_NAME</c>
+        /// environment variable using the <c>thunderpropagator.{subsystem}</c> convention
+        /// (e.g., <c>thunderpropagator.feeders</c>).
+        /// </summary>
+        public const string MeterName = "thunderpropagator";
+
+        /// <summary>
+        /// The default <see cref="ActivitySource"/> name.
+        /// Subsystem-specific packages should override this via the <c>ACTIVITY_NAME</c>
+        /// environment variable using the <c>thunderpropagator.{subsystem}</c> convention
+        /// (e.g., <c>thunderpropagator.feeders</c>).
+        /// </summary>
+        public const string ActivityName = "thunderpropagator";
 
         private static string _version = "1.0.0";
         private static int _configured;
