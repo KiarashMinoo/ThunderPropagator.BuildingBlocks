@@ -12,12 +12,12 @@ namespace ThunderPropagator.BuildingBlocks.Application.Identity
 
         [JsonProperty, JsonInclude] public string ValidIssuer { get; set; } = null!;
 
-        [JsonProperty, JsonInclude] public bool ValidateLifetime { get; set; }
+        [JsonProperty, JsonInclude] public bool ValidateLifetime { get; set; } = true;
 
-        [JsonProperty, JsonInclude] public bool ValidateAudience { get; set; }
+        [JsonProperty, JsonInclude] public bool ValidateAudience { get; set; } = true;
 
-        [JsonProperty, JsonInclude] public bool ValidateIssuer { get; set; }
+        [JsonProperty, JsonInclude] public bool ValidateIssuer { get; set; } = true;
 
-        [JsonProperty, JsonInclude] public bool ValidateIssuerSigningKey { get; set; }
+        [JsonProperty, JsonInclude] public bool ValidateIssuerSigningKey { get; set; } = true;
     }
 }
