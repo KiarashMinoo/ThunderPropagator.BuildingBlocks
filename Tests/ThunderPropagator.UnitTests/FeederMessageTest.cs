@@ -1,3 +1,4 @@
+using System.Reflection;
 using JetBrains.Annotations;
 using ThunderPropagator.BuildingBlocks.Application;
 using ThunderPropagator.BuildingBlocks.Application.CorrelationId;
@@ -88,6 +89,65 @@ public class FeederMessageTest
         });
 
         Assert.Equal(1_000, payload.Count);
+    }
+
+    // --- Issue #133 security tests ---
+
+    [Fact]
+    public void Indexer_Setter_IsProtected_NotPubliclyAccessible()
+    {
+        var indexer = typeof(FeederMessage)
+            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .First(p => p.GetIndexParameters().Length > 0);
+
+        Assert.NotNull(indexer.SetMethod);
+        Assert.False(indexer.SetMethod!.IsPublic);
+        Assert.True(indexer.SetMethod!.IsFamily); // IsFamily == protected
+    }
+
+    [Fact]
+    public void Reset_IsProtected_NotPubliclyAccessible()
+    {
+        var resetMethod = typeof(FeederMessage)
+            .GetMethod("Reset", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+
+        Assert.NotNull(resetMethod);
+        Assert.False(resetMethod!.IsPublic);
+        Assert.True(resetMethod!.IsFamily); // IsFamily == protected
+    }
+
+    [Fact]
+    public void IDictionaryIndexer_Write_StillAllowsPayloadMutation()
+    {
+        var message = new TestFeederMessage();
+        var dict = (IDictionary<string, object?>)message;
+
+        dict["SomeKey"] = "SomeValue";
+
+        Assert.True(dict.TryGetValue("SomeKey", out var value));
+        Assert.Equal("SomeValue", value);
+    }
+
+    [Fact]
+    public void Reset_CanBeCalledBySubclass()
+    {
+        var message = new ResettableFeederMessage();
+        message.Id = Guid.NewGuid();
+
+        message.PublicReset();
+
+        Assert.Null(message.Id == Guid.Empty ? (Guid?)null : message.Id);
+    }
+
+    private class ResettableFeederMessage : FeederMessage
+    {
+        public Guid? Id
+        {
+            get => GetValueOrNull<Guid>();
+            set => SetValue(value);
+        }
+
+        public void PublicReset() => Reset();
     }
 
     private class TestFeederMessage : FeederMessage
