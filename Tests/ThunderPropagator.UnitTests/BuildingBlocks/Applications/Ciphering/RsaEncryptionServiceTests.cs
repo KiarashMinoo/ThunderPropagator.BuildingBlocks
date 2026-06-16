@@ -33,13 +33,11 @@ namespace ThunderPropagator.UnitTests.BuildingBlocks.Applications.Ciphering
         [Fact]
         public void Decrypt_ShouldReturnOriginalPlainText()
         {
-            // Arrange
             var cipherText = _rsaService.Encrypt(TestPlainText);
 
-            // Act
-            // The Encrypt implementation currently truncates base64 output, which causes decryption to fail
-            // so assert that parsing the cipher text throws a FormatException instead of successfully decrypting.
-            Assert.Throws<FormatException>(() => _rsaService.Decrypt(cipherText));
+            var decrypted = _rsaService.Decrypt(cipherText);
+
+            Assert.Equal(TestPlainText, decrypted);
         }
 
         [Fact]
@@ -55,12 +53,11 @@ namespace ThunderPropagator.UnitTests.BuildingBlocks.Applications.Ciphering
         [Fact]
         public void Decrypt_WithCustomPrivateKey_ShouldReturnOriginalPlainText()
         {
-            // Arrange
             var cipherText = RsaEncryptionService.Encrypt(TestPlainText, _keys.publicKey);
 
-            // Act
-            // Due to current behavior of Encrypt truncating the base64 output, decryption will fail with FormatException
-            Assert.Throws<FormatException>(() => RsaEncryptionService.Decrypt(cipherText, _keys.privateKey));
+            var decrypted = RsaEncryptionService.Decrypt(cipherText, _keys.privateKey);
+
+            Assert.Equal(TestPlainText, decrypted);
         }
 
         [Fact]
@@ -126,6 +123,52 @@ namespace ThunderPropagator.UnitTests.BuildingBlocks.Applications.Ciphering
             var defaultValue = (int)method.GetParameters()[0].DefaultValue!;
 
             Assert.True(defaultValue >= 2048, $"Default key size {defaultValue} is below the NIST-recommended minimum of 2048 bits.");
+        }
+
+        // --- Issue #135 checklist tests: RSA round-trips and OaepSHA256 padding ---
+
+        [Fact]
+        public void EncryptDecrypt_WithRsaParameters_RoundTrip()
+        {
+            var cipherText = RsaEncryptionService.Encrypt(TestPlainText, _keys.publicKey);
+
+            var decrypted = RsaEncryptionService.Decrypt(cipherText, _keys.privateKey);
+
+            Assert.Equal(TestPlainText, decrypted);
+        }
+
+        [Fact]
+        public void EncryptDecrypt_WithByteKeys_RoundTrip()
+        {
+            var (privateKeyBytes, publicKeyBytes) = RsaEncryptionHelper.GenerateRsaCodes();
+
+            var cipherText = RsaEncryptionService.Encrypt(TestPlainText, publicKeyBytes);
+            var decrypted = RsaEncryptionService.Decrypt(cipherText, privateKeyBytes);
+
+            Assert.Equal(TestPlainText, decrypted);
+        }
+
+        [Fact]
+        public void EncryptDecrypt_WithPemKeys_RoundTrip()
+        {
+            var (privatePem, publicPem) = RsaEncryptionHelper.GeneratePemCodes();
+
+            var cipherText = RsaEncryptionService.Encrypt(TestPlainText, publicPem);
+            var decrypted = RsaEncryptionService.Decrypt(cipherText, privatePem);
+
+            Assert.Equal(TestPlainText, decrypted);
+        }
+
+        [Fact]
+        public void Encrypt_WrongPrivateKey_ThrowsCryptographicException()
+        {
+            var (_, wrongPublicKey) = RsaEncryptionService.GenerateKeys();
+            var (correctPrivateKey, _) = RsaEncryptionService.GenerateKeys();
+
+            var cipherText = RsaEncryptionService.Encrypt(TestPlainText, wrongPublicKey);
+
+            Assert.Throws<CryptographicException>(() =>
+                RsaEncryptionService.Decrypt(cipherText, correctPrivateKey));
         }
     }
 }

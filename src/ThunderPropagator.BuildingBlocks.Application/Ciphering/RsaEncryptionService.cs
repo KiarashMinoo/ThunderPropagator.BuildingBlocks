@@ -95,7 +95,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Ciphering
             rsa.ImportRSAPublicKey(Guard.Against.NullOrEmpty(rsaPublicKey).ToArray(), out _);
             var dataBytes = Guard.Against.NullOrWhiteSpace(plainText).ToByteArray();
             var cipherData = rsa.Encrypt(dataBytes, RSAEncryptionPadding.OaepSHA256);
-            return Convert.ToBase64String(cipherData)[..^2];
+            return Convert.ToBase64String(cipherData).TrimEnd('=');
         }
 
         public static string Encrypt(string plainText, string pemPublicKey, int dwKeySize = 2048)
@@ -104,7 +104,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Ciphering
             rsa.ImportFromPem(Guard.Against.NullOrWhiteSpace(pemPublicKey));
             var dataBytes = Guard.Against.NullOrWhiteSpace(plainText).ToByteArray();
             var cipherData = rsa.Encrypt(dataBytes, RSAEncryptionPadding.OaepSHA256);
-            return Convert.ToBase64String(cipherData)[..^2];
+            return Convert.ToBase64String(cipherData).TrimEnd('=');
         }
 
         public static string Encrypt(string plainText, RSAParameters publicKey, int dwKeySize = 2048)
@@ -113,14 +113,14 @@ namespace ThunderPropagator.BuildingBlocks.Application.Ciphering
             rsa.ImportParameters(publicKey);
             var dataBytes = Guard.Against.NullOrWhiteSpace(plainText).ToByteArray();
             var cipherData = rsa.Encrypt(dataBytes, RSAEncryptionPadding.OaepSHA256);
-            return Convert.ToBase64String(cipherData)[..^2];
+            return Convert.ToBase64String(cipherData).TrimEnd('=');
         }
 
         public string Encrypt(string plainText) => Encrypt(Guard.Against.NullOrWhiteSpace(plainText), PublicKey);
 
         public static string Decrypt(string cipherText, byte[] rsaPrivateKey, int dwKeySize = 2048)
         {
-            var dataBytes = Convert.FromBase64String(Guard.Against.NullOrWhiteSpace(cipherText));
+            var dataBytes = Convert.FromBase64String(AddBase64Padding(Guard.Against.NullOrWhiteSpace(cipherText)));
             using var rsa = CreateRsaInstance(dwKeySize);
             rsa.ImportRSAPrivateKey(Guard.Against.NullOrEmpty(rsaPrivateKey).ToArray(), out _);
             var plainTextBytes = rsa.Decrypt(dataBytes, RSAEncryptionPadding.OaepSHA256);
@@ -129,7 +129,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Ciphering
 
         public static string Decrypt(string cipherText, string pemPrivateKey, int dwKeySize = 2048)
         {
-            var dataBytes = Convert.FromBase64String(Guard.Against.NullOrWhiteSpace(cipherText));
+            var dataBytes = Convert.FromBase64String(AddBase64Padding(Guard.Against.NullOrWhiteSpace(cipherText)));
             using var rsa = CreateRsaInstance(dwKeySize);
             rsa.ImportFromPem(Guard.Against.NullOrWhiteSpace(pemPrivateKey));
             var plainTextBytes = rsa.Decrypt(dataBytes, RSAEncryptionPadding.OaepSHA256);
@@ -138,11 +138,17 @@ namespace ThunderPropagator.BuildingBlocks.Application.Ciphering
 
         public static string Decrypt(string cipherText, RSAParameters privateKey, int dwKeySize = 2048)
         {
-            var dataBytes = Convert.FromBase64String(Guard.Against.NullOrWhiteSpace(cipherText));
+            var dataBytes = Convert.FromBase64String(AddBase64Padding(Guard.Against.NullOrWhiteSpace(cipherText)));
             using var rsa = CreateRsaInstance(dwKeySize);
             rsa.ImportParameters(privateKey);
             var plainTextBytes = rsa.Decrypt(dataBytes, RSAEncryptionPadding.OaepSHA256);
             return Encoding.UTF8.GetString(plainTextBytes);
+        }
+
+        private static string AddBase64Padding(string value)
+        {
+            var padding = value.Length % 4;
+            return padding == 0 ? value : value.PadRight(value.Length + 4 - padding, '=');
         }
 
         public string Decrypt(string cipherText) => Decrypt(Guard.Against.NullOrWhiteSpace(cipherText), PrivateKey);
