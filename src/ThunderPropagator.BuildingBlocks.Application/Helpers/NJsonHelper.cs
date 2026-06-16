@@ -134,14 +134,6 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             return JsonConvert.DeserializeObject<T>(json, NJsonSerializerSettings<T>(serializerSettings));
         }
 
-        public static T? FromNJson<T>(this string json, TypeNameHandling typeNameHandling)
-        {
-            const string activityName = $"{nameof(NJsonHelper)}_{nameof(FromNJson)}";
-            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
-
-            return JsonConvert.DeserializeObject<T>(json, GetCachedSettings(typeNameHandling, IsCamelCase(typeof(T))));
-        }
-
         public static object? FromNJson(this string json, Type type, Func<JsonSerializerSettings, JsonSerializerSettings>? settings = null)
         {
             const string activityName = $"{nameof(NJsonHelper)}_{nameof(FromNJson)}";
@@ -155,14 +147,6 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             var serializerSettings = BuildDefaultNSerializerSettings();
             settings(serializerSettings);
             return JsonConvert.DeserializeObject(json, type, NJsonSerializerSettings(type, serializerSettings));
-        }
-
-        public static object? FromNJson(this string json, Type type, TypeNameHandling typeNameHandling)
-        {
-            const string activityName = $"{nameof(NJsonHelper)}_{nameof(FromNJson)}";
-            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
-
-            return JsonConvert.DeserializeObject(json, type, GetCachedSettings(typeNameHandling, IsCamelCase(type)));
         }
 
         public static T? FromNJsonBytes<T>(this byte[] bytes, Func<JsonSerializerSettings, JsonSerializerSettings>? settings = null)
@@ -187,20 +171,6 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             return JsonConvert.DeserializeObject<T>(json, NJsonSerializerSettings<T>(serializerSettings));
         }
 
-        public static T? FromNJsonBytes<T>(this byte[] bytes, TypeNameHandling typeNameHandling)
-        {
-            if (bytes.Length == 0)
-            {
-                return default;
-            }
-
-            const string activityName = $"{nameof(NJsonHelper)}_{nameof(FromNJsonBytes)}";
-            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
-
-            var json = Encoding.UTF8.GetString(bytes);
-            return JsonConvert.DeserializeObject<T>(json, GetCachedSettings(typeNameHandling, IsCamelCase(typeof(T))));
-        }
-
         public static T? FromNJsonBase64<T>(this string str, Func<JsonSerializerSettings, JsonSerializerSettings>? settings = null)
         {
             if (string.IsNullOrWhiteSpace(str))
@@ -213,16 +183,27 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             return bytes.FromNJsonBytes<T>(settings);
         }
 
-        public static T? FromNJsonBase64<T>(this string str, TypeNameHandling typeNameHandling)
+        /// <summary>
+        /// Deserializes <paramref name="json"/> into <typeparamref name="T"/> allowing polymorphic
+        /// <c>$type</c> resolution, constrained to the types permitted by <paramref name="allowList"/>.
+        /// Use this internal overload only when polymorphic deserialization is genuinely required;
+        /// prefer <see cref="FromNJson{T}(string,Func{JsonSerializerSettings,JsonSerializerSettings}?)"/>
+        /// for all other deserialization.
+        /// </summary>
+        internal static T? FromNJsonPolymorphic<T>(this string json, ISerializationBinder allowList)
         {
-            if (string.IsNullOrWhiteSpace(str))
+            ArgumentNullException.ThrowIfNull(allowList);
+
+            const string activityName = $"{nameof(NJsonHelper)}_{nameof(FromNJsonPolymorphic)}";
+            using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
+
+            return JsonConvert.DeserializeObject<T>(json, new JsonSerializerSettings
             {
-                return default;
-            }
-
-            var bytes = Convert.FromBase64String(str);
-
-            return bytes.FromNJsonBytes<T>(typeNameHandling);
+                TypeNameHandling = TypeNameHandling.Objects,
+                SerializationBinder = allowList,
+                ContractResolver = IsCamelCase(typeof(T)) ? _camelCaseResolver : null,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            });
         }
 
         public static void PopulateFromNJson<T>(this string json, T target, Func<JsonSerializerSettings, JsonSerializerSettings>? settings = null)
