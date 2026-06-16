@@ -3,6 +3,7 @@ using CaseConverter;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using ThunderPropagator.BuildingBlocks.Application.Attributes;
 using ThunderPropagator.BuildingBlocks.Application.Helpers;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -34,6 +35,19 @@ namespace ThunderPropagator.BuildingBlocks.Application
                     .ToHashSet(StringComparer.OrdinalIgnoreCase));
         }
 
+        // Sensitive-key set per concrete subclass — properties marked [SensitiveData] are
+        // encrypted on write and decrypted on read by the JSON converter.
+        private static readonly ConcurrentDictionary<Type, IReadOnlySet<string>> _sensitiveKeysCache = new();
+
+        private static IReadOnlySet<string> GetSensitiveKeys(Type type)
+        {
+            return _sensitiveKeysCache.GetOrAdd(type, static t =>
+                t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(p => p.GetCustomAttribute<SensitiveDataAttribute>() != null)
+                    .Select(p => p.Name)
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase));
+        }
+
         private
 #if !DEBUG
             sealed
@@ -47,10 +61,15 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
                 writer.WriteStartObject();
 
+                var sensitiveKeys = GetSensitiveKeys(value.GetType());
+
                 foreach (var item in value._properties)
                 {
                     writer.WritePropertyName(item.Key.ToCamelCase());
-                    writer.WriteValue(item.Value);
+                    var v = SensitiveDataEncryption.IsConfigured && sensitiveKeys.Contains(item.Key)
+                        ? SensitiveDataEncryption.Encrypt(item.Value)
+                        : item.Value;
+                    writer.WriteValue(v);
                 }
 
                 writer.WriteEndObject();
@@ -64,13 +83,17 @@ namespace ThunderPropagator.BuildingBlocks.Application
                 if (rtn is not null)
                 {
                     var allowedKeys = GetAllowedKeys(objectType);
+                    var sensitiveKeys = GetSensitiveKeys(objectType);
                     var jObject = JObject.Load(reader);
                     foreach (var property in jObject)
                     {
                         var key = property.Key.ToPascalCase();
                         if (allowedKeys.Count > 0 && !allowedKeys.Contains(key))
                             continue;
-                        rtn._properties[key] = property.Value!.ToString();
+                        var rawValue = property.Value!.ToString();
+                        rtn._properties[key] = SensitiveDataEncryption.IsConfigured && sensitiveKeys.Contains(key)
+                            ? SensitiveDataEncryption.Decrypt(rawValue)
+                            : rawValue;
                     }
                 }
 
@@ -212,5 +235,17 @@ namespace ThunderPropagator.BuildingBlocks.Application
         public static TServiceConfiguration CreateNew<TServiceConfiguration>(ServiceConfiguration serviceConfiguration)
             where TServiceConfiguration : ServiceConfiguration, new()
             => new() { _properties = new ConcurrentDictionary<string, string>(serviceConfiguration._properties) };
+
+        /// <summary>
+        /// Configures the AES key used to encrypt properties marked with
+        /// <see cref="Attributes.SensitiveDataAttribute"/> during JSON serialization and to decrypt
+        /// them during JSON deserialization. Delegates to
+        /// <see cref="SensitiveDataEncryption.Configure"/>; subsequent calls are silently ignored.
+        /// </summary>
+        /// <param name="key">The AES key bytes (16, 24, or 32 bytes).</param>
+        public static void ConfigureEncryption(byte[] key)
+        {
+            SensitiveDataEncryption.Configure(key);
+        }
     }
 }

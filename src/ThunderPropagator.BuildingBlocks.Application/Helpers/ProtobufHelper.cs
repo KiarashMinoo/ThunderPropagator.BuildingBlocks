@@ -11,7 +11,16 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             MemoryStream memoryStream = new();
-            Serializer.Serialize(memoryStream, instance);
+            var originals = SensitiveDataEncryption.EncryptInPlace(instance);
+            try
+            {
+                Serializer.Serialize(memoryStream, instance);
+            }
+            finally
+            {
+                if (originals is not null)
+                    SensitiveDataEncryption.RevertEncryption(instance, originals);
+            }
             return memoryStream;
         }
 
@@ -38,7 +47,9 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             const string activityName = $"{nameof(ProtobufHelper)}_{nameof(FromProtobuf)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
-            return Serializer.Deserialize<T>(stream);
+            var result = Serializer.Deserialize<T>(stream);
+            SensitiveDataEncryption.DecryptInPlace(result);
+            return result;
         }
 
         public static T FromProtobuf<T>(this byte[] bytes)

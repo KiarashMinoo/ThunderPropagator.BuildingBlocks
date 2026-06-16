@@ -10,7 +10,16 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             const string activityName = $"{nameof(MessagePackHelper)}_{nameof(ToMessagePackJson)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
-            return MessagePackSerializer.SerializeToJson(instance, serializerOptions, cancellationToken);
+            var originals = SensitiveDataEncryption.EncryptInPlace(instance);
+            try
+            {
+                return MessagePackSerializer.SerializeToJson(instance, serializerOptions, cancellationToken);
+            }
+            finally
+            {
+                if (originals is not null)
+                    SensitiveDataEncryption.RevertEncryption(instance, originals);
+            }
         }
 
         public static Stream ToMessagePack<T>(this T instance, MessagePackSerializerOptions? serializerOptions = null, CancellationToken cancellationToken = default)
@@ -19,7 +28,16 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
             MemoryStream memoryStream = new();
-            MessagePackSerializer.Serialize(memoryStream, instance, serializerOptions, cancellationToken);
+            var originals = SensitiveDataEncryption.EncryptInPlace(instance);
+            try
+            {
+                MessagePackSerializer.Serialize(memoryStream, instance, serializerOptions, cancellationToken);
+            }
+            finally
+            {
+                if (originals is not null)
+                    SensitiveDataEncryption.RevertEncryption(instance, originals);
+            }
             return memoryStream;
         }
 
@@ -28,7 +46,16 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             const string activityName = $"{nameof(MessagePackHelper)}_{nameof(ToMessagePackBytes)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
-            return MessagePackSerializer.Serialize(instance, serializerOptions, cancellationToken);
+            var originals = SensitiveDataEncryption.EncryptInPlace(instance);
+            try
+            {
+                return MessagePackSerializer.Serialize(instance, serializerOptions, cancellationToken);
+            }
+            finally
+            {
+                if (originals is not null)
+                    SensitiveDataEncryption.RevertEncryption(instance, originals);
+            }
         }
 
         public static string ToMessagePackBase64<T>(this T instance, MessagePackSerializerOptions? serializerOptions = null, CancellationToken cancellationToken = default)
@@ -45,7 +72,9 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             const string activityName = $"{nameof(MessagePackHelper)}_{nameof(FromMessagePack)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
-            return MessagePackSerializer.Deserialize<T>(stream, serializerOptions, cancellationToken);
+            var result = MessagePackSerializer.Deserialize<T>(stream, serializerOptions, cancellationToken);
+            SensitiveDataEncryption.DecryptInPlace(result);
+            return result;
         }
 
         public static T FromMessagePack<T>(this byte[] bytes, MessagePackSerializerOptions? serializerOptions = null, CancellationToken cancellationToken = default)

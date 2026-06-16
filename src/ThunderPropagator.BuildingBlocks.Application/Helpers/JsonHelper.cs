@@ -1,6 +1,7 @@
 using ThunderPropagator.BuildingBlocks.Application.Attributes;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace ThunderPropagator.BuildingBlocks.Application.Helpers
@@ -18,7 +19,46 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                TypeInfoResolver = new DefaultJsonTypeInfoResolver().WithAddedModifier(ApplySensitiveDataEncryption),
             };
+        }
+
+        private static void ApplySensitiveDataEncryption(JsonTypeInfo typeInfo)
+        {
+            if (typeInfo.Kind != JsonTypeInfoKind.Object)
+                return;
+
+            foreach (var prop in typeInfo.Properties)
+            {
+                if (prop.PropertyType == typeof(string)
+                    && prop.AttributeProvider?.GetCustomAttributes(typeof(SensitiveDataAttribute), true) is { Length: > 0 })
+                {
+                    prop.CustomConverter = SensitiveDataStringJsonConverter.Instance;
+                }
+            }
+        }
+
+        private sealed class SensitiveDataStringJsonConverter : JsonConverter<string>
+        {
+            internal static readonly SensitiveDataStringJsonConverter Instance = new();
+
+            public override string? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                var value = reader.GetString();
+                if (value is null || !SensitiveDataEncryption.IsConfigured)
+                    return value;
+                return SensitiveDataEncryption.Decrypt(value);
+            }
+
+            public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
+            {
+                if (!SensitiveDataEncryption.IsConfigured)
+                {
+                    writer.WriteStringValue(value);
+                    return;
+                }
+                writer.WriteStringValue(SensitiveDataEncryption.Encrypt(value));
+            }
         }
 
         // Returns a mutable clone of the default options for callers that need to customise

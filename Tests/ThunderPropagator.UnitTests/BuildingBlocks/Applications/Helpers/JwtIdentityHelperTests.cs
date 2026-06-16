@@ -246,6 +246,41 @@ public class JwtIdentityHelperTests
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
+    // --- Issue #136 security tests: telemetry tag safety ---
+
+    [Fact]
+    public void GetPrincipalFromToken_FailureResult_DoesNotContainSigningKeyValue()
+    {
+        // The error message surfaced to callers on validation failure must never
+        // expose the raw signing key.  If the JWT library ever changes to include
+        // key material in exception messages this test will catch the regression.
+        var expiredToken = GenerateToken(Config, TimeSpan.FromMinutes(-10));
+
+        var result = JwtIdentityHelper.GetPrincipalFromToken(expiredToken, Config);
+
+        Assert.False(result.IsSuccess);
+        Assert.NotNull(result.Error);
+        Assert.DoesNotContain(SigningKey, result.Error, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void GetPrincipalFromToken_WrongKeyFailure_DoesNotContainSigningKeyValue()
+    {
+        var otherConfig = new TestJwtConfig
+        {
+            IssuerSigningKey = "completely-different-key-that-is-long-enough-for-hmac!!",
+            ValidAudience = Audience,
+            ValidIssuer = Issuer,
+            ValidateIssuerSigningKey = true
+        };
+        var token = GenerateToken(otherConfig, TimeSpan.FromMinutes(5));
+
+        var result = JwtIdentityHelper.GetPrincipalFromToken(token, Config);
+
+        Assert.False(result.IsSuccess);
+        Assert.DoesNotContain(SigningKey, result.Error!, StringComparison.OrdinalIgnoreCase);
+    }
+
     private static string GenerateTokenWithOverrides(JwtConfiguration config, TimeSpan lifetime, string? issuer = null, string? audience = null)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.IssuerSigningKey));
