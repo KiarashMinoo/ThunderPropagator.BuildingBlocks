@@ -66,7 +66,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
                     foreach (var property in jObject)
                     {
                         var key = property.Key.ToPascalCase();
-                        if (!allowedKeys.Contains(key))
+                        if (allowedKeys.Count > 0 && !allowedKeys.Contains(key))
                             continue;
                         rtn._properties[key] = property.Value!.ToString();
                     }

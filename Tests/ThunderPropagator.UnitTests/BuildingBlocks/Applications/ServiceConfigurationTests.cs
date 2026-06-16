@@ -139,6 +139,23 @@ namespace ThunderPropagator.UnitTests.BuildingBlocks.Applications
             Assert.Null(config.Region);
         }
 
+        [Fact]
+        public void ReadJson_ConfigurationWithNoProperties_AcceptsAllKeys()
+        {
+            // A raw-bag subclass with no declared properties has no surface to protect,
+            // so all incoming keys must pass through unchanged.
+            const string json = "{\"anyKey\":\"value1\",\"anotherKey\":\"value2\"}";
+
+            var config = JsonConvert.DeserializeObject<EmptyServiceConfiguration>(json);
+
+            Assert.NotNull(config);
+            var keys = config.Select(kv => kv.Key).ToList();
+            Assert.Contains("AnyKey", keys);
+            Assert.Contains("AnotherKey", keys);
+        }
+
+        private class EmptyServiceConfiguration : ServiceConfiguration { }
+
         private class TestServiceConfiguration : ServiceConfiguration
         {
             public string? Name
