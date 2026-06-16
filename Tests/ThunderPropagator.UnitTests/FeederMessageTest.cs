@@ -91,6 +91,45 @@ public class FeederMessageTest
         Assert.Equal(1_000, payload.Count);
     }
 
+    // --- Issue #33 append-only contract tests ---
+
+    [Fact]
+    public void IDictionary_IsReadOnly_ReturnsTrue()
+    {
+        var message = new TestFeederMessage();
+        var collection = (ICollection<KeyValuePair<string, object?>>)message;
+
+        Assert.True(collection.IsReadOnly);
+    }
+
+    [Fact]
+    public void IDictionary_Clear_ThrowsNotSupportedException()
+    {
+        var message = new TestFeederMessage();
+        var collection = (ICollection<KeyValuePair<string, object?>>)message;
+
+        Assert.Throws<NotSupportedException>(() => collection.Clear());
+    }
+
+    [Fact]
+    public void IDictionary_RemoveByKey_ThrowsNotSupportedException()
+    {
+        var message = new TestFeederMessage { Id = Guid.NewGuid() };
+        var dict = (IDictionary<string, object?>)message;
+
+        Assert.Throws<NotSupportedException>(() => dict.Remove("Id"));
+    }
+
+    [Fact]
+    public void IDictionary_RemoveByKvp_ThrowsNotSupportedException()
+    {
+        var message = new TestFeederMessage { Id = Guid.NewGuid() };
+        var collection = (ICollection<KeyValuePair<string, object?>>)message;
+        var kvp = new KeyValuePair<string, object?>("Id", message.Id);
+
+        Assert.Throws<NotSupportedException>(() => collection.Remove(kvp));
+    }
+
     // --- Issue #133 security tests ---
 
     [Fact]
