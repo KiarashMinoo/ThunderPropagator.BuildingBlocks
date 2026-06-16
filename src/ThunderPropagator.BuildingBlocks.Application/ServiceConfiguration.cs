@@ -29,6 +29,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
         {
             return _allowedKeysCache.GetOrAdd(type, static t =>
                 t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(p => p.CanWrite && p.GetIndexParameters().Length == 0)
                     .Select(p => p.Name)
                     .ToHashSet(StringComparer.OrdinalIgnoreCase));
         }
@@ -199,6 +200,8 @@ namespace ThunderPropagator.BuildingBlocks.Application
         public static TServiceConfiguration CreateNew<TServiceConfiguration>(IEnumerable<KeyValuePair<string, string>> properties)
             where TServiceConfiguration : ServiceConfiguration, new()
         {
+            ArgumentNullException.ThrowIfNull(properties);
+
             var allowedKeys = GetAllowedKeys(typeof(TServiceConfiguration));
             var filtered = allowedKeys.Count > 0
                 ? properties.Where(kv => allowedKeys.Contains(kv.Key))

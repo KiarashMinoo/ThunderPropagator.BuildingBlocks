@@ -252,6 +252,40 @@ namespace ThunderPropagator.UnitTests.BuildingBlocks.Applications
             Assert.Contains("AnotherKey", keys);
         }
 
+        [Fact]
+        public void CreateNew_NullProperties_ThrowsArgumentNullException()
+        {
+            IEnumerable<KeyValuePair<string, string>> nullProperties = null!;
+            Assert.Throws<ArgumentNullException>(() =>
+                ServiceConfiguration.CreateNew<TestServiceConfiguration>(nullProperties));
+        }
+
+        [Fact]
+        public void ReadJson_ReadOnlyProperty_IsNotInjectedIntoProperties()
+        {
+            // "ComputedName" is a getter-only property — the allowlist must exclude it.
+            const string json = "{\"name\":\"primary\",\"computedName\":\"injected\"}";
+
+            var config = JsonConvert.DeserializeObject<ReadOnlyPropertyConfiguration>(json);
+
+            Assert.NotNull(config);
+            Assert.Equal("primary", config.Name);
+            var keys = config.Select(kv => kv.Key).ToList();
+            Assert.DoesNotContain("ComputedName", keys);
+        }
+
+        private class ReadOnlyPropertyConfiguration : ServiceConfiguration
+        {
+            public string? Name
+            {
+                get => Get<string>();
+                set => Set(value);
+            }
+
+            // Getter-only — must not appear in the allowlist.
+            public string? ComputedName => Name?.ToUpperInvariant();
+        }
+
         private class EmptyServiceConfiguration : ServiceConfiguration { }
 
         private class TestServiceConfiguration : ServiceConfiguration
