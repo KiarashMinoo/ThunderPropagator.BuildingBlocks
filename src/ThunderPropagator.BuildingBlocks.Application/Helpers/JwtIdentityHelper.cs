@@ -44,6 +44,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             {
                 var principal = tokenHandler.ValidateToken(token, validationParameters, out _);
                 activity?.SetTag(Telemetry.SuccessfulTag.Key, Telemetry.SuccessfulTag.Value);
+                activity?.SetStatus(ActivityStatusCode.Ok);
                 return Result<ClaimsPrincipal>.Success(principal);
             }
             catch (Exception ex) when (ex is SecurityTokenException or ArgumentException)
@@ -55,6 +56,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
                 // token structure detail, or any credential from jwtConfiguration.
                 activity?.SetTag(Telemetry.UnsuccessfulTag.Key, Telemetry.UnsuccessfulTag.Value);
                 activity?.SetTag("exception.type", ex.GetType().Name);
+                activity?.SetStatus(ActivityStatusCode.Error);
                 return Result<ClaimsPrincipal>.Failure(ex.Message);
             }
         }
