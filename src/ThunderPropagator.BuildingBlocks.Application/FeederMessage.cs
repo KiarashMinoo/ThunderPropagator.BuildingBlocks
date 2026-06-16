@@ -9,6 +9,23 @@ using System.Runtime.CompilerServices;
 
 namespace ThunderPropagator.BuildingBlocks.Application
 {
+    /// <summary>
+    /// Abstract base class for all strongly-typed DTO carrier messages. Each subclass property
+    /// stores its value in a shared <c>ConcurrentDictionary</c> keyed by the property name via
+    /// <see cref="System.Runtime.CompilerServices.CallerMemberNameAttribute"/>. This means the
+    /// dictionary is tightly coupled to the object's typed surface; callers must never remove or
+    /// clear entries through the <see cref="IDictionary{TKey,TValue}"/> interface, as doing so
+    /// would silently wipe typed property values and leave the instance in a broken state.
+    /// <para>
+    /// <see cref="IDictionary{TKey,TValue}"/> is exposed only for serializers and infrastructure
+    /// code that need read or add access. <see cref="ICollection{T}.IsReadOnly"/> returns
+    /// <see langword="true"/> to signal the append-only contract: <c>Clear()</c>,
+    /// <c>Remove(string)</c>, and <c>Remove(KeyValuePair)</c> always throw
+    /// <see cref="NotSupportedException"/>. The only safe payload-clearing operations are
+    /// <see cref="Reset"/> (opt-in object-pool reset) and <see cref="DisposeManagedResources"/>
+    /// (called on disposal).
+    /// </para>
+    /// </summary>
     [JsonSerialization(CamelCase = false)]
     public abstract class FeederMessage : DisposableObject,
         IDictionary<string, object?>,
@@ -50,7 +67,12 @@ namespace ThunderPropagator.BuildingBlocks.Application
             set => _payload.SetValue(value, Guard.Against.NullOrWhiteSpace(key));
         }
 
-        bool ICollection<KeyValuePair<string, object?>>.IsReadOnly => false;
+        /// <summary>
+        /// Always <see langword="true"/>. <see cref="FeederMessage"/> is an append-only DTO carrier;
+        /// mutation via <see cref="IDictionary{TKey,TValue}"/> is intentionally unsupported.
+        /// Use <see cref="SetValue"/> from subclass constructors or property setters to initialise fields.
+        /// </summary>
+        bool ICollection<KeyValuePair<string, object?>>.IsReadOnly => true;
 
         int ICollection<KeyValuePair<string, object?>>.Count => ((IDictionary<string, object?>)_payload).Count;
         int IReadOnlyCollection<KeyValuePair<string, object?>>.Count => ((IReadOnlyDictionary<string, object?>)_payload).Count;
