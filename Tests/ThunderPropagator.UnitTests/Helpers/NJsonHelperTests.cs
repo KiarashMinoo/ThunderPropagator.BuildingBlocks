@@ -209,5 +209,11 @@ namespace ThunderPropagator.UnitTests.Helpers
 
             Assert.Throws<JsonSerializationException>(() => json.FromNJsonPolymorphic<Animal>(new DogOnlyBinder()));
         }
+
+        [Fact]
+        public void FromNJsonPolymorphic_NullBinder_ThrowsArgumentNullException()
+        {
+            Assert.Throws<ArgumentNullException>(() => "{\"kind\":\"dog\"}".FromNJsonPolymorphic<Animal>(null!));
+        }
     }
 }

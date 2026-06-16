@@ -192,6 +192,8 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         /// </summary>
         internal static T? FromNJsonPolymorphic<T>(this string json, ISerializationBinder allowList)
         {
+            ArgumentNullException.ThrowIfNull(allowList);
+
             const string activityName = $"{nameof(NJsonHelper)}_{nameof(FromNJsonPolymorphic)}";
             using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(activityName, ActivityKind.Internal) : null;
 
