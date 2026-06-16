@@ -17,18 +17,20 @@ namespace ThunderPropagator.BuildingBlocks.Application
     public static class Telemetry
     {
         /// <summary>
-        /// The default <see cref="System.Diagnostics.Metrics.Meter"/> name for this library.
-        /// Override at startup via the <c>METER_NAME</c> environment variable.
-        /// Follows the OTel <c>thunderpropagator.{subsystem}</c> convention.
+        /// The default <see cref="System.Diagnostics.Metrics.Meter"/> name.
+        /// Subsystem-specific packages should override this via the <c>METER_NAME</c>
+        /// environment variable using the <c>thunderpropagator.{subsystem}</c> convention
+        /// (e.g., <c>thunderpropagator.feeders</c>).
         /// </summary>
-        public const string MeterName = "thunderpropagator.buildingblocks";
+        public const string MeterName = "thunderpropagator";
 
         /// <summary>
-        /// The default <see cref="ActivitySource"/> name for this library.
-        /// Override at startup via the <c>ACTIVITY_NAME</c> environment variable.
-        /// Follows the OTel <c>thunderpropagator.{subsystem}</c> convention.
+        /// The default <see cref="ActivitySource"/> name.
+        /// Subsystem-specific packages should override this via the <c>ACTIVITY_NAME</c>
+        /// environment variable using the <c>thunderpropagator.{subsystem}</c> convention
+        /// (e.g., <c>thunderpropagator.feeders</c>).
         /// </summary>
-        public const string ActivityName = "thunderpropagator.buildingblocks";
+        public const string ActivityName = "thunderpropagator";
 
         private static string _version = "1.0.0";
         private static int _configured;
