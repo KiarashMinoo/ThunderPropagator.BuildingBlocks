@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using ThunderPropagator.BuildingBlocks.Application.Attributes;
@@ -8,7 +9,8 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
 {
     public static class NJsonHelper
     {
-        private static readonly CamelCasePropertyNamesContractResolver _camelCaseResolver = new();
+        private static readonly SensitiveDataContractResolver _camelCaseResolver = new(camelCase: true);
+        private static readonly SensitiveDataContractResolver _defaultResolver = new(camelCase: false);
         private static readonly ConcurrentDictionary<int, JsonSerializerSettings> _settingsCache = new();
 
         private static JsonSerializerSettings GetCachedSettings(TypeNameHandling typeNameHandling, bool camelCase)
@@ -17,7 +19,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             return _settingsCache.GetOrAdd(key, static (_, args) =>
                 new JsonSerializerSettings
                 {
-                    ContractResolver = args.camelCase ? _camelCaseResolver : null,
+                    ContractResolver = args.camelCase ? _camelCaseResolver : _defaultResolver,
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                     TypeNameHandling = args.typeNameHandling
                 }, (typeNameHandling, camelCase));
@@ -52,7 +54,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             var jsonSerializationAttribute = JsonSerializationAttributeCache.Get(type);
 
             if (jsonSerializationAttribute?.CamelCase == false)
-                serializerSettings.ContractResolver = null;
+                serializerSettings.ContractResolver = _defaultResolver;
 
             return serializerSettings;
         }
@@ -201,7 +203,7 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
             {
                 TypeNameHandling = TypeNameHandling.Objects,
                 SerializationBinder = allowList,
-                ContractResolver = IsCamelCase(typeof(T)) ? _camelCaseResolver : null,
+                ContractResolver = IsCamelCase(typeof(T)) ? _camelCaseResolver : _defaultResolver,
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             });
         }
@@ -226,6 +228,63 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
 
             var json = Encoding.UTF8.GetString(bytes);
             json.PopulateFromNJson(target, settings);
+        }
+
+        // Extends DefaultContractResolver (not CamelCasePropertyNamesContractResolver, which
+        // has a shared static contract cache that would suppress our CreateProperty override)
+        // and transparently encrypts/decrypts string properties marked [SensitiveData].
+        private
+#if !DEBUG
+            sealed
+#endif
+            class SensitiveDataContractResolver : DefaultContractResolver
+        {
+            public SensitiveDataContractResolver(bool camelCase)
+            {
+                if (camelCase)
+                    NamingStrategy = new CamelCaseNamingStrategy();
+            }
+
+            protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
+            {
+                var prop = base.CreateProperty(member, memberSerialization);
+
+                if (member.GetCustomAttribute<SensitiveDataAttribute>() is not null
+                    && prop.PropertyType == typeof(string))
+                {
+                    prop.ValueProvider = new SensitiveDataValueProvider(prop.ValueProvider!);
+                }
+
+                return prop;
+            }
+        }
+
+        private
+#if !DEBUG
+            sealed
+#endif
+            class SensitiveDataValueProvider : IValueProvider
+        {
+            private readonly IValueProvider _inner;
+
+            public SensitiveDataValueProvider(IValueProvider inner) => _inner = inner;
+
+            // Called during serialization: read the plain value, encrypt before writing.
+            public object? GetValue(object target)
+            {
+                var value = _inner.GetValue(target) as string;
+                if (value is null || !SensitiveDataEncryption.IsConfigured)
+                    return value;
+                return SensitiveDataEncryption.Encrypt(value);
+            }
+
+            // Called during deserialization: decrypt the ciphertext before setting the property.
+            public void SetValue(object target, object? value)
+            {
+                if (value is string ciphertext && SensitiveDataEncryption.IsConfigured)
+                    value = SensitiveDataEncryption.Decrypt(ciphertext);
+                _inner.SetValue(target, value);
+            }
         }
     }
 }
