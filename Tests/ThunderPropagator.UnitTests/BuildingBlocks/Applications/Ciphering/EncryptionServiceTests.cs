@@ -143,6 +143,33 @@ namespace ThunderPropagator.UnitTests.BuildingBlocks.Applications.Ciphering
             Assert.True(defaultValue >= 600_000, $"Default iteration count {defaultValue} is below the NIST-recommended minimum of 600 000.");
         }
 
+        // --- Issue #135 checklist tests: PBKDF2 algorithm hygiene ---
+
+        [Fact]
+        public void CreateKey_DefaultAlgorithm_ProducesSameResultAsSha3_256Explicit()
+        {
+            // Verifies the default algorithm is SHA3-256, not a weak hash like MD5 or SHA-1.
+            // If the default drifted to a weaker algorithm, the two derived keys would differ.
+            var salt = RandomNumberGenerator.GetBytes(16);
+
+            var keyDefault = EncryptionService.CreateKey(TestPassword, salt, iterations: TestIterations);
+            var keyExplicit = EncryptionService.CreateKey(TestPassword, salt, iterations: TestIterations, algorithmName: HashAlgorithmName.SHA3_256);
+
+            Assert.Equal(keyExplicit, keyDefault);
+        }
+
+        [Fact]
+        public void CreateKey_WithWeakAlgorithm_Sha1_ProducesDifferentKeyThanDefault()
+        {
+            // SHA-1 is explicitly NOT the default; this ensures the default is a stronger algorithm.
+            var salt = RandomNumberGenerator.GetBytes(16);
+
+            var keyDefault = EncryptionService.CreateKey(TestPassword, salt, iterations: TestIterations);
+            var keySha1 = EncryptionService.CreateKey(TestPassword, salt, iterations: TestIterations, algorithmName: HashAlgorithmName.SHA1);
+
+            Assert.NotEqual(keySha1, keyDefault);
+        }
+
         private static string AddBase64Padding(string value)
         {
             var padding = value.Length % 4;
