@@ -25,6 +25,14 @@ public class JwtIdentityHelperTests
         ValidateIssuerSigningKey = true
     };
 
+    // Flags are intentionally not set — relies on the secure defaults (all true).
+    private static readonly TestJwtConfig DefaultConfig = new()
+    {
+        IssuerSigningKey = SigningKey,
+        ValidAudience = Audience,
+        ValidIssuer = Issuer
+    };
+
     [Fact]
     public void GetPrincipalFromToken_ValidToken_ReturnsSuccessWithPrincipal()
     {
@@ -150,6 +158,81 @@ public class JwtIdentityHelperTests
         Assert.Throws<InvalidOperationException>(() => _ = result.Value);
     }
 
+    // --- Default-flag security tests (acceptance criteria for issue #130) ---
+
+    [Fact]
+    public void DefaultConfig_ValidToken_ReturnsSuccess()
+    {
+        var token = GenerateToken(DefaultConfig, TimeSpan.FromMinutes(5));
+
+        var result = JwtIdentityHelper.GetPrincipalFromToken(token, DefaultConfig);
+
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
+    }
+
+    [Fact]
+    public void DefaultConfig_ExpiredToken_ReturnsFailure()
+    {
+        var token = GenerateToken(DefaultConfig, TimeSpan.FromMinutes(-10));
+
+        var result = JwtIdentityHelper.GetPrincipalFromToken(token, DefaultConfig);
+
+        Assert.False(result.IsSuccess);
+        Assert.NotNull(result.Error);
+    }
+
+    [Fact]
+    public void DefaultConfig_TamperedSignature_ReturnsFailure()
+    {
+        var token = GenerateToken(DefaultConfig, TimeSpan.FromMinutes(5));
+        var tampered = token[..^4] + "XXXX";
+
+        var result = JwtIdentityHelper.GetPrincipalFromToken(tampered, DefaultConfig);
+
+        Assert.False(result.IsSuccess);
+        Assert.NotNull(result.Error);
+    }
+
+    [Fact]
+    public void DefaultConfig_WrongSigningKey_ReturnsFailure()
+    {
+        var otherConfig = new TestJwtConfig
+        {
+            IssuerSigningKey = "completely-different-key-that-is-long-enough-for-hmac!!",
+            ValidAudience = Audience,
+            ValidIssuer = Issuer
+        };
+        var token = GenerateToken(otherConfig, TimeSpan.FromMinutes(5));
+
+        var result = JwtIdentityHelper.GetPrincipalFromToken(token, DefaultConfig);
+
+        Assert.False(result.IsSuccess);
+        Assert.NotNull(result.Error);
+    }
+
+    [Fact]
+    public void DefaultConfig_WrongIssuer_ReturnsFailure()
+    {
+        var token = GenerateTokenWithOverrides(DefaultConfig, TimeSpan.FromMinutes(5), issuer: "wrong-issuer");
+
+        var result = JwtIdentityHelper.GetPrincipalFromToken(token, DefaultConfig);
+
+        Assert.False(result.IsSuccess);
+        Assert.NotNull(result.Error);
+    }
+
+    [Fact]
+    public void DefaultConfig_WrongAudience_ReturnsFailure()
+    {
+        var token = GenerateTokenWithOverrides(DefaultConfig, TimeSpan.FromMinutes(5), audience: "wrong-audience");
+
+        var result = JwtIdentityHelper.GetPrincipalFromToken(token, DefaultConfig);
+
+        Assert.False(result.IsSuccess);
+        Assert.NotNull(result.Error);
+    }
+
     private static string GenerateToken(JwtConfiguration config, TimeSpan lifetime)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.IssuerSigningKey));
@@ -157,6 +240,19 @@ public class JwtIdentityHelperTests
         var token = new JwtSecurityToken(
             issuer: config.ValidIssuer,
             audience: config.ValidAudience,
+            expires: DateTime.UtcNow.Add(lifetime),
+            signingCredentials: credentials
+        );
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    private static string GenerateTokenWithOverrides(JwtConfiguration config, TimeSpan lifetime, string? issuer = null, string? audience = null)
+    {
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.IssuerSigningKey));
+        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var token = new JwtSecurityToken(
+            issuer: issuer ?? config.ValidIssuer,
+            audience: audience ?? config.ValidAudience,
             expires: DateTime.UtcNow.Add(lifetime),
             signingCredentials: credentials
         );
