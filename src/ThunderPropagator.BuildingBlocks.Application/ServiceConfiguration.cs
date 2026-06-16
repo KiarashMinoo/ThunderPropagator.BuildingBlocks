@@ -21,23 +21,24 @@ namespace ThunderPropagator.BuildingBlocks.Application
         INotifyPropertyChanging,
         IEquatable<ServiceConfiguration>
     {
+        // One allowlist per concrete subclass, built once via reflection and reused by both
+        // the JSON converter and the CreateNew factory.
+        private static readonly ConcurrentDictionary<Type, IReadOnlySet<string>> _allowedKeysCache = new();
+
+        private static IReadOnlySet<string> GetAllowedKeys(Type type)
+        {
+            return _allowedKeysCache.GetOrAdd(type, static t =>
+                t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    .Select(p => p.Name)
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase));
+        }
+
         private
 #if !DEBUG
             sealed
 #endif
             class ServiceConfigurationJsonConverter : JsonConverter<ServiceConfiguration>
         {
-            // One allowlist per concrete subclass, built once via reflection and reused.
-            private static readonly ConcurrentDictionary<Type, IReadOnlySet<string>> _allowedKeysCache = new();
-
-            private static IReadOnlySet<string> GetAllowedKeys(Type type)
-            {
-                return _allowedKeysCache.GetOrAdd(type, static t =>
-                    t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                        .Select(p => p.Name)
-                        .ToHashSet(StringComparer.OrdinalIgnoreCase));
-            }
-
             public override void WriteJson(JsonWriter writer, ServiceConfiguration? value, JsonSerializer serializer)
             {
                 if (value is null)
@@ -78,8 +79,24 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         private ConcurrentDictionary<string, string> _properties = null!;
 
-        public event PropertyChangingEventHandler? PropertyChanging;
-        public event PropertyChangedEventHandler? PropertyChanged;
+        private PropertyChangingEventHandler? _propertyChanging;
+        private PropertyChangedEventHandler? _propertyChanged;
+
+        // Explicit interface implementations prevent external code from subscribing
+        // directly on the concrete type and observing sensitive property writes.
+        // Subscription still works via the INotifyPropertyChanging / INotifyPropertyChanged
+        // interface references, which is the intended usage pattern.
+        event PropertyChangingEventHandler? INotifyPropertyChanging.PropertyChanging
+        {
+            add => _propertyChanging += value;
+            remove => _propertyChanging -= value;
+        }
+
+        event PropertyChangedEventHandler? INotifyPropertyChanged.PropertyChanged
+        {
+            add => _propertyChanged += value;
+            remove => _propertyChanged -= value;
+        }
 
         protected ServiceConfiguration() => _properties = new ConcurrentDictionary<string, string>();
 
@@ -105,11 +122,11 @@ namespace ThunderPropagator.BuildingBlocks.Application
                     return;
                 }
 
-                PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(propertyName));
+                _propertyChanging?.Invoke(this, new PropertyChangingEventArgs(propertyName));
 
                 _properties[propertyName] = stringValue;
 
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                _propertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
             }
         }
 
@@ -181,7 +198,13 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         public static TServiceConfiguration CreateNew<TServiceConfiguration>(IEnumerable<KeyValuePair<string, string>> properties)
             where TServiceConfiguration : ServiceConfiguration, new()
-            => new() { _properties = new ConcurrentDictionary<string, string>(properties) };
+        {
+            var allowedKeys = GetAllowedKeys(typeof(TServiceConfiguration));
+            var filtered = allowedKeys.Count > 0
+                ? properties.Where(kv => allowedKeys.Contains(kv.Key))
+                : properties;
+            return new() { _properties = new ConcurrentDictionary<string, string>(filtered) };
+        }
 
         public static TServiceConfiguration CreateNew<TServiceConfiguration>(ServiceConfiguration serviceConfiguration)
             where TServiceConfiguration : ServiceConfiguration, new()
