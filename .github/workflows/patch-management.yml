@@ -48,6 +48,7 @@ jobs:
       fail-on-outdated: ${{ github.event_name == 'workflow_dispatch' && inputs.fail-on-outdated || false }}
       create-issue: ${{ github.event_name == 'workflow_dispatch' && inputs.create-issue || true }}
       owasp-fail-cvss: ${{ github.event_name == 'workflow_dispatch' && inputs.owasp-fail-cvss || 7 }}
+      owasp-suppression-file: 'owasp-suppression.xml'
     secrets:
       gh-token: ${{ secrets.GH_TOKEN }}
       nvd-api-key: ${{ secrets.NVD_API_KEY }}
