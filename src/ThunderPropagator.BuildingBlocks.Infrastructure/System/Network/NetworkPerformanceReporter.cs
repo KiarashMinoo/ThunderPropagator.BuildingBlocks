@@ -10,7 +10,7 @@ namespace ThunderPropagator.BuildingBlocks.Infrastructure.System.Network
 #if !DEBUG
         sealed
 #endif
-        class NetworkPerformanceReporter : DisposableObject
+        partial class NetworkPerformanceReporter : DisposableObject
     {
         private long _tcpReceived;
         private long _tcpSent;
@@ -144,7 +144,8 @@ namespace ThunderPropagator.BuildingBlocks.Infrastructure.System.Network
             catch (Exception exception)
             {
                 ResetCounters(); // Stop reporting figures
-                _logger?.LogError(exception, "ETW session {Session} failed.", _sessionName);
+                if (_logger is not null)
+                    Log.EtwSessionFailed(_logger, exception, _sessionName);
                 readyTcs?.TrySetException(exception);
             }
 
@@ -196,6 +197,15 @@ namespace ThunderPropagator.BuildingBlocks.Infrastructure.System.Network
         protected override void DisposeManagedResources()
         {
             _etwSession?.Dispose();
+        }
+
+        /// <summary>Source-generated high-performance logging methods for <see cref="NetworkPerformanceReporter"/>.</summary>
+        private static partial class Log
+        {
+            /// <summary>Logs an ETW session failure at <see cref="LogLevel.Error"/> level.</summary>
+            [LoggerMessage(EventId = 2001, Level = LogLevel.Error,
+                Message = "ETW session {Session} failed.")]
+            public static partial void EtwSessionFailed(ILogger logger, Exception exception, string session);
         }
     }
 }
