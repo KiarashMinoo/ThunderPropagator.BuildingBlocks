@@ -37,6 +37,16 @@ namespace ThunderPropagator.BuildingBlocks.Application
         public object? this[string key]
         {
             get => _payload.GetValueOrNull<object>(key)!;
+            protected set => _payload.SetValue(value, Guard.Against.NullOrWhiteSpace(key));
+        }
+
+        // Protected set above does not satisfy IDictionary<string, object?>'s read-write
+        // indexer requirement — explicit implementation keeps the interface write path alive
+        // for infrastructure code while preventing arbitrary external mutation via the
+        // concrete type directly.
+        object? IDictionary<string, object?>.this[string key]
+        {
+            get => _payload.GetValueOrNull<object>(key)!;
             set => _payload.SetValue(value, Guard.Against.NullOrWhiteSpace(key));
         }
 
@@ -125,7 +135,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
         /// <summary>
         /// Resets all fields to their initial state so the instance can be returned to an object pool.
         /// </summary>
-        public virtual void Reset()
+        protected virtual void Reset()
         {
             _payload.Clear();
             _envelope.CorrelationId = string.Empty;
