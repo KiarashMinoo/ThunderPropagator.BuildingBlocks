@@ -49,4 +49,6 @@ jobs:
       enable-devskim: ${{ github.event_name == 'workflow_dispatch' && inputs.enable-devskim || true }}
       enable-secret-scan: ${{ github.event_name == 'workflow_dispatch' && inputs.enable-secret-scan || true }}
       codeql-queries: 'security-extended,security-and-quality'
-      fail-on-findings: ${{ github.event_name == 'workflow_dispat
+      fail-on-findings: ${{ github.event_name == 'workflow_dispatch' && inputs.fail-on-findings || false }}
+    secrets:
+      gh-token: ${{ secrets.GITHUB_TOKEN }}
