@@ -19,7 +19,7 @@
     <PackageVersion Include="Bogus" Version="35.6.5" />
     <PackageVersion Include="NodaTime" Version="3.2.2" />
     <PackageVersion Include="CaseConverter" Version="2.0.1" />
-    <PackageVersion Include="JetBrains.Annotations" Version="2025.2.4" />
+    <PackageVersion Include="JetBrains.Annotations" Version="2026.2.0" />
     <PackageVersion Include="MessagePack" Version="3.1.7" />
     <PackageVersion Include="MessagePackAnalyzer" Version="3.1.7">
       <PrivateAssets>all</PrivateAssets>
@@ -29,15 +29,15 @@
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageVersion Include="protobuf-net" Version="3.2.56" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.19.1" />
-    <PackageVersion Include="YamlDotNet" Version="18.0.0" />
+    <PackageVersion Include="YamlDotNet" Version="18.1.0" />
     <PackageVersion Include="Ardalis.GuardClauses" Version="5.0.0" />
     <PackageVersion Include="SharpZipLib" Version="1.4.2" />
     <PackageVersion Include="Apache.NMS.ActiveMQ" Version="2.2.0" />
-    <PackageVersion Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="3.2.3" />
+    <PackageVersion Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="3.2.4" />
     <PackageVersion Include="ToonNet" Version="1.0.4" />
   </ItemGroup>
   <ItemGroup Label="Testing Packages">
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.6.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.7.0" />
     <PackageVersion Include="NSubstitute" Version="5.3.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5">
