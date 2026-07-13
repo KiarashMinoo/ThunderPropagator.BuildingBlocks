@@ -20,8 +20,8 @@
     <PackageVersion Include="NodaTime" Version="3.2.2" />
     <PackageVersion Include="CaseConverter" Version="2.0.1" />
     <PackageVersion Include="JetBrains.Annotations" Version="2026.2.0" />
-    <PackageVersion Include="MessagePack" Version="3.1.7" />
-    <PackageVersion Include="MessagePackAnalyzer" Version="3.1.7">
+    <PackageVersion Include="MessagePack" Version="3.1.8" />
+    <PackageVersion Include="MessagePackAnalyzer" Version="3.1.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
@@ -38,7 +38,7 @@
   </ItemGroup>
   <ItemGroup Label="Testing Packages">
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.7.0" />
-    <PackageVersion Include="NSubstitute" Version="5.3.0" />
+    <PackageVersion Include="NSubstitute" Version="6.0.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
