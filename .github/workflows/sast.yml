@@ -4,20 +4,20 @@ on:
   push:
     branches: [develop]
   schedule:
-    # Run every Monday at 07:00 UTC so results are ready at the start of the week
-    - cron: '0 7 * * 1'
+    - cron: '0 0 * * *'   # 12:00 AM UTC daily
+    - cron: '0 12 * * *'  # 12:00 PM UTC daily
   workflow_dispatch:
     inputs:
       enable-codeql:
         description: Run CodeQL analysis
         type: boolean
         default: true
-      enable-semgrep:
-        description: Run Semgrep SAST
+      enable-devskim:
+        description: Run DevSkim SAST analysis
         type: boolean
         default: true
-      enable-gitleaks:
-        description: Run Gitleaks secret scanning
+      enable-secret-scan:
+        description: Run TruffleHog secret scanning
         type: boolean
         default: true
       fail-on-findings:
@@ -41,11 +41,9 @@ jobs:
         10.0.x
       solution-path: 'ThunderPropagator.BuildingBlocks.slnx'
       enable-codeql: ${{ github.event_name == 'workflow_dispatch' && inputs.enable-codeql || true }}
-      enable-semgrep: ${{ github.event_name == 'workflow_dispatch' && inputs.enable-semgrep || true }}
-      enable-gitleaks: ${{ github.event_name == 'workflow_dispatch' && inputs.enable-gitleaks || true }}
-      semgrep-config: 'p/csharp'
+      enable-devskim: ${{ github.event_name == 'workflow_dispatch' && inputs.enable-devskim || true }}
+      enable-secret-scan: ${{ github.event_name == 'workflow_dispatch' && inputs.enable-secret-scan || true }}
       codeql-queries: 'security-extended,security-and-quality'
       fail-on-findings: ${{ github.event_name == 'workflow_dispatch' && inputs.fail-on-findings || false }}
     secrets:
-      gh-token: ${{ secrets.GH_TOKEN }}
-      semgrep-app-token: ${{ secrets.SEMGREP_APP_TOKEN }}
+      gh-token: ${{ secrets.GITHUB_TOKEN }}
