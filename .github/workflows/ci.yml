@@ -27,6 +27,17 @@ jobs:
   # named NUGET_API_KEY (Settings > Secrets and variables > Actions > Secrets) with a
   # classic API key from nuget.org > API Keys, scoped to this package/owner.
   #
+  # ADMIN_PUSH_TOKEN: develop has a classic "Require a pull request before merging"
+  # branch protection rule with no usable bypass for the default GITHUB_TOKEN identity
+  # (github-actions[bot]) -- neither classic protection's "administrators can bypass"
+  # toggle nor this (personal, non-org) repo's Ruleset bypass list can be granted to
+  # that identity, only to a real admin-role account. So a Personal Access Token
+  # belonging to an account with Admin role on this repo is stored as the ADMIN_PUSH_TOKEN
+  # secret and passed through as push-token, which reusable-ci.yml's version job uses
+  # (instead of gh-token) ONLY for the checkout that sets up the git credential the
+  # later version-bump commit push reuses. That admin account's role must also be added
+  # to the branch protection/ruleset's bypass list on GitHub's side for this to work.
+  #
   # IMPORTANT: a job-level `permissions:` block is exhaustive, not additive -- any
   # scope not listed here is implicitly set to "none" for every nested job the called
   # reusable workflow runs, regardless of what that nested job requests for itself.
@@ -59,6 +70,7 @@ jobs:
       nuget-auth-mode: 'classic'
     secrets:
       gh-token: ${{ secrets.GITHUB_TOKEN }}
+      push-token: ${{ secrets.ADMIN_PUSH_TOKEN }}
       nuget-api-key: ${{ secrets.NUGET_API_KEY }}
 
   manual-ci:
@@ -77,4 +89,5 @@ jobs:
       nuget-auth-mode: 'classic'
     secrets:
       gh-token: ${{ secrets.GITHUB_TOKEN }}
+      push-token: ${{ secrets.ADMIN_PUSH_TOKEN }}
       nuget-api-key: ${{ secrets.NUGET_API_KEY }}
