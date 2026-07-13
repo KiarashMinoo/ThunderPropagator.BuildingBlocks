@@ -46,4 +46,4 @@ jobs:
       fail-on-alerts: ${{ inputs.fail-on-alerts }}
       artifact-retention-days: ${{ inputs.artifact-retention-days }}
     secrets:
-      gh-token: ${{ secrets.GH_TOKEN }}
+      gh-token: ${{ secrets.GITHUB_TOKEN }}
