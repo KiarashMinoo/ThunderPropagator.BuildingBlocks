@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [develop, release/**]
+    branches: [develop] # beta invokes automatically on every push. Release is manual-only (workflow_dispatch) for now.
   workflow_dispatch: {}
 
 concurrency:
@@ -10,27 +10,54 @@ concurrency:
   cancel-in-progress: ${{ github.ref == 'refs/heads/develop' }}
 
 jobs:
-  # NuGet.org Trusted Publishing (OIDC) is built directly into reusable-beta-ci.yml
-  # and reusable-release-ci.yml (each has its own inline publish-nuget job) — this
-  # repo doesn't need its own publish-nuget job. Set a repo secret named NUGET_USER
-  # (Settings > Secrets and variables > Actions > Secrets) with your nuget.org
-  # account name.
+  # NuGet.org Trusted Publishing (OIDC) is built directly into reusable-ci.yml (it has
+  # its own inline publish-nuget job) — this repo doesn't need its own. reusable-ci.yml
+  # defaults to nuget-auth-mode: 'classic', which pushes with a plain NuGet.org API key
+  # (secrets.nuget-api-key) instead of OIDC Trusted Publishing -- OIDC doesn't work
+  # through a reusable workflow hosted in a different repo (see reusable-ci.yml's
+  # nuget-auth-mode input description for the full explanation). Set a repo secret
+  # named NUGET_API_KEY (Settings > Secrets and variables > Actions > Secrets) with a
+  # classic API key from nuget.org > API Keys, scoped to this package/owner.
+  #
+  # IMPORTANT: a job-level `permissions:` block is exhaustive, not additive -- any
+  # scope not listed here is implicitly set to "none" for every nested job the called
+  # reusable workflow runs, regardless of what that nested job requests for itself.
+  # This must list every scope ANY job in reusable-ci.yml needs across the whole run:
+  # contents:write (version/changelog commit, tag, GitHub Release), packages:write +
+  # id-token:write (publish-nuget, for GitHub Packages / OIDC respectively, if ever
+  # switched on), actions:write (cleanup-nuget-artifacts, to delete run artifacts).
   beta-ci:
     if: github.ref == 'refs/heads/develop'
-    uses: KiarashMinoo/.github/.github/workflows/reusable-beta-ci.yml@main
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      actions: write
+    uses: KiarashMinoo/.github/.github/workflows/reusable-ci.yml@main
     with:
+      channel: beta
       solution-path: 'ThunderPropagator.BuildingBlocks.slnx'
       publish-to-nuget: true
+      nuget-target: 'nuget.org'
+      nuget-auth-mode: 'classic'
     secrets:
       gh-token: ${{ secrets.GITHUB_TOKEN }}
-      nuget-user: ${{ secrets.NUGET_USER }}
+      nuget-api-key: ${{ secrets.NUGET_API_KEY }}
 
   release-ci:
     if: startsWith(github.ref, 'refs/heads/release/')
-    uses: KiarashMinoo/.github/.github/workflows/reusable-release-ci.yml@main
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      actions: write
+    uses: KiarashMinoo/.github/.github/workflows/reusable-ci.yml@main
     with:
+      channel: release
       solution-path: 'ThunderPropagator.BuildingBlocks.slnx'
       publish-to-nuget: true
+      nuget-target: 'nuget.org'
+      nuget-auth-mode: 'classic'
     secrets:
       gh-token: ${{ secrets.GITHUB_TOKEN }}
-      nuget-user: ${{ secrets.NUGET_USER }}
+      nuget-api-key: ${{ secrets.NUGET_API_KEY }}
