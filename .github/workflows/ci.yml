@@ -26,8 +26,14 @@ jobs:
   # contents:write (version/changelog commit, tag, GitHub Release), packages:write +
   # id-token:write (publish-nuget, for GitHub Packages / OIDC respectively, if ever
   # switched on), actions:write (cleanup-nuget-artifacts, to delete run artifacts).
+  #
+  # beta-ci and release-ci are gated by BOTH github.event_name and github.ref (not ref
+  # alone) so a manual workflow_dispatch run from develop can't accidentally trigger
+  # both jobs at once: beta only ever fires on an automatic push to develop; release
+  # only ever fires on a manual dispatch, whether that dispatch is run against develop
+  # (this repo doesn't cut separate release/** branches) or a release/** branch.
   beta-ci:
-    if: github.ref == 'refs/heads/develop'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     permissions:
       contents: write
       packages: write
@@ -45,7 +51,7 @@ jobs:
       nuget-api-key: ${{ secrets.NUGET_API_KEY }}
 
   release-ci:
-    if: startsWith(github.ref, 'refs/heads/release/')
+    if: github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/release/'))
     permissions:
       contents: write
       packages: write
