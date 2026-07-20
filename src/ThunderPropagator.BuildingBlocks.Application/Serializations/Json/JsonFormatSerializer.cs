@@ -12,8 +12,8 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Json
         /// <inheritdoc/>
         public SerializerType SerializerType => SerializerType.Json;
 
-        /// <inheritdoc/>
-        public string MediaType => SerializerMediaTypes.Json;
+        /// <summary>application/json</summary>
+        public string MediaType => "application/json";
 
         /// <inheritdoc/>
         public string Serialize<T>(T instance)

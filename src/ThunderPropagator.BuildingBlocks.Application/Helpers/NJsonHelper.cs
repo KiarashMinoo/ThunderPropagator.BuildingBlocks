@@ -212,13 +212,13 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
         {
             if (settings is null)
             {
-                JsonConvert.PopulateObject(json, target, GetCachedSettings(TypeNameHandling.None, IsCamelCase(typeof(T))));
+                JsonConvert.PopulateObject(json, target!, GetCachedSettings(TypeNameHandling.None, IsCamelCase(typeof(T))));
                 return;
             }
 
             var serializerSettings = BuildDefaultNSerializerSettings();
             settings(serializerSettings);
-            JsonConvert.PopulateObject(json, target, NJsonSerializerSettings<T>(serializerSettings));
+            JsonConvert.PopulateObject(json, target!, NJsonSerializerSettings<T>(serializerSettings));
         }
 
         public static void PopulateFromNJsonBytes<T>(this byte[] bytes, T target, Func<JsonSerializerSettings, JsonSerializerSettings>? settings = null)
