@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.1-beta.109] — 2026-07-20
+
+### ♻️ Refactoring
+
+- update serialization classes and methods for improved clarity and functionality `(9199e87)` — Kiarash Minoo
+
 ## [1.0.1-beta.108] — 2026-07-20
 
 ### 📦 Dependencies
