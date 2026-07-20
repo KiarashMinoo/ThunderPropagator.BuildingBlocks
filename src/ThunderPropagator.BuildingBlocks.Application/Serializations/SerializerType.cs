@@ -6,15 +6,11 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations
     public class SerializerType
     {
         public int Value { get; }
+
         private SerializerType(int value) => Value = value;
 
         public static implicit operator int(SerializerType type) => type.Value;
         public static implicit operator SerializerType(int value) => new(value);
-
-        /// <summary>
-        /// System.Text.Json — application/tpg
-        /// </summary>
-        public static SerializerType Proprietary { get; } = new(0);
 
         /// <summary>
         /// System.Text.Json — application/json
