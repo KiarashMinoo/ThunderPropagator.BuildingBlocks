@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.1-beta.107] — 2026-07-20
+
+### 🏠 Chores
+
+- Ignore TFM-pinned packages in Dependabot `(3fb38df)` — Kiarash Minoo
+
 ## [1.0.1-beta.106] — 2026-07-13
 
 ### 📦 Dependencies
