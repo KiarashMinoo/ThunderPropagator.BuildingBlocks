@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.1-beta.112] — 2026-07-20
+
+### ♻️ Refactoring
+
+- update JsonFormatSerializer and NJsonFormatSerializer for improved clarity and consistency `(6e3e405)` — Kiarash Minoo
+
 ## [1.0.1-beta.111] — 2026-07-20
 
 ### ♻️ Refactoring
