@@ -15,13 +15,7 @@ updates:
       - "dependencies"
       - "security"
     open-pull-requests-limit: 10
-    # Group all Microsoft.Extensions.* and Asp.Versioning.* bumps into a single PR
-    # to reduce noise — they are released together and rarely introduce regressions.
     groups:
-      microsoft-extensions:
-        patterns:
-          - "Microsoft.Extensions.*"
-          - "Microsoft.AspNetCore.*"
       messaging:
         patterns:
           - "Apache.NMS*"
@@ -36,6 +30,16 @@ updates:
           - "BenchmarkDotNet"
           - "Bogus"
           - "Microsoft.NET.Test.Sdk"
+    # These are pinned per-TargetFramework in Directory.Packages.props (net8.0 -> 8.*,
+    # net9.0 -> 9.*, net10.0 -> 10.*) — CentralPackageFloatingVersionsEnabled already
+    # floats each to the latest matching release at restore time, and Dependabot can't
+    # represent one package pinned to three different major versions depending on TFM
+    # as a single update target, so they're ignored here to avoid incorrect/duplicate PRs.
+    # (This also empties out what used to be the "microsoft-extensions" group above —
+    # every package it matched lives only in this TFM-conditioned block.)
+    ignore:
+      - dependency-name: "Microsoft.Extensions.DependencyInjection.Abstractions"
+      - dependency-name: "Microsoft.Extensions.Diagnostics.HealthChecks"
 
   # Keep GitHub Actions pinned and up-to-date.
   # Dependabot automatically proposes SHA-pinned updates so action versions
