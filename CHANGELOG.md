@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.1-beta.110] — 2026-07-20
+
+### ♻️ Refactoring
+
+- simplify serializer tests by removing unused formats and properties `(d2b0e25)` — Kiarash Minoo
+
 ## [1.0.1-beta.109] — 2026-07-20
 
 ### ♻️ Refactoring
