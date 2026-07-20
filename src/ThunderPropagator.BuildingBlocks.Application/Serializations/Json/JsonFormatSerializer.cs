@@ -9,11 +9,16 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Json
     /// </summary>
     public sealed class JsonFormatSerializer : IFormatSerializer, IFormatDeserializer
     {
-        /// <inheritdoc/>
-        public SerializerType SerializerType => SerializerType.Json;
+        /// <summary>
+        /// System.Text.Json — application/json
+        /// </summary>
+        public static readonly SerializerType Json = 1;
 
         /// <summary>application/json</summary>
-        public string MediaType => "application/json";
+        public const string JsonMediaType = "application/json";
+
+        public SerializerType SerializerType => Json;
+        public string MediaType => JsonMediaType;
 
         /// <inheritdoc/>
         public string Serialize<T>(T instance)
@@ -62,5 +67,3 @@ namespace ThunderPropagator.BuildingBlocks.Application.Serializations.Json
         }
     }
 }
-
-
