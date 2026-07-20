@@ -30,21 +30,21 @@ namespace ThunderPropagator.BuildingBlocks.Application
         /// to derive a key from a master password. Subsequent calls are silently ignored.
         /// </summary>
         /// <param name="key">The AES key bytes (16, 24, or 32 bytes).</param>
-        public static void Configure(byte[] key)
+        internal static void Configure(byte[] key)
         {
             ArgumentNullException.ThrowIfNull(key);
             if (Interlocked.CompareExchange(ref _configured, 1, 0) == 0)
                 _key = (byte[])key.Clone();
         }
 
-        internal static string Encrypt(string plaintext)
+        public static string Encrypt(string plaintext)
         {
             return _key is not null
                 ? EncryptionService.Encrypt(plaintext, _key)
                 : plaintext;
         }
 
-        internal static string Decrypt(string ciphertext)
+        public static string Decrypt(string ciphertext)
         {
             return _key is not null
                 ? EncryptionService.Decrypt(ciphertext, _key)
@@ -58,8 +58,8 @@ namespace ThunderPropagator.BuildingBlocks.Application
             return _sensitivePropsCache.GetOrAdd(type, static t =>
                 t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                     .Where(p => p.CanRead && p.CanWrite
-                        && p.PropertyType == typeof(string)
-                        && p.GetCustomAttribute<SensitiveDataAttribute>() is not null)
+                                          && p.PropertyType == typeof(string)
+                                          && p.GetCustomAttribute<SensitiveDataAttribute>() is not null)
                     .ToArray());
         }
 
@@ -69,7 +69,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
         /// can revert after serialization. Returns <see langword="null"/> when encryption is not
         /// configured, the instance is <see langword="null"/>, or the type is a value type.
         /// </summary>
-        internal static (PropertyInfo Prop, string? Original)[]? EncryptInPlace(object? instance)
+        public static (PropertyInfo Prop, string? Original)[]? EncryptInPlace(object? instance)
         {
             if (!IsConfigured || instance is null || instance.GetType().IsValueType)
                 return null;
@@ -95,7 +95,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
         /// <see cref="EncryptInPlace"/>. Always call this in a <see langword="finally"/>
         /// block after serialization completes.
         /// </summary>
-        internal static void RevertEncryption(object? instance, (PropertyInfo Prop, string? Original)[] originals)
+        public static void RevertEncryption(object? instance, (PropertyInfo Prop, string? Original)[] originals)
         {
             if (instance is null)
                 return;
@@ -109,7 +109,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
         /// on <paramref name="instance"/> in-place after deserialization. No-op when encryption is
         /// not configured, the instance is <see langword="null"/>, or the type is a value type.
         /// </summary>
-        internal static void DecryptInPlace(object? instance)
+        public static void DecryptInPlace(object? instance)
         {
             if (!IsConfigured || instance is null || instance.GetType().IsValueType)
                 return;

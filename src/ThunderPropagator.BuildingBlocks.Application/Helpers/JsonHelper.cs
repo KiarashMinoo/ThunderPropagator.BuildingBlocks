@@ -57,23 +57,24 @@ namespace ThunderPropagator.BuildingBlocks.Application.Helpers
                     writer.WriteStringValue(value);
                     return;
                 }
+
                 writer.WriteStringValue(SensitiveDataEncryption.Encrypt(value));
             }
         }
 
         // Returns a mutable clone of the default options for callers that need to customise
         // the settings (e.g. ToonHelper) without touching the shared frozen instance.
-        internal static JsonSerializerOptions BuildDefaultSerializerOptions()
+        public static JsonSerializerOptions BuildDefaultSerializerOptions()
         {
             return new JsonSerializerOptions(_defaultOptions);
         }
 
-        internal static JsonSerializerOptions JsonSerializerOptions<T>(JsonSerializerOptions? serializerOptions = null)
+        public static JsonSerializerOptions JsonSerializerOptions<T>(JsonSerializerOptions? serializerOptions = null)
         {
             return JsonSerializerOptions(typeof(T), serializerOptions);
         }
 
-        internal static JsonSerializerOptions JsonSerializerOptions(Type type, JsonSerializerOptions? serializerOptions = null)
+        public static JsonSerializerOptions JsonSerializerOptions(Type type, JsonSerializerOptions? serializerOptions = null)
         {
             var jsonSerializationAttribute = JsonSerializationAttributeCache.Get(type);
             var disableCamelCase = jsonSerializationAttribute?.CamelCase == false;
