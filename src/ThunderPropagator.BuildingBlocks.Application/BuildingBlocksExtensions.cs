@@ -41,7 +41,7 @@ namespace ThunderPropagator.BuildingBlocks.Application
 
         /// <summary>
         /// Registers the format serializer registry and all built-in format implementations
-        /// (<see cref="SerializerType.Json"/>, <see cref="SerializerType.NJson"/>) with the DI container.
+        /// (<see cref="JsonFormatSerializer.Json"/>, <see cref="NJsonFormatSerializer.NJson"/>) with the DI container.
         /// </summary>
         /// <param name="services">The service collection.</param>
         /// <returns>The service collection for chaining.</returns>
