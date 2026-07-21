@@ -1,5 +1,5 @@
-## [1.0.1-beta.113] — 2026-07-20
+## [1.0.1-beta.114] — 2026-07-21
 
 ### ♻️ Refactoring
 
-- update serializer references for improved clarity in documentation and tests `(8159d14)` — Kiarash Minoo
+- convert SerializerType to a record struct for improved performance and clarity `(f309a88)` — Kiarash Minoo

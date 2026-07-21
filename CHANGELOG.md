@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.1-beta.114] — 2026-07-21
+
+### ♻️ Refactoring
+
+- convert SerializerType to a record struct for improved performance and clarity `(f309a88)` — Kiarash Minoo
+
 ## [1.0.1-beta.113] — 2026-07-20
 
 ### ♻️ Refactoring
