@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.1-beta.119] — 2026-07-27
+
+### 📝 Documentation
+
+- Refine CLAUDE.md contributor guidance `(82f48be)` — Kiarash Minoo
+
 ## [1.0.1-beta.118] — 2026-07-27
 
 ### 🐛 Bug Fixes
