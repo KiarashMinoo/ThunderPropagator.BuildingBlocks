@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.1-beta.116] — 2026-07-27
+
+### 📦 Dependencies
+
+| Package | Old | New |
+|---------|-----|-----|
+| System.IdentityModel.Tokens.Jwt | 8.19.2 | 8.21.0 |
+
+- Bump System.IdentityModel.Tokens.Jwt from 8.19.2 to 8.21.0 `(5703171)` — dependabot[bot]
+
 ## [1.0.1-beta.115] — 2026-07-27
 
 ### 📝 Documentation
