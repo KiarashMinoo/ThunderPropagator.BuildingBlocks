@@ -1,9 +1,5 @@
-## [1.0.1-beta.116] — 2026-07-27
+## [1.0.1-beta.117] — 2026-07-27
 
-### 📦 Dependencies
+### 📝 Documentation
 
-| Package | Old | New |
-|---------|-----|-----|
-| System.IdentityModel.Tokens.Jwt | 8.19.2 | 8.21.0 |
-
-- Bump System.IdentityModel.Tokens.Jwt from 8.19.2 to 8.21.0 `(5703171)` — dependabot[bot]
+- update ReadMe.md for improved clarity and structure `(19a3035)` — Kiarash Minoo
