@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.1-beta.117] — 2026-07-27
+
+### 📝 Documentation
+
+- update ReadMe.md for improved clarity and structure `(19a3035)` — Kiarash Minoo
+
 ## [1.0.1-beta.116] — 2026-07-27
 
 ### 📦 Dependencies
