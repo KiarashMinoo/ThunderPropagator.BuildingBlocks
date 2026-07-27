@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.1-beta.115] — 2026-07-27
+
+### 📝 Documentation
+
+- rebuild repository documentation `(f768a42)` — Codex
+
 ## [1.0.1-beta.114] — 2026-07-21
 
 ### ♻️ Refactoring

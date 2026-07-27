@@ -1,5 +1,5 @@
-## [1.0.1-beta.114] — 2026-07-21
+## [1.0.1-beta.115] — 2026-07-27
 
-### ♻️ Refactoring
+### 📝 Documentation
 
-- convert SerializerType to a record struct for improved performance and clarity `(f309a88)` — Kiarash Minoo
+- rebuild repository documentation `(f768a42)` — Codex
