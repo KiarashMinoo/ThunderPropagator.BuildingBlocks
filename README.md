@@ -33,21 +33,21 @@ dotnet build -c Release
 Generated documentation is available from the [`/docs` landing page](docs/README.md). The catalog below is generated from the current documentation tree.
 
 - [Application](docs/Application/README.md) `Types:11` `Files:17` `Diagrams:✓`
-  - [Attributes](docs/Application/Attributes/README.md) `Types:3` `Files:3` `Diagrams:✓`
-  - [Certificate](docs/Application/Certificate/README.md) `Types:1` `Files:1` `Diagrams:✓`
-  - [ChangeTrackingItems](docs/Application/ChangeTrackingItems/README.md) `Types:2` `Files:5` `Diagrams:✓`
-  - [Ciphering](docs/Application/Ciphering/README.md) `Types:2` `Files:3` `Diagrams:✓`
-  - [Collections](docs/Application/Collections/README.md) `Types:6` `Files:3` `Diagrams:✓`
-  - [CorrelationId](docs/Application/CorrelationId/README.md) `Types:3` `Files:3` `Diagrams:✓`
-  - [Enums](docs/Application/Enums/README.md) `Types:4` `Files:4` `Diagrams:✓`
-  - [Helpers](docs/Application/Helpers/README.md) `Types:13` `Files:15` `Diagrams:✓`
-  - [Identity](docs/Application/Identity/README.md) `Types:2` `Files:2` `Diagrams:✓`
-  - [Objects](docs/Application/Objects/README.md) `Types:9` `Files:5` `Diagrams:✓`
-  - [Serializations](docs/Application/Serializations/README.md) `Types:5` `Files:5` `Diagrams:✓`
+    - [Attributes](docs/Application/Attributes/README.md) `Types:3` `Files:3` `Diagrams:✓`
+    - [Certificate](docs/Application/Certificate/README.md) `Types:1` `Files:1` `Diagrams:✓`
+    - [ChangeTrackingItems](docs/Application/ChangeTrackingItems/README.md) `Types:2` `Files:5` `Diagrams:✓`
+    - [Ciphering](docs/Application/Ciphering/README.md) `Types:2` `Files:3` `Diagrams:✓`
+    - [Collections](docs/Application/Collections/README.md) `Types:6` `Files:3` `Diagrams:✓`
+    - [CorrelationId](docs/Application/CorrelationId/README.md) `Types:3` `Files:3` `Diagrams:✓`
+    - [Enums](docs/Application/Enums/README.md) `Types:4` `Files:4` `Diagrams:✓`
+    - [Helpers](docs/Application/Helpers/README.md) `Types:13` `Files:15` `Diagrams:✓`
+    - [Identity](docs/Application/Identity/README.md) `Types:2` `Files:2` `Diagrams:✓`
+    - [Objects](docs/Application/Objects/README.md) `Types:9` `Files:5` `Diagrams:✓`
+    - [Serializations](docs/Application/Serializations/README.md) `Types:5` `Files:5` `Diagrams:✓`
 - [Infrastructure](docs/Infrastructure/README.md) `Types:0` `Files:2` `Diagrams:✓`
-  - [HealthChecks](docs/Infrastructure/HealthChecks/README.md) `Types:1` `Files:3` `Diagrams:✓`
-  - [System](docs/Infrastructure/System/README.md) `Types:0` `Files:0` `Diagrams:✓`
-  - [SystemResourceMonitor](docs/Infrastructure/SystemResourceMonitor/README.md) `Types:4` `Files:4` `Diagrams:✓`
+    - [HealthChecks](docs/Infrastructure/HealthChecks/README.md) `Types:1` `Files:3` `Diagrams:✓`
+    - [System](docs/Infrastructure/System/README.md) `Types:0` `Files:0` `Diagrams:✓`
+    - [SystemResourceMonitor](docs/Infrastructure/SystemResourceMonitor/README.md) `Types:4` `Files:4` `Diagrams:✓`
 
 **Last generated:** July 27, 2026
 

@@ -37,7 +37,7 @@
   </PropertyGroup>
   <ItemGroup Label="PackageAssets">
     <!-- PackagePath="README.md" ensures consistent naming inside the package on case-sensitive Linux -->
-    <None Include="$(MSBuildThisFileDirectory)ReadMe.md" Pack="true" PackagePath="README.md" />
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="README.md" />
   </ItemGroup>
   <!-- ── Targets ───────────────────────────────────────────────────────────── -->
   <!--
