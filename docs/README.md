@@ -1,212 +1,61 @@
-# ThunderPropagator BuildingBlocks Documentation
+# ThunderPropagator.BuildingBlocks Documentation
+
+Shared building blocks and reusable abstractions for the ThunderPropagator real-time .NET streaming ecosystem.
 
 ## Contents
-- [Overview](#overview)
-- [Architecture](#architecture)
-- [Component Catalog](#component-catalog)
-- [Quick Start](#quick-start)
-- [See Also](#see-also)
 
-## Overview
+- [Documentation areas](#documentation-areas)
+- [Package dependencies](#package-dependencies)
+- [Coverage audit](#coverage-audit)
 
-ThunderPropagator BuildingBlocks (Project ARC) provides production-ready, reusable components for building high-performance, cloud-native .NET applications. The library targets .NET 8.0, 9.0, and 10.0 with full multi-platform support (AnyCPU, x86, x64, ARM64).
+## Documentation areas
 
-The solution is architected in two primary layers: **Application** (core building blocks with zero infrastructure dependencies) and **Infrastructure** (system-level components for monitoring, health checks, and observability).
+- [Application](./Application/README.md) `Types:11` `Files:17` `Diagrams:✓`
+- [Infrastructure](./Infrastructure/README.md) `Types:0` `Files:2` `Diagrams:✓`
 
-## Architecture
+## Package dependencies
 
-```mermaid
-graph TD
-    A[Application Layer] --> B[Infrastructure Layer]
-    A --> C[Core Abstractions]
-    A --> D[Helpers & Utilities]
-    A --> E[Serialization]
-    A --> F[Collections]
-    B --> G[System Monitoring]
-    B --> H[Health Checks]
-    B --> I[Network Performance]
-    
-    C --> C1[FeederMessage]
-    C --> C2[ServiceConfiguration]
-    C --> C3[DisposableObject]
-    D --> D1[JSON/YAML/ProtoBuf]
-    D --> D2[DateTime/String/Collection]
-    D --> D3[Cryptography]
-    E --> E1[Attribute-Driven]
-    E --> E2[Multi-Format Support]
-    F --> F1[LinkedArray]
-    F --> F2[BindingDictionary]
-    G --> G1[CPU/Memory/Disk]
-    G --> G2[GPU/Battery]
-    H --> H1[ASP.NET Core Health]
-```
+| Package | Version | Registry |
+|---|---|---|
+| `Apache.NMS.ActiveMQ` | `2.2.0` | [Package](https://www.nuget.org/packages/Apache.NMS.ActiveMQ) |
+| `Ardalis.GuardClauses` | `5.0.0` | [Package](https://www.nuget.org/packages/Ardalis.GuardClauses) |
+| `CaseConverter` | `2.0.1` | [Package](https://www.nuget.org/packages/CaseConverter) |
+| `JetBrains.Annotations` | `2026.2.0` | [Package](https://www.nuget.org/packages/JetBrains.Annotations) |
+| `Microsoft.Diagnostics.Tracing.TraceEvent` | `3.2.5` | [Package](https://www.nuget.org/packages/Microsoft.Diagnostics.Tracing.TraceEvent) |
+| `Microsoft.Extensions.DependencyInjection.Abstractions` | `10.*` | [Package](https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection.Abstractions) |
+| `Microsoft.Extensions.Diagnostics.HealthChecks` | `10.*` | [Package](https://www.nuget.org/packages/Microsoft.Extensions.Diagnostics.HealthChecks) |
+| `Newtonsoft.Json` | `13.0.4` | [Package](https://www.nuget.org/packages/Newtonsoft.Json) |
+| `SharpZipLib` | `1.4.2` | [Package](https://www.nuget.org/packages/SharpZipLib) |
+| `System.IdentityModel.Tokens.Jwt` | `8.19.2` | [Package](https://www.nuget.org/packages/System.IdentityModel.Tokens.Jwt) |
 
-### Layer Responsibilities
+## Coverage audit
 
-- **Application Layer**: Core abstractions, helpers, serialization, collections, and utilities with **no infrastructure dependencies**
-- **Infrastructure Layer**: System resource monitoring, health checks, network performance tracking, and platform-specific implementations
+| Documentation area | Status | Files | Types | Retry passes |
+|---|---|---:|---:|---:|
+| [`Application`](./Application/README.md) | ✅ Complete | 17 | 11 | 1 |
+| [`Application/Attributes`](./Application/Attributes/README.md) | ✅ Complete | 3 | 3 | 1 |
+| [`Application/Certificate`](./Application/Certificate/README.md) | ✅ Complete | 1 | 1 | 1 |
+| [`Application/ChangeTrackingItems`](./Application/ChangeTrackingItems/README.md) | ✅ Complete | 5 | 2 | 1 |
+| [`Application/Ciphering`](./Application/Ciphering/README.md) | ✅ Complete | 3 | 2 | 1 |
+| [`Application/Collections`](./Application/Collections/README.md) | ✅ Complete | 3 | 6 | 1 |
+| [`Application/CorrelationId`](./Application/CorrelationId/README.md) | ✅ Complete | 3 | 3 | 1 |
+| [`Application/Enums`](./Application/Enums/README.md) | ✅ Complete | 4 | 4 | 1 |
+| [`Application/Helpers`](./Application/Helpers/README.md) | ✅ Complete | 15 | 13 | 1 |
+| [`Application/Identity`](./Application/Identity/README.md) | ✅ Complete | 2 | 2 | 1 |
+| [`Application/Objects`](./Application/Objects/README.md) | ✅ Complete | 5 | 9 | 1 |
+| [`Application/Serializations`](./Application/Serializations/README.md) | ✅ Complete | 5 | 5 | 1 |
+| [`Application/Serializations/Json`](./Application/Serializations/Json/README.md) | ✅ Complete | 3 | 3 | 1 |
+| [`Infrastructure`](./Infrastructure/README.md) | ✅ Complete | 2 | 0 | 2 |
+| [`Infrastructure/HealthChecks`](./Infrastructure/HealthChecks/README.md) | ✅ Complete | 3 | 1 | 1 |
+| [`Infrastructure/System`](./Infrastructure/System/README.md) | ✅ Complete | 0 | 0 | 1 |
+| [`Infrastructure/System/Network`](./Infrastructure/System/Network/README.md) | ✅ Complete | 2 | 3 | 1 |
+| [`Infrastructure/SystemResourceMonitor`](./Infrastructure/SystemResourceMonitor/README.md) | ✅ Complete | 4 | 4 | 1 |
+| [`Infrastructure/SystemResourceMonitor/Metrics`](./Infrastructure/SystemResourceMonitor/Metrics/README.md) | ✅ Complete | 2 | 2 | 1 |
+| [`Infrastructure/SystemResourceMonitor/Metrics/Battery`](./Infrastructure/SystemResourceMonitor/Metrics/Battery/README.md) | ✅ Complete | 2 | 3 | 1 |
+| [`Infrastructure/SystemResourceMonitor/Metrics/Cpu`](./Infrastructure/SystemResourceMonitor/Metrics/Cpu/README.md) | ✅ Complete | 4 | 4 | 1 |
+| [`Infrastructure/SystemResourceMonitor/Metrics/Disk`](./Infrastructure/SystemResourceMonitor/Metrics/Disk/README.md) | ✅ Complete | 4 | 5 | 1 |
+| [`Infrastructure/SystemResourceMonitor/Metrics/Gpu`](./Infrastructure/SystemResourceMonitor/Metrics/Gpu/README.md) | ✅ Complete | 2 | 3 | 1 |
+| [`Infrastructure/SystemResourceMonitor/Metrics/Memory`](./Infrastructure/SystemResourceMonitor/Metrics/Memory/README.md) | ✅ Complete | 2 | 1 | 1 |
+| [`Infrastructure/SystemResourceMonitor/Metrics/SystemDrives`](./Infrastructure/SystemResourceMonitor/Metrics/SystemDrives/README.md) | ✅ Complete | 2 | 2 | 1 |
 
-**Critical**: Application layer must NEVER depend on Infrastructure. This constraint is enforced by architecture tests in `Tests/ArchTests/ArchitectureTests.cs`.
-
-## Component Catalog
-
-### Application Layer
-
-| Area | Types | Files | Diagrams | Description |
-|------|-------|-------|----------|-------------|
-| [BuildingBlocks.Application](./BuildingBlocks.Application/README.md) | 15 | 12 | ✓ | Core abstractions including FeederMessage, ServiceConfiguration, DisposableObject |
-| [Attributes](./BuildingBlocks.Application/Attributes/README.md) | 2 | 2 | ✓ | JSON serialization control and member ignore attributes |
-| [Certificate](./BuildingBlocks.Application/Certificate/README.md) | 1 | 1 | ✗ | X.509 certificate handling and management |
-| [ChangeTrackingItems](./BuildingBlocks.Application/ChangeTrackingItems/README.md) | 5 | 5 | ✓ | Property change tracking with observable patterns |
-| [Ciphering](./BuildingBlocks.Application/Ciphering/README.md) | 3 | 3 | ✓ | AES/RSA encryption and password generation |
-| [Collections](./BuildingBlocks.Application/Collections/README.md) | 3 | 3 | ✓ | Specialized collections (LinkedArray, BindingDictionary, GenericOrderedDictionary) |
-| [CorrelationId](./BuildingBlocks.Application/CorrelationId/README.md) | 3 | 3 | ✓ | Correlation ID management for distributed tracing |
-| [Enums](./BuildingBlocks.Application/Enums/README.md) | 4 | 4 | ✗ | Common enumerations (AuthenticationType, CastType, DataType) |
-| [Helpers](./BuildingBlocks.Application/Helpers/README.md) | 18 | 18 | ✓ | Comprehensive utility helpers for JSON, YAML, collections, strings, dates |
-| [Identity](./BuildingBlocks.Application/Identity/README.md) | 1 | 1 | ✗ | JWT identity helper utilities |
-| [Objects](./BuildingBlocks.Application/Objects/README.md) | 7 | 7 | ✓ | Base classes (DisposableObject, EquatableObject, NotifiableObject) |
-| [Serializations](./BuildingBlocks.Application/Serializations/README.md) | 4 | 4 | ✓ | Serialization abstractions and Kafka serializer types |
-| [Serializations/Json](./BuildingBlocks.Application/Serializations/Json/README.md) | 2 | 2 | ✓ | JSON-specific serializers for Kafka |
-| [Serializations/Yaml](./BuildingBlocks.Application/Serializations/Yaml/README.md) | 2 | 2 | ✓ | YAML-specific serializers for Kafka |
-
-### Infrastructure Layer
-
-| Area | Types | Files | Diagrams | Description |
-|------|-------|-------|----------|-------------|
-| [BuildingBlocks.Infrastructure](./BuildingBlocks.Infrastructure/README.md) | 3 | 2 | ✓ | Infrastructure layer entry point and assembly info |
-| [HealthChecks](./BuildingBlocks.Infrastructure/HealthChecks/README.md) | 0 | 0 | ✗ | ASP.NET Core health check integrations |
-| [System](./BuildingBlocks.Infrastructure/System/README.md) | 0 | 0 | ✓ | System-level utilities and abstractions |
-| [System/Network](./BuildingBlocks.Infrastructure/System/Network/README.md) | 2 | 2 | ✓ | Network performance monitoring and reporting |
-| [SystemResourceMonitor](./BuildingBlocks.Infrastructure/SystemResourceMonitor/README.md) | 4 | 4 | ✓ | Cross-platform system resource monitoring framework |
-| [SystemResourceMonitor/Metrics](./BuildingBlocks.Infrastructure/SystemResourceMonitor/Metrics/README.md) | 2 | 2 | ✓ | Metrics client abstractions and base interfaces |
-| [SystemResourceMonitor/Metrics/Battery](./BuildingBlocks.Infrastructure/SystemResourceMonitor/Metrics/Battery/README.md) | 3 | 2 | ✓ | Battery status, charge, and health metrics (Windows/macOS/Linux) |
-| [SystemResourceMonitor/Metrics/Cpu](./BuildingBlocks.Infrastructure/SystemResourceMonitor/Metrics/Cpu/README.md) | 4 | 4 | ✓ | CPU usage and temperature monitoring |
-| [SystemResourceMonitor/Metrics/Disk](./BuildingBlocks.Infrastructure/SystemResourceMonitor/Metrics/Disk/README.md) | 6 | 4 | ✓ | Disk health (SMART) and I/O performance metrics |
-| [SystemResourceMonitor/Metrics/Gpu](./BuildingBlocks.Infrastructure/SystemResourceMonitor/Metrics/Gpu/README.md) | 3 | 2 | ✓ | GPU utilization, memory, temperature (Windows/Linux) |
-| [SystemResourceMonitor/Metrics/Memory](./BuildingBlocks.Infrastructure/SystemResourceMonitor/Metrics/Memory/README.md) | 2 | 2 | ✓ | System and process memory usage metrics |
-| [SystemResourceMonitor/Metrics/SystemDrives](./BuildingBlocks.Infrastructure/SystemResourceMonitor/Metrics/SystemDrives/README.md) | 2 | 2 | ✓ | System drive enumeration and space metrics |
-
-## Quick Start
-
-### Installation
-
-Packages are hosted on **GitHub Packages**. Configure your NuGet source:
-
-```bash
-dotnet nuget add source https://nuget.pkg.github.com/KiarashMinoo/index.json \
-  --name "ThunderPropagator" \
-  --username YOUR_GITHUB_USERNAME \
-  --password YOUR_GITHUB_PAT
-```
-
-Install packages:
-
-```bash
-# Core application building blocks
-dotnet add package ThunderPropagator.BuildingBlocks.Application
-
-# Infrastructure components
-dotnet add package ThunderPropagator.BuildingBlocks.Infrastructure
-```
-
-### Basic Usage
-
-**FeederMessage Pattern**:
-
-```csharp
-using ThunderPropagator.BuildingBlocks.Application;
-
-public class MyMessage : FeederMessage
-{
-    public Guid Id
-    {
-        get => GetValueOrDefault(Guid.NewGuid());
-        set => SetValue(value);
-    }
-    
-    public string? Name
-    {
-        get => GetValueOrNull<string>();
-        set => SetValue(value);
-    }
-}
-
-var message = new MyMessage
-{
-    Id = Guid.NewGuid(),
-    Name = "Sample",
-    CorrelationId = "req-12345"
-};
-```
-
-**System Resource Monitoring**:
-
-```csharp
-using ThunderPropagator.BuildingBlocks.Infrastructure.SystemResourceMonitor;
-
-services.AddSystemResourceMonitor(options =>
-{
-    options.EnableCpuMetrics = true;
-    options.EnableMemoryMetrics = true;
-    options.EnableDiskHealth = true;
-    options.DefaultSamplingWindowMs = 500;
-});
-
-// In your service
-public class MonitoringService
-{
-    private readonly ISystemResourceMonitor _monitor;
-    
-    public MonitoringService(ISystemResourceMonitor monitor)
-    {
-        _monitor = monitor;
-    }
-    
-    public async Task<SystemResourceMonitorMetrics> GetMetricsAsync()
-    {
-        return await _monitor.Collect();
-    }
-}
-```
-
-**Serialization Helpers**:
-
-```csharp
-using ThunderPropagator.BuildingBlocks.Application.Helpers;
-
-// JSON
-var json = myObject.ToJson();
-var obj = json.FromJson<MyType>();
-
-// YAML
-var yaml = myObject.ToYaml();
-var obj = yaml.FromYaml<MyType>();
-
-// ProtoBuf
-var bytes = myObject.ToProtoBufBytes();
-var obj = bytes.FromProtoBufBytes<MyType>();
-
-// MessagePack
-var base64 = myObject.ToMessagePackBase64();
-var obj = base64.FromMessagePackBase64<MyType>();
-```
-
-## Design RFCs
-
-| RFC | Title | Status |
-|-----|-------|--------|
-| [RFC-48](./RFC/RFC-48-FeederMessage-Envelope-Payload-Split.md) | FeederMessage Envelope/Payload Split | Proposed |
-
-## See Also
-
-- [Application Layer Documentation](./BuildingBlocks.Application/README.md)
-- [Infrastructure Layer Documentation](./BuildingBlocks.Infrastructure/README.md)
-- [Root README](../README.md)
-- [Architecture Tests](../Tests/ArchTests/ArchitectureTests.cs)
-
----
-
-**Last generated**: December 28, 2025  
-**Total types documented**: 100+  
-**Total files documented**: 92  
-**Total diagrams**: 25+
+**Last generated:** July 27, 2026
