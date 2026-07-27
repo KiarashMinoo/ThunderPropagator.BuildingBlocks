@@ -1,89 +1,65 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for working in this repository.
 
-## Project Overview
-
-ThunderPropagator BuildingBlocks (Project ARC) is a multi-targeted .NET library (net8.0, net9.0, net10.0) of production-ready, reusable components for cloud-native applications. It publishes two NuGet packages to GitHub Packages.
-
-## Build Commands
+## Commands
 
 ```powershell
 dotnet restore
 dotnet build -c Release
 dotnet test -c Release
-dotnet test --filter "FullyQualifiedName~FeederMessageTest"   # single test
+dotnet test --filter "FullyQualifiedName~<Name>"
 dotnet pack -c Release -o artifacts/pkg
 ```
 
-Benchmarks run via: `dotnet run -c Release --filter "*Benchmark*"` from the unit test project.
+Benchmarks: `dotnet run -c Release --filter "*Benchmark*"` from the unit-test project.
 
 ## Architecture
 
-Strict two-layer structure enforced by `Tests/ArchTests/ArchitectureTests.cs`:
+Two layers, one-way dependency, enforced by an architecture-test project:
 
-- **Application Layer** (`src/ThunderPropagator.BuildingBlocks.Application/`): Core building blocks — zero Infrastructure dependencies. Breaking this rule will fail the arch tests.
-- **Infrastructure Layer** (`src/ThunderPropagator.BuildingBlocks.Infrastructure/`): System monitoring, health checks, network. Depends on Application only.
+- **Application** — the reusable building blocks themselves; zero dependency on Infrastructure.
+- **Infrastructure** — system/platform monitoring and health checks; depends on Application only.
 
-## Key Design Patterns
+## Key patterns
 
-**FeederMessage** — Dictionary-backed message base class (`ConcurrentDictionary` internally). Strongly-typed properties use `GetValueOrDefault<T>()` / `GetValueOrNull<T>()` / `SetValue()`. Inherit and add typed properties:
-```csharp
-public Guid Id
-{
-    get => GetValueOrDefault(Guid.NewGuid());
-    set => SetValue(value);
-}
-```
+- **Dictionary-backed message base** — a concurrent-dictionary-backed message type; typed properties wrap `GetValueOrDefault<T>()`/`GetValueOrNull<T>()`/`SetValue()`:
+  ```csharp
+  public Guid Id
+  {
+      get => GetValueOrDefault(Guid.NewGuid());
+      set => SetValue(value);
+  }
+  ```
+- **Observable configuration base** — abstract config base with change-notification interfaces; properties tracked/serialized via reflection.
+- **Disposable base** — override a managed- or unmanaged-resource hook; use an action-based wrapper for one-off cleanup instead of a bespoke class.
+- **Telemetry** — wrap every non-trivial operation in an activity, guarded by a listener check:
+  ```csharp
+  using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(ClassName_MethodName, ActivityKind.Internal) : null;
+  activity?.SetTag("key", value);
+  ```
+  Name activities `{ClassName}_{MethodName}`.
+- **Platform metric provider** — a typed metrics-client interface, an internal per-platform provider interface, and a factory selecting the concrete provider via an OS-platform runtime check. Never depend on a platform-specific package — only BCL APIs and command-line tools. Degrade gracefully (empty/null + message) when a metric can't be read.
+- **Serialization helper** — every format exposes three encodings (string/bytes/base64) in both directions; wrap each call in a telemetry activity.
 
-**ServiceConfiguration** — Abstract base for config with `INotifyPropertyChanged` / `INotifyPropertyChanging`. Properties tracked and serialized via reflection with `CaseConverter` for camelCase JSON.
+## Conventions
 
-**DisposableObject** — Base class for all disposable types. Override `DisposeManagedResources()` or `DisposeUnmanagedResources()`. Use `AnonymousDisposable` for action-based cleanup.
+- Private fields: `_camelCase`.
+- Platform names use mixed inner-case, not all-caps acronyms.
+- Guard-clause library for argument validation, using the caller-expression attribute for messages.
+- XML docs required on all public API — the build fails without them.
+- Warnings are errors, with two narrow, explicit suppressions.
+- Sealed in Release, non-sealed in Debug, for testability.
+- Block-scoped namespaces; no primary constructors; no expression-bodied methods/constructors (accessors are fine).
 
-**Telemetry** — Wrap all significant operations with OpenTelemetry activities:
-```csharp
-using var activity = Telemetry.HasListeners() ? Telemetry.StartActivity(ClassName_MethodName, ActivityKind.Internal) : null;
-activity?.SetTag("key", value);
-```
-Naming convention: `{ClassName}_{MethodName}`.
+## Adding a feature
 
-**Platform Providers** — System monitoring pattern: define `IMetricsClient<TMetric>`, internal `IXxxProvider` with per-platform implementations, `CreatePlatformProvider()` factory using `RuntimeInformation.IsOSPlatform()`. Never use external platform-specific packages — only .NET BCL and CLI tools (e.g., nvidia-smi). Graceful degradation (null/empty + error message) when metrics unavailable.
+- **New metric**: metric record → typed client interface → per-platform providers → register in the monitor's DI extension → add the property to the metrics aggregate → wire into the collector → document it.
+- **New helper**: static extension-method class, argument validation via the caller-expression guard pattern, XML docs, unit tests.
+- **New serialization format**: implement all six variants (string/bytes/base64 × serialize/deserialize), each wrapped in telemetry.
 
-## Code Conventions
+## Build & versioning
 
-- Internal fields: `_camelCase` with underscore prefix
-- Platform name casing: `MacOs` not `MacOS`; `onAcPower` not `onACPower`
-- Guard clauses via Ardalis: `Guard.Against.Null(param)` with `[CallerArgumentExpression]`
-- XML docs are **required** for all public APIs (`GenerateDocumentationFile=true`; build fails without them)
-- `TreatWarningsAsErrors=true` — no suppressed warnings except CS1591 and CS0067
-- `sealed` classes in DEBUG builds become non-sealed for testability
-- Block-scoped namespace declarations; no primary constructors; no expression-bodied methods/constructors (properties/accessors are fine)
+Version and target frameworks are centralized; CI bumps the version automatically per branch — never hand-edit it during feature work. Package versions are centrally managed. Debug builds get a distinguishing package-id suffix. Preview language features are enabled only in test projects.
 
-## Serialization Helpers
-
-All serialization helpers expose three variants (string, bytes, base64) for every format:
-- JSON (`ToJson` / `FromJson`) — System.Text.Json with `[JsonSerialization]` attribute support
-- NetJSON, Newtonsoft.Json, YAML (YamlDotNet), ProtoBuf (protobuf-net), MessagePack
-
-Wrap every helper method in a telemetry activity.
-
-## Build Configuration
-
-- Versions centralized in `Directory.Build.props` — do not edit version manually; CI handles bumps
-- Package dependencies centralized in `Directory.Packages.props` (`ManagePackageVersionsCentrally=true`)
-- Debug builds append `.Debug` to package IDs
-- `EnablePreviewFeatures=true` only in test projects
-
-## CI/CD
-
-- `develop` branch → reusable beta workflow → increments beta version and publishes to GitHub Packages
-- `release/` branch → reusable release workflow → strips beta suffix, creates GitHub Release, syncs back to develop
-- Secrets required: `GH_TOKEN`, `NUGET_API_KEY`
-
-## Adding New Features
-
-**New metric** (Infrastructure): Create metric record → `IMetricsClient<TMetric>` interface → platform providers → register in `SystemResourceMonitorExtensions.cs` → add property to `SystemResourceMonitorMetrics.cs` → update `ISystemResourceMonitor.Collect()` → add docs in `docs/`.
-
-**New helper** (Application): Static class with extension methods in `src/.../Helpers/` → `[CallerArgumentExpression]` for validation → XML docs → tests in `Tests/ThunderPropagator.UnitTests/`.
-
-**New serialization format**: Implement all six variants (string/bytes/base64 × serialize/deserialize), wrap each in a telemetry activity.
+CI publishes on two branch patterns: a beta channel that bumps and publishes a prerelease on every push, and a release channel that finalizes the version and publishes a stable release.
