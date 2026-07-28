@@ -147,7 +147,7 @@
          ContinueOnError="WarnAndContinue" on the download itself matters just as much: without
          it, a network hiccup here would fail the whole restore/build outright instead of
          degrading to the Warning below and letting a later restore/build pick the file up once
-         connectivity returns. .
+         connectivity returns.
 
          ?cb=<ticks> busts raw.githubusercontent.com's CDN cache: a shared props file just
          pushed upstream can otherwise still serve a stale cached copy here for a few minutes
