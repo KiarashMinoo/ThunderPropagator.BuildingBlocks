@@ -1,5 +1,5 @@
-## [1.0.1-beta.121] — 2026-07-28
+## [1.0.1-beta.122] — 2026-07-28
 
 ### 🐛 Bug Fixes
 
-- update DownloadFile URL to prevent stale cache issues in SharedProps.props `(d1123d8)` — Kiarash Minoo
+- correct typo in SharedProps.props documentation `(fd13ea1)` — Kiarash Minoo

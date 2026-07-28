@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.1-beta.122] — 2026-07-28
+
+### 🐛 Bug Fixes
+
+- correct typo in SharedProps.props documentation `(fd13ea1)` — Kiarash Minoo
+
 ## [1.0.1-beta.121] — 2026-07-28
 
 ### 🐛 Bug Fixes
