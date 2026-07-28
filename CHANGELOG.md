@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.1-beta.121] — 2026-07-28
+
+### 🐛 Bug Fixes
+
+- update DownloadFile URL to prevent stale cache issues in SharedProps.props `(d1123d8)` — Kiarash Minoo
+
 ## [1.0.1-beta.120] — 2026-07-28
 
 ### 🏠 Chores
