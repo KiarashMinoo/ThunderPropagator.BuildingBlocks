@@ -1,5 +1,5 @@
-## [1.0.1-beta.120] — 2026-07-28
+## [1.0.1-beta.121] — 2026-07-28
 
-### 🏠 Chores
+### 🐛 Bug Fixes
 
-- ThunderPropagator.BuildingBlocks: Split shared-props bootstrap into SharedProps.props `(ab8432b)` — Kiarash Minoo
+- update DownloadFile URL to prevent stale cache issues in SharedProps.props `(d1123d8)` — Kiarash Minoo
