@@ -1,5 +1,5 @@
-## [1.0.1-beta.119] — 2026-07-27
+## [1.0.1-beta.120] — 2026-07-28
 
-### 📝 Documentation
+### 🏠 Chores
 
-- Refine CLAUDE.md contributor guidance `(82f48be)` — Kiarash Minoo
+- ThunderPropagator.BuildingBlocks: Split shared-props bootstrap into SharedProps.props `(ab8432b)` — Kiarash Minoo

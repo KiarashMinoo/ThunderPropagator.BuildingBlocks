@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.1-beta.120] — 2026-07-28
+
+### 🏠 Chores
+
+- ThunderPropagator.BuildingBlocks: Split shared-props bootstrap into SharedProps.props `(ab8432b)` — Kiarash Minoo
+
 ## [1.0.1-beta.119] — 2026-07-27
 
 ### 📝 Documentation
