@@ -1,6 +1,9 @@
-## [1.0.1-beta.125] — 2026-09-03
+## [1.0.1-beta.126] — 2026-09-03
 
-### ⚙️ CI / Tooling
+### 📦 Dependencies
 
-- ThunderPropagator.BuildingBlocks: ci: move NuGet publish to inline OIDC job `(0315b15)` — Kiarash Minoo
-- ThunderPropagator.BuildingBlocks: ci: grant reusable-ci.yml the permissions its declared jobs require `(5140db8)` — Kiarash Minoo
+| Package | Old | New |
+|---------|-----|-----|
+| Microsoft.Diagnostics.Tracing.TraceEvent | 3.2.5 | 3.2.6 |
+
+- Bump Microsoft.Diagnostics.Tracing.TraceEvent from 3.2.5 to 3.2.6 `(e48c509)` — dependabot[bot]
