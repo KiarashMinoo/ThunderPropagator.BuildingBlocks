@@ -21,7 +21,7 @@
     <PackageVersion Include="CaseConverter" Version="2.0.1" />
     <PackageVersion Include="JetBrains.Annotations" Version="2026.2.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
-    <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.21.0" />
+    <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.22.0" />
     <PackageVersion Include="Ardalis.GuardClauses" Version="5.0.0" />
     <PackageVersion Include="SharpZipLib" Version="1.4.2" />
     <PackageVersion Include="Apache.NMS.ActiveMQ" Version="2.2.0" />
