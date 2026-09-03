@@ -48,10 +48,15 @@ jobs:
   #
   # IMPORTANT: a job-level `permissions:` block is exhaustive, not additive -- any
   # scope not listed here is implicitly set to "none" for every nested job the called
-  # reusable workflow runs, regardless of what that nested job requests for itself.
-  # With publish-to-nuget: false, reusable-ci.yml never runs its own publish-nuget or
-  # cleanup-nuget-artifacts jobs, so contents:write (version/changelog commit, tag,
-  # GitHub Release) is the only scope any of its nested jobs still needs.
+  # reusable workflow runs, regardless of what that nested job requests for itself --
+  # and GitHub validates this statically against every job reusable-ci.yml DECLARES,
+  # not just the ones that will actually execute once `if:` conditions are evaluated.
+  # So even with publish-to-nuget: false (which only skips publish-nuget/
+  # cleanup-nuget-artifacts at runtime), this must still list every scope those two
+  # jobs declare needing: contents:write (version/changelog commit, tag, GitHub
+  # Release), packages:write + id-token:write (publish-nuget's GitHub Packages / OIDC
+  # paths), actions:write (cleanup-nuget-artifacts, to delete run artifacts) -- or the
+  # run fails at startup with "requesting X, but is only allowed none".
   #
   # beta-ci and manual-ci are gated by BOTH github.event_name and github.ref (not ref
   # alone) so a manual workflow_dispatch run from develop can't accidentally trigger
@@ -65,6 +70,9 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     permissions:
       contents: write
+      packages: write
+      id-token: write
+      actions: write
     uses: KiarashMinoo/.github/.github/workflows/reusable-ci.yml@main
     with:
       channel: beta
@@ -79,6 +87,9 @@ jobs:
     if: github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/release/'))
     permissions:
       contents: write
+      packages: write
+      id-token: write
+      actions: write
     uses: KiarashMinoo/.github/.github/workflows/reusable-ci.yml@main
     with:
       channel: ${{ inputs.release-mode }}
