@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.1-beta.128] — 2026-09-06
+
+### ⚙️ CI / Tooling
+
+- ThunderPropagator.BuildingBlocks: enable nuget-filter in OIDC publish step `(6731609)` — Kiarash Minoo
+
 ## [1.0.1-beta.127] — 2026-09-03
 
 ### 📦 Dependencies
