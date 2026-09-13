@@ -1,5 +1,5 @@
-## [1.0.1-beta.130] — 2026-09-06
+## [1.0.1-beta.131] — 2026-09-13
 
-### ⚙️ CI / Tooling
+### 🏠 Chores
 
-- ThunderPropagator.BuildingBlocks: disable nuget-filter in OIDC publish step `(7344dbf)` — Kiarash Minoo
+- ThunderPropagator.BuildingBlocks: move layer patterns into scoped .claude/rules `(dfebfcf)` — Kiarash Minoo
