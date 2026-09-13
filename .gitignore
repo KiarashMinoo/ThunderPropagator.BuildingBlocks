@@ -28,7 +28,9 @@ Desktop.ini
 # ------------------------------------------------------------
 # Local agents, notes, and analysis output
 # ------------------------------------------------------------
-.claude/
+.claude/*
+!.claude/rules/
+!.claude/rules/**
 .code-review-graph/
 .obsidian/
 .shared-props/
