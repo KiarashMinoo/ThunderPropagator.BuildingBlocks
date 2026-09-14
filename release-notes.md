@@ -1,9 +1,5 @@
-## [1.0.1-beta.132] — 2026-09-14
+## [1.0.1-beta.133] — 2026-09-14
 
-### 📦 Dependencies
+### ⚙️ CI / Tooling
 
-| Package | Old | New |
-|---------|-----|-----|
-| Microsoft.NET.Test.Sdk | 18.9.0 | 18.10.0 |
-
-- Bump the testing group with 1 update `(ec70f80)` — dependabot[bot]
+- ThunderPropagator.BuildingBlocks: queue automated NuGet pushes through relay `(7f06d90)` — Kiarash Minoo
