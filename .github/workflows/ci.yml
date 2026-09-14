@@ -132,6 +132,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      actions: write # queue mode deletes the now-redundant raw pkg-*/symbols-* artifacts it just folded into the payload
     steps:
       - name: Push directly
         if: github.event_name == 'workflow_dispatch' && inputs.publish-mode == 'push'
