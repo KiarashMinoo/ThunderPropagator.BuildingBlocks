@@ -35,6 +35,13 @@ jobs:
   # File=ci.yml. Requires a NUGET_USER repo secret (the nuget.org username the policy
   # is attached to) -- Settings > Secrets and variables > Actions > Secrets.
   #
+  # Manual vs. automated (added 2026-09-14): only a manual workflow_dispatch run still
+  # pushes directly here (mode: push, unchanged). An automated push-triggered run
+  # instead queues its packages (mode: queue) for KiarashMinoo/.github's
+  # nuget-queue-relay.yml to pull and push on a 20-minute cron -- see nuget-oidc-publish
+  # action.yml's header comment for why (collapsing every automated repo's pushes onto
+  # one paced queue against the shared account-wide nuget.org quota).
+  #
   # ADMIN_PUSH_TOKEN: develop has a classic "Require a pull request before merging"
   # branch protection rule with no usable bypass for the default GITHUB_TOKEN identity
   # (github-actions[bot]) -- neither classic protection's "administrators can bypass"
@@ -110,7 +117,16 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: KiarashMinoo/.github/.github/actions/nuget-oidc-publish@main
+      - name: Push directly (manual runs)
+        if: github.event_name == 'workflow_dispatch'
+        uses: KiarashMinoo/.github/.github/actions/nuget-oidc-publish@main
         with:
           nuget-user: ${{ secrets.NUGET_USER }}
+          nuget-filter-enabled: false
+
+      - name: Queue for relay (automated runs)
+        if: github.event_name != 'workflow_dispatch'
+        uses: KiarashMinoo/.github/.github/actions/nuget-oidc-publish@main
+        with:
+          mode: queue
           nuget-filter-enabled: false
