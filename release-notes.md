@@ -1,5 +1,9 @@
-## [1.0.1-beta.131] — 2026-09-13
+## [1.0.1-beta.132] — 2026-09-14
 
-### 🏠 Chores
+### 📦 Dependencies
 
-- ThunderPropagator.BuildingBlocks: move layer patterns into scoped .claude/rules `(dfebfcf)` — Kiarash Minoo
+| Package | Old | New |
+|---------|-----|-----|
+| Microsoft.NET.Test.Sdk | 18.9.0 | 18.10.0 |
+
+- Bump the testing group with 1 update `(ec70f80)` — dependabot[bot]
