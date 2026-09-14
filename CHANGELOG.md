@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.1-beta.134] — 2026-09-14
+
+### ⚙️ CI / Tooling
+
+- ThunderPropagator.BuildingBlocks: let manual CI runs opt into the queue path `(402315f)` — Kiarash Minoo
+
 ## [1.0.1-beta.133] — 2026-09-14
 
 ### ⚙️ CI / Tooling
