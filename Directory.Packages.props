@@ -17,7 +17,7 @@
   </ItemGroup>
   <ItemGroup Label="Application Packages">
     <PackageVersion Include="Bogus" Version="35.6.5" />
-    <PackageVersion Include="NodaTime" Version="3.2.2" />
+    <PackageVersion Include="NodaTime" Version="3.3.6" />
     <PackageVersion Include="CaseConverter" Version="2.0.1" />
     <PackageVersion Include="JetBrains.Annotations" Version="2026.2.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
