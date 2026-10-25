@@ -1,9 +1,9 @@
-## [1.0.1-beta.140] — 2026-10-25
+## [1.0.1-beta.141] — 2026-10-25
 
-### ⚙️ CI / Tooling
+### 📦 Dependencies
 
-- ThunderPropagator.BuildingBlocks: Add third-party and floating-version support to dependency updater `(e706904)` — Kiarash Minoo
+| Package | Old | New |
+|---------|-----|-----|
+| NodaTime | 3.2.2 | 3.3.6 |
 
-### 🏠 Chores
-
-- ThunderPropagator.BuildingBlocks: Pin Directory.Build.props version to beta.139 `(383b51f)` — Kiarash Minoo
+- ThunderPropagator.BuildingBlocks: Bump NodaTime to 3.3.6 `(73d4174)` — Kiarash Minoo
