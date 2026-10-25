@@ -1,9 +1,11 @@
-## [1.0.1-beta.138] — 2026-10-25
+## [1.0.1-beta.139] — 2026-10-25
 
 ### 📦 Dependencies
 
 | Package | Old | New |
 |---------|-----|-----|
-| Apache.NMS.ActiveMQ | 2.2.0 | 2.3.0 |
+| Microsoft.NET.Test.Sdk | 18.10.1 | 18.11.0 |
+| xunit.runner.visualstudio | 4.0.0 | 4.0.1 |
+| coverlet.collector | 10.0.1 | 10.1.0 |
 
-- Bump the messaging group with 1 update `(0f154e2)` — dependabot[bot]
+- Bump the testing group with 3 updates `(eef5f33)` — dependabot[bot]
