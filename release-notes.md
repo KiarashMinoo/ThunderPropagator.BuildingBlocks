@@ -1,5 +1,9 @@
-## [1.0.1-beta.137] — 2026-10-07
+## [1.0.1-beta.138] — 2026-10-25
 
-### 📝 Documentation
+### 📦 Dependencies
 
-- Add architecture diagram badge to README `(c4f01fe)` — Kiarash Minoo
+| Package | Old | New |
+|---------|-----|-----|
+| Apache.NMS.ActiveMQ | 2.2.0 | 2.3.0 |
+
+- Bump the messaging group with 1 update `(0f154e2)` — dependabot[bot]
