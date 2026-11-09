@@ -1,14 +1,5 @@
-## [1.0.1-beta.142] — 2026-10-25
+## [1.0.1-beta.143] — 2026-11-09
 
-### 📦 Dependencies
+### ⚙️ CI / Tooling
 
-| Package | Old | New |
-|---------|-----|-----|
-| NodaTime | 3.2.2 | 3.3.6 |
-
-- ThunderPropagator.BuildingBlocks: Bump NodaTime to 3.3.6 `(73d4174)` — Kiarash Minoo
-
-### 🏠 Chores
-
-- bump version to 1.0.1-beta.141 [skip ci] `(f711b3c)` — github-actions[bot]
-- ThunderPropagator.BuildingBlocks: Add Microsoft.Extensions.DependencyInjection to unit tests `(0916185)` — Kiarash Minoo
+- Add automated security and quality scans `(0c79353)` — Kiarash Minoo
