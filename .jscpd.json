@@ -1,0 +1,25 @@
+{
+  "format": ["csharp"],
+  "minLines": 10,
+  "minTokens": 100,
+  "threshold": 2,
+  "reporters": ["console", "json"],
+  "output": "./.jscpd-report",
+  "ignore": [
+    "**/obj/**",
+    "**/bin/**",
+    "**/node_modules/**",
+    "**/Tests/**",
+    "**/tests/**",
+    "**/*.Tests/**",
+    "**/test/**",
+    "**/TestResults/**",
+    "**/artifacts/**",
+    "**/.shared-props/**",
+    "**/aspire-output/**",
+    "**/Migrations/**",
+    "**/*.g.cs",
+    "**/*.generated.cs",
+    "**/*.Designer.cs"
+  ]
+}
