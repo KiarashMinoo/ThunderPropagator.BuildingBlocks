@@ -1,5 +1,5 @@
-## [1.0.1-beta.143] — 2026-11-09
+## [1.0.1-beta.144] — 2026-11-12
 
 ### ⚙️ CI / Tooling
 
-- Add automated security and quality scans `(0c79353)` — Kiarash Minoo
+- ThunderPropagator.BuildingBlocks: Add net11.0 support to build and CI `(b00c0e8)` — Kiarash Minoo
