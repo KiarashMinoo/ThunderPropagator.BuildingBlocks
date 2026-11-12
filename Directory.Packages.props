@@ -18,6 +18,11 @@
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.*" />
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.*" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net11.0'" Label="Microsoft.Extensions">
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="11.*" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="11.*" />
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="11.*" />
+  </ItemGroup>
   <ItemGroup Label="Application Packages">
     <PackageVersion Include="Bogus" Version="35.6.5" />
     <PackageVersion Include="NodaTime" Version="3.3.6" />
@@ -31,7 +36,7 @@
     <PackageVersion Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="4.0.0" />
   </ItemGroup>
   <ItemGroup Label="Testing Packages">
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.12.0" />
     <PackageVersion Include="NSubstitute" Version="6.2.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.1">

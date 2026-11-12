@@ -16,7 +16,6 @@
        ═══════════════════════════════════════════════════════════════════════ -->
   <!-- Target frameworks and repo metadata. -->
   <PropertyGroup Label="RepoIdentity">
-    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <RepositoryUrl>https://github.com/KiarashMinoo/ThunderPropagator.BuildingBlocks</RepositoryUrl>
   </PropertyGroup>
   <!-- Version is bumped by CI per branch — never hand-edit this. -->
