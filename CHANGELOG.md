@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.1-beta.145] — 2026-11-13
+
+### 🏠 Chores
+
+- ThunderPropagator.BuildingBlocks: Add TargetFrameworks to Directory.Build.props `(5d81dc4)` — Kiarash Minoo
+
 ## [1.0.1-beta.144] — 2026-11-12
 
 ### ⚙️ CI / Tooling

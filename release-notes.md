@@ -1,5 +1,5 @@
-## [1.0.1-beta.144] — 2026-11-12
+## [1.0.1-beta.145] — 2026-11-13
 
-### ⚙️ CI / Tooling
+### 🏠 Chores
 
-- ThunderPropagator.BuildingBlocks: Add net11.0 support to build and CI `(b00c0e8)` — Kiarash Minoo
+- ThunderPropagator.BuildingBlocks: Add TargetFrameworks to Directory.Build.props `(5d81dc4)` — Kiarash Minoo
